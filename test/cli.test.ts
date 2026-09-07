@@ -33,6 +33,37 @@ test("status reports metadata without requiring wallet creation", async () => {
   assert.equal(parsed.identity, null);
 });
 
+test("wallet create is standalone and idempotent without creating configuration", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "gossip-cli-wallet-"));
+  try {
+    const first = await run(process.execPath, [
+      tsx,
+      entry,
+      "wallet",
+      "create",
+      "--directory",
+      directory,
+    ]);
+    const second = await run(process.execPath, [
+      tsx,
+      entry,
+      "wallet",
+      "create",
+      "--directory",
+      directory,
+    ]);
+    const firstAddress = (JSON.parse(first.stdout) as { address: string })
+      .address;
+    const secondAddress = (JSON.parse(second.stdout) as { address: string })
+      .address;
+    assert.match(firstAddress, /^0x[0-9a-fA-F]{40}$/);
+    assert.equal(secondAddress, firstAddress);
+    await assert.rejects(() => readFile(join(directory, "config.yaml")));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("setup rejects an HTTP endpoint before creating wallet state", async () => {
   const directory = await mkdtemp(join(tmpdir(), "gossip-cli-"));
   try {

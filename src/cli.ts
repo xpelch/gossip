@@ -15,7 +15,6 @@ import { readSecret } from "./secret-prompt.js";
 import { hostConfiguration, type SupportedHost } from "./hosts.js";
 import { installHost, uninstallHost } from "./host-install.js";
 import { createStandardsCapabilityReport } from "./standards.js";
-import { checkConnection, serve } from "./bridge.js";
 
 const defaultDirectory = resolve(homedir(), ".gossip");
 const profiles = ["sherwood-eip191-personal-sign-v1", "erc8128"] as const;
@@ -28,6 +27,11 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
     const directory = parseDirectory(argv);
     if (command === "status") return await status(directory);
     if (command === "doctor") return await doctor(directory);
+    if (Number(process.versions.node.split(".")[0]) < 24) {
+      throw new Error(
+        "Node.js 24 or newer is required. Install Node.js 24, then rerun this command.",
+      );
+    }
     if (command === "setup") return await setup(directory, argv.slice(1));
     if (command === "connect") return await connect(directory);
     if (command === "serve") return await serveCommand(directory);
@@ -76,6 +80,8 @@ async function status(directory: string): Promise<void> {
   console.log(
     JSON.stringify({
       kitAvailable: true,
+      runtimeVersion: process.versions.node,
+      runtimeSupported: Number(process.versions.node.split(".")[0]) >= 24,
       connected: false,
       connectionChecked: false,
       enabled: Boolean(config?.enabled),
@@ -103,7 +109,9 @@ async function doctor(directory: string): Promise<void> {
   console.log(
     JSON.stringify({
       nextStep:
-        "Run `gossip setup --endpoint <url> --audience <audience>` if configuration is pending.",
+        Number(process.versions.node.split(".")[0]) < 24
+          ? "Run the documented Linux bootstrap script or install Node.js 24, then rerun doctor."
+          : "Run `gossip setup --endpoint <url> --audience <audience>` if configuration is pending.",
     }),
   );
 }
@@ -166,6 +174,7 @@ async function setup(directory: string, args: string[]): Promise<void> {
 }
 
 async function connect(directory: string): Promise<void> {
+  const { checkConnection } = await import("./bridge.js");
   const config = await loadConfiguration(directory);
   const result = await checkConnection(directory);
   await saveConfiguration(directory, { ...config, enabled: true });
@@ -173,6 +182,7 @@ async function connect(directory: string): Promise<void> {
 }
 
 async function serveCommand(directory: string): Promise<void> {
+  const { serve } = await import("./bridge.js");
   const config = await loadConfiguration(directory);
   if (!config.enabled)
     throw new Error("Gossip is disconnected; run connect first");
@@ -188,6 +198,11 @@ async function disconnect(directory: string): Promise<void> {
 async function walletCommand(directory: string, args: string[]): Promise<void> {
   const vault = new WalletVault(directory, createCredentialStore(directory));
   const action = args[0];
+  if (action === "create") {
+    const identity = await vault.create();
+    console.log(JSON.stringify({ ...identity, connected: false }));
+    return;
+  }
   if (action === "import") {
     const file = requiredOption(args, "--file");
     const address = requiredOption(args, "--address");
@@ -243,7 +258,7 @@ async function walletCommand(directory: string, args: string[]): Promise<void> {
     console.log(JSON.stringify({ deleted: true }));
     return;
   }
-  throw new Error("wallet requires import, backup, or delete");
+  throw new Error("wallet requires create, import, backup, or delete");
 }
 
 async function policyCommand(directory: string, args: string[]): Promise<void> {
@@ -386,6 +401,11 @@ function printHelp(): void {
 }
 
 function safeError(error: unknown): string {
+  if (
+    error instanceof Error &&
+    error.message.startsWith("Node.js 24 or newer is required.")
+  )
+    return error.message;
   if (!(error instanceof Error)) {
     return "Gossip command failed. Run `gossip doctor` and retry.";
   }

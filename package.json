@@ -16,7 +16,8 @@
     "README.md",
     "LICENSE",
     "scripts/install.mjs",
-    "docs"
+    "docs",
+    "scripts/bootstrap-linux.sh"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
