@@ -91,7 +91,7 @@ async function runNpm(args, cwd) {
   await new Promise((resolveProcess, reject) => {
     const child = spawn(executable, npmArgs, {
       cwd,
-      stdio: ["ignore", "ignore", "pipe"],
+      stdio: "ignore",
       shell: false,
       windowsHide: true,
     });
@@ -168,7 +168,7 @@ export async function installArtifact({
   const parent = dirname(destinationPath);
   await mkdir(parent, { recursive: true });
   const stagingPath = join(parent, `.gossip-install-${randomUUID()}`);
-  await mkdir(stagingPath);
+  await mkdir(stagingPath, { mode: 0o700 });
   try {
     const stagedArtifactPath = join(stagingPath, "artifact.tgz");
     await copyFile(artifactPath, stagedArtifactPath);
@@ -241,8 +241,9 @@ export async function installArtifact({
       artifactSha256: actualSha256,
     };
   } catch (error) {
-    await rm(stagingPath, { recursive: true, force: true });
     throw error instanceof Error ? error : new Error("installation failed");
+  } finally {
+    await rm(stagingPath, { recursive: true, force: true });
   }
 }
 

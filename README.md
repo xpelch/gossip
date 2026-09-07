@@ -13,7 +13,6 @@ npm ci --ignore-scripts
 npm run build
 node dist/cli.js --help
 node dist/cli.js status
-node dist/cli.js standards
 ```
 
 The explicit `--ignore-scripts` also avoids the upstream Anvil package's Unix-style postinstall on Windows. Its platform binary is supplied as an optional development dependency.
@@ -23,6 +22,7 @@ For a development engine, provide its exact HTTPS MCP endpoint and configured au
 ```sh
 node dist/cli.js setup --endpoint https://localhost/mcp --audience https://localhost
 node dist/cli.js connect
+node dist/cli.js standards
 ```
 
 Use a locally trusted development certificate. Setup does not disable TLS checks. Only a successful signed `agent_access` response enables the bridge. `status` reports stored state without claiming a live connection. `doctor` currently provides setup guidance, not full release-integrity or host verification.
@@ -67,3 +67,4 @@ npm pack --ignore-scripts
 Tests use synthetic identities only. [Engine interoperability](docs/engine-testing.md) uses a pinned private engine checkout and Docker PostgreSQL. [Standards evidence](docs/standards.md) distinguishes local implementation, contract fixtures, and server dependencies. [Artifact installation](docs/install.md) verifies a local tarball digest; no npm package or public endpoint has been published.
 
 New code is Apache-2.0 licensed. Dependency licenses remain with their packages. Read `AGENTS.md`, `CONTEXT.md`, and relevant ADRs before contributing.
+

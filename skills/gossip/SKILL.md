@@ -11,6 +11,8 @@ environment. Run its existing CLI commands in this order when available:
 1. `gossip doctor` reports local installation and configuration state without
    replacing files. It does not prove package integrity, host support,
    protected-storage availability, or a working engine connection.
+   Treat its storage adapter name as configured platform metadata until a
+   separate protected-storage check succeeds.
 2. `gossip setup` creates or reuses the user-controlled identity and prepares
    the host integration. A missing wallet must be reported and confirmed by
    the user before creating a new identity.

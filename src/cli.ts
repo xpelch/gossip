@@ -75,22 +75,25 @@ async function status(directory: string): Promise<void> {
   }
   console.log(
     JSON.stringify({
-      installed: true,
+      kitAvailable: true,
       connected: false,
       connectionChecked: false,
       enabled: Boolean(config?.enabled),
       configured: Boolean(config),
       identity: identity?.address ?? null,
-      secureStorage:
+      configuredStorageAdapter:
         process.platform === "win32"
           ? "windows-dpapi"
           : process.platform === "linux"
             ? "linux-secret-service"
             : "unsupported",
-      limitations:
-        process.platform === "darwin"
+      storageVerified: false,
+      limitations: [
+        "protected credential storage availability is not verified by status",
+        ...(process.platform === "darwin"
           ? ["protected credential storage is unsupported on macOS"]
-          : [],
+          : []),
+      ],
     }),
   );
 }
@@ -383,18 +386,23 @@ function printHelp(): void {
 }
 
 function safeError(error: unknown): string {
-  if (!(error instanceof Error)) return "Gossip command failed";
-  if (/configuration/i.test(error.message)) return "Configuration error";
+  if (!(error instanceof Error)) {
+    return "Gossip command failed. Run `gossip doctor` and retry.";
+  }
+  if (/configuration/i.test(error.message)) {
+    return "Configuration error. Run `gossip doctor` and review the local configuration.";
+  }
   if (/password|terminal/i.test(error.message))
-    return "Secure password input failed";
+    return "Secure password input failed. Retry locally without sharing secrets.";
   if (/wallet|identity|keystore/i.test(error.message))
-    return "Wallet operation failed";
+    return "Wallet operation failed. Check protected storage and run `gossip doctor`.";
   if (/host|config path|--config|--host/i.test(error.message))
-    return "Host configuration failed";
-  if (/directory/i.test(error.message)) return "Directory argument is invalid";
+    return "Host configuration failed. Check the absolute `--config` path and run the host's read-only status command.";
+  if (/directory/i.test(error.message))
+    return "Directory argument is invalid. Use `--directory ABSOLUTE`.";
   if (/endpoint|audience|URL|profile/i.test(error.message))
-    return "Setup arguments are invalid";
-  return "Gossip command failed";
+    return "Setup arguments are invalid. Use HTTPS URLs without credentials or fragments and a supported profile.";
+  return "Gossip command failed. Run `gossip doctor` and retry.";
 }
 if (import.meta.url === pathToFileURL(resolve(process.argv[1] ?? "")).href)
   main().catch((error) => {

@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile, rm, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { execFile } from "node:child_process";
@@ -33,6 +33,7 @@ async function makeArtifact(root: string) {
       name: "@gossip/agent-kit",
       version: "1.0.0",
       main: "dist/cli.js",
+      scripts: { install: 'node -e "process.exit(77)"' },
       files: ["dist"],
     }),
   );
@@ -65,6 +66,19 @@ test("installs a verified local package without running package scripts", async 
       "--destination",
       destination,
     ]);
+    await execFileAsync(process.execPath, [
+      installer,
+      "--artifact",
+      artifact,
+      "--sha256",
+      digest,
+      "--destination",
+      destination,
+    ]);
+    assert.equal(
+      (await readdir(root)).some((name) => name.startsWith(".gossip-install-")),
+      false,
+    );
     assert.equal(
       JSON.parse(
         await readFile(join(destination, ".gossip-install.json"), "utf8"),

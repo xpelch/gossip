@@ -24,10 +24,12 @@ test("status reports metadata without requiring wallet creation", async () => {
   ]);
   assert.notEqual(result.stdout.trim(), "");
   const parsed = JSON.parse(result.stdout) as {
-    installed: boolean;
+    kitAvailable: boolean;
+    storageVerified: boolean;
     identity: unknown;
   };
-  assert.equal(parsed.installed, true);
+  assert.equal(parsed.kitAvailable, true);
+  assert.equal(parsed.storageVerified, false);
   assert.equal(parsed.identity, null);
 });
 
