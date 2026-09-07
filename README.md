@@ -67,4 +67,3 @@ npm pack --ignore-scripts
 Tests use synthetic identities only. [Engine interoperability](docs/engine-testing.md) uses a pinned private engine checkout and Docker PostgreSQL. [Standards evidence](docs/standards.md) distinguishes local implementation, contract fixtures, and server dependencies. [Artifact installation](docs/install.md) verifies a local tarball digest; no npm package or public endpoint has been published.
 
 New code is Apache-2.0 licensed. Dependency licenses remain with their packages. Read `AGENTS.md`, `CONTEXT.md`, and relevant ADRs before contributing.
-
