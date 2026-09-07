@@ -25,3 +25,5 @@ short-lived JSON fixture; no private key or engine source is committed.
 
 Each run creates an ephemeral wallet in memory; no user key or key fixture is
 stored in the repository.
+
+The capture now exercises the existing-file signer subprocess with an ephemeral synthetic source wallet before passing its proof to the real engine. The source is removed after capture; the transport receives a signature rather than a private key.

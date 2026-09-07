@@ -5,6 +5,7 @@ import { dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { getAddress } from "ethers";
 import { WalletVault } from "./wallet.js";
+import { validateKeyFile } from "./external-signer.js";
 import { createCredentialStore } from "./credential-store.js";
 import {
   loadConfiguration,
@@ -68,7 +69,7 @@ async function status(directory: string): Promise<void> {
   } catch {
     /* status reports pending state */
   }
-  let identity: { address: string } | null = null;
+  let identity: Awaited<ReturnType<WalletVault["identity"]>> | null = null;
   try {
     identity = await new WalletVault(
       directory,
@@ -88,11 +89,13 @@ async function status(directory: string): Promise<void> {
       configured: Boolean(config),
       identity: identity?.address ?? null,
       configuredStorageAdapter:
-        process.platform === "win32"
-          ? "windows-dpapi"
-          : process.platform === "linux"
-            ? "linux-secret-service"
-            : "unsupported",
+        identity?.signer === "existing-key-file"
+          ? "existing-key-file"
+          : process.platform === "win32"
+            ? "windows-dpapi"
+            : process.platform === "linux"
+              ? "linux-secret-service"
+              : "unsupported",
       storageVerified: false,
       limitations: [
         "protected credential storage availability is not verified by status",
@@ -152,6 +155,18 @@ async function setup(directory: string, args: string[]): Promise<void> {
     directory,
     createCredentialStore(directory),
   ).create();
+  const selected = await new WalletVault(
+    directory,
+    createCredentialStore(directory),
+  ).identity();
+  if (
+    selected.signer === "existing-key-file" &&
+    requestedProfile !== "sherwood-eip191-personal-sign-v1"
+  ) {
+    throw new Error(
+      "Existing-file wallet supports only the legacy signing profile",
+    );
+  }
   await saveConfiguration(
     directory,
     config ?? {
@@ -198,6 +213,24 @@ async function disconnect(directory: string): Promise<void> {
 async function walletCommand(directory: string, args: string[]): Promise<void> {
   const vault = new WalletVault(directory, createCredentialStore(directory));
   const action = args[0];
+  if (action === "attach-file") {
+    const reference = validateKeyFile({
+      keyFile: requiredAbsoluteOption(args, "--file"),
+      format: requiredOption(args, "--format"),
+    });
+    const identity = await vault.attachFile(
+      requiredOption(args, "--address"),
+      reference,
+    );
+    console.log(
+      JSON.stringify({
+        ...identity,
+        signer: "existing-key-file",
+        connected: false,
+      }),
+    );
+    return;
+  }
   if (action === "create") {
     const identity = await vault.create();
     console.log(JSON.stringify({ ...identity, connected: false }));
@@ -258,7 +291,9 @@ async function walletCommand(directory: string, args: string[]): Promise<void> {
     console.log(JSON.stringify({ deleted: true }));
     return;
   }
-  throw new Error("wallet requires create, import, backup, or delete");
+  throw new Error(
+    "wallet requires create, attach-file, import, backup, or delete",
+  );
 }
 
 async function policyCommand(directory: string, args: string[]): Promise<void> {

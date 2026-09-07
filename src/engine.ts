@@ -1,6 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import type { Wallet } from "ethers";
+import type { IdentitySigner } from "./transport.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import type { Connection } from "./transport.js";
 import { createSignedFetch } from "./transport.js";
@@ -13,7 +13,7 @@ const allowedTools = new Set([
   "gossip_receipt",
 ]);
 export async function connectEngine(
-  wallet: Wallet,
+  wallet: IdentitySigner,
   connection: Connection,
 ): Promise<Engine & { close(): Promise<void> }> {
   const client = new Client({

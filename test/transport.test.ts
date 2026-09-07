@@ -112,3 +112,24 @@ test("ERC-8128 requests verify with the pinned independent verifier and cannot b
     false,
   );
 });
+
+test("an external signer can authenticate without exposing its key to the transport", async () => {
+  let captured;
+  const external = {
+    address: wallet.address,
+    signMessage: (message: string | Uint8Array) => wallet.signMessage(message),
+  };
+  const signed = createSignedFetch(
+    external,
+    { endpoint, audience: endpoint },
+    async (input) => {
+      captured = new Request(input);
+      return new Response("{}");
+    },
+  );
+  await signed(endpoint, { method: "POST", body: "{}" });
+  assert.equal(
+    captured!.headers.get("X-Sherwood-Public-Key"),
+    wallet.signingKey.publicKey,
+  );
+});

@@ -1,6 +1,9 @@
-import { writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Wallet } from "ethers";
 import { createSignedFetch } from "../../src/transport.ts";
+import { existingFileSigner } from "../../src/external-signer.ts";
 
 const outputPath = process.argv[2];
 if (!outputPath) throw new Error("Usage: capture-request.ts <output.json>");
@@ -19,28 +22,56 @@ const body = JSON.stringify({
   },
 });
 
-const capture = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+const capture = async (
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<Response> => {
   const request = new Request(input, init);
   const headers: Record<string, string> = {};
-  request.headers.forEach((value, key) => { headers[key] = value; });
-  await writeFile(outputPath, JSON.stringify({
-    endpoint,
-    audience,
-    method: request.method,
-    path: new URL(request.url).pathname,
-    body: await request.text(),
-    headers,
-    walletAddress: wallet.address,
-  }, null, 2) + "\n", "utf8");
+  request.headers.forEach((value, key) => {
+    headers[key] = value;
+  });
+  await writeFile(
+    outputPath,
+    JSON.stringify(
+      {
+        endpoint,
+        audience,
+        method: request.method,
+        path: new URL(request.url).pathname,
+        body: await request.text(),
+        headers,
+        walletAddress: wallet.address,
+      },
+      null,
+      2,
+    ) + "\n",
+    "utf8",
+  );
   return new Response("{}", { status: 200 });
 };
 
-const signedFetch = createSignedFetch(wallet, { endpoint, audience }, capture);
-await signedFetch(endpoint, {
-  method: "POST",
-  headers: {
-    "accept": "application/json, text/event-stream",
-    "content-type": "application/json",
-  },
-  body,
-});
+const temporary = await mkdtemp(join(tmpdir(), "gossip-interop-signer-"));
+const keyFile = join(temporary, "synthetic-key");
+try {
+  await writeFile(keyFile, wallet.privateKey, { mode: 0o600 });
+  const signer = existingFileSigner(wallet.address, {
+    keyFile,
+    format: "raw-hex",
+  });
+  const signedFetch = createSignedFetch(
+    signer,
+    { endpoint, audience },
+    capture,
+  );
+  await signedFetch(endpoint, {
+    method: "POST",
+    headers: {
+      accept: "application/json, text/event-stream",
+      "content-type": "application/json",
+    },
+    body,
+  });
+} finally {
+  await rm(temporary, { recursive: true, force: true });
+}

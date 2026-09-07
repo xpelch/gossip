@@ -16,6 +16,13 @@ environment. Run its existing CLI commands in this order when available:
 2. `gossip setup` creates or reuses the user-controlled identity and prepares
    the host integration. A missing wallet must be reported and confirmed by
    the user before creating a new identity.
+   For deliberate reuse of an existing source wallet, use the local
+   `gossip wallet attach-file --file ABSOLUTE --format raw-hex|json-privateKey|json-private_key --address CHECKSUM --directory EMPTY_STATE`
+   flow when available. Select the exact format; never inspect or echo secret
+   contents in agent context. It links the source through a trusted host
+   helper, preserves the source, uses no Secret Service copy, and does not
+   support external signer providers. `wallet delete` removes only the Gossip
+   link; source backups remain with the owner’s wallet tools.
 3. `gossip serve` runs the local MCP bridge. Keep the bridge endpoint and
    audience explicit and HTTPS-only.
 

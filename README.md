@@ -69,3 +69,5 @@ Tests use synthetic identities only. [Engine interoperability](docs/engine-testi
 New code is Apache-2.0 licensed. Dependency licenses remain with their packages. Read `AGENTS.md`, `CONTEXT.md`, and relevant ADRs before contributing.
 
 For Linux agents missing Node 24, start with the [public prerequisite bootstrap](docs/bootstrap.md). It installs a dedicated runtime without replacing the host's Node version. A standalone `node dist/cli.js wallet create` creates or reuses a protected identity without an endpoint; it still requires Node 24 and working protected storage.
+
+An existing local EOA file can now be attached without copying its key or using Secret Service. See [existing-wallet attachment](docs/existing-wallet.md). This is an explicit existing-wallet option; fresh wallets continue to require supported protected storage. Generic remote signer providers and contract-wallet onboarding remain separate work.

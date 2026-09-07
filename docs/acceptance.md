@@ -5,6 +5,7 @@ This preview is partial implementation, not release acceptance.
 ## Implemented locally
 
 - Protected EOA creation/reuse and encrypted JSON import/backup with address preservation; Windows DPAPI round trip.
+- Existing-wallet attach-file flow documents the tested source format labels (`raw-hex`, `json-privateKey`, `json-private_key`), checksummed address continuity, source preservation, and link-only deletion. It does not claim a completed Grok host run.
 - Four-tool MCP bridge, exact legacy signing, ERC-8128 client profile, strict endpoint binding and no redirects.
 - Submission-kind permission and conservative SQLite reservations shared by processes using one state directory.
 - Additive host config editing, conflict protection, explicit removal and local disconnect.
@@ -15,7 +16,7 @@ This preview is partial implementation, not release acceptance.
 
 - Public endpoint plus actual version-pinned Grok Bot, Hermes and OpenClaw end-to-end runs. Config-shape tests are not host runs.
 - Engine support and actual access interoperability for ERC-8128, existing ERC-1271 accounts and atomic standard-only consultation policy. Engine changes are outside this repository's authorization.
-- Connect-existing-signer and complete contract-wallet onboarding, profile migration/rollback and paired create/migrate acceptance for all six standards. Library helpers alone do not meet this requirement.
+- Connect-existing-signer, external-provider integration, and complete contract-wallet onboarding remain incomplete. The attach-file path is a deliberate source-file link through a local host helper, not external signer support or a plaintext fallback. Profile migration/rollback and paired create/migrate acceptance for all six standards remain required.
 - Full installer diagnostics and a trusted release distribution/provenance workflow; external signer and derivation format compatibility matrix.
 - Real Linux protected-storage validation. macOS is unsupported.
 - Full installed-process-to-engine acceptance for domain calls, TLS rejection, expiry boundaries, and retry reconciliation. The current engine harness proves legacy authentication through real middleware/MCP/PostgreSQL, not the full CLI flow.

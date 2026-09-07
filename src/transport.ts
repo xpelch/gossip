@@ -1,6 +1,11 @@
 import { createSignerClient } from "@slicekit/erc8128";
 import { createHash, randomUUID } from "node:crypto";
-import type { Wallet } from "ethers";
+import { computeAddress, getAddress, hashMessage, SigningKey } from "ethers";
+
+export interface IdentitySigner {
+  readonly address: string;
+  signMessage(message: string | Uint8Array): Promise<string>;
+}
 
 export interface Connection {
   endpoint: string;
@@ -10,7 +15,7 @@ export interface Connection {
 }
 
 export function createSignedFetch(
-  wallet: Wallet,
+  wallet: IdentitySigner,
   connection: Connection,
   send: typeof fetch = fetch,
 ): typeof fetch {
@@ -62,7 +67,7 @@ export function createSignedFetch(
         address: wallet.address as `0x${string}`,
         chainId: connection.chainId!,
         signMessage: async (message: Uint8Array) =>
-          (await wallet.signMessage(message)) as `0x${string}`,
+          (await checkedSignature(wallet, message)).signature as `0x${string}`,
       });
       const signed = await signer.signRequest(request);
       return send(new Request(signed, { redirect: "error" }));
@@ -79,13 +84,26 @@ export function createSignedFetch(
       nonce,
       expires,
     ].join("\n");
-    request.headers.set("X-Sherwood-Public-Key", wallet.signingKey.publicKey);
-    request.headers.set(
-      "X-Sherwood-Signature",
-      await wallet.signMessage(message),
-    );
+    const proof = await checkedSignature(wallet, message);
+    request.headers.set("X-Sherwood-Public-Key", proof.publicKey);
+    request.headers.set("X-Sherwood-Signature", proof.signature);
     request.headers.set("X-Sherwood-Nonce", nonce);
     request.headers.set("X-Sherwood-Expires", expires);
     return send(request);
   };
+}
+
+async function checkedSignature(
+  wallet: IdentitySigner,
+  message: string | Uint8Array,
+) {
+  const signature = await wallet.signMessage(message);
+  const publicKey = SigningKey.recoverPublicKey(
+    hashMessage(message),
+    signature,
+  );
+  if (getAddress(computeAddress(publicKey)) !== getAddress(wallet.address)) {
+    throw new Error("Signer returned a proof for a different identity.");
+  }
+  return { signature, publicKey };
 }

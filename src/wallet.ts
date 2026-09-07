@@ -1,10 +1,17 @@
-import { mkdir, open, readFile, rename, rm } from "node:fs/promises";
+import { mkdir, open, readFile, readdir, rename, rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { Wallet, getAddress } from "ethers";
 import type { CredentialStore } from "./credential-store.js";
 import { credentialId } from "./credential-store.js";
+import {
+  existingFileSigner,
+  validateKeyFile,
+  verifyExistingSigner,
+  type ExistingKeyFile,
+} from "./external-signer.js";
+import type { IdentitySigner } from "./transport.js";
 
-type Profile = { address: string };
+type Profile = { address: string; external?: ExistingKeyFile };
 
 export class WalletVault {
   private readonly directory: string;
@@ -25,6 +32,12 @@ export class WalletVault {
   async create(): Promise<{ address: string }> {
     return this.withLock(async () => {
       const profile = await this.readProfile();
+      if (profile?.external) {
+        await verifyExistingSigner(
+          existingFileSigner(profile.address, profile.external),
+        );
+        return { address: profile.address };
+      }
       const secret = await this.store.read(this.id);
       if (profile) {
         if (!secret)
@@ -55,9 +68,11 @@ export class WalletVault {
     });
   }
 
-  async identity(): Promise<{ address: string }> {
+  async identity(): Promise<{ address: string; signer?: "existing-key-file" }> {
     const profile = await this.readProfile();
     if (!profile) throw new Error("Gossip identity wallet is not configured");
+    if (profile.external)
+      return { address: profile.address, signer: "existing-key-file" };
     const secret = await this.store.read(this.id);
     if (!secret)
       throw new Error("Wallet profile exists but its protected key is missing");
@@ -66,9 +81,11 @@ export class WalletVault {
     return profile;
   }
 
-  async signer(): Promise<Wallet> {
+  async signer(): Promise<IdentitySigner> {
     const profile = await this.readProfile();
     if (!profile) throw new Error("Gossip identity wallet is not configured");
+    if (profile.external)
+      return existingFileSigner(profile.address, profile.external);
     const secret = await this.store.read(this.id);
     if (!secret)
       throw new Error("Wallet profile exists but its protected key is missing");
@@ -92,6 +109,10 @@ export class WalletVault {
     return this.withLock(async () => {
       const existing = await this.readProfile();
       if (existing) {
+        if (existing.external)
+          throw new Error(
+            "An external wallet is attached; importing over it is not supported",
+          );
         if (existing.address !== address)
           throw new Error("A different wallet identity already exists");
         const current = await this.store.read(this.id);
@@ -114,12 +135,45 @@ export class WalletVault {
   }
 
   async backup(password: string): Promise<string> {
-    return (await this.signer()).encrypt(password);
+    const signer = await this.signer();
+    if (!(signer instanceof Wallet))
+      throw new Error(
+        "Back up the existing wallet using its owner tools; Gossip does not export its key",
+      );
+    return signer.encrypt(password);
+  }
+
+  async attachFile(
+    address: string,
+    reference: ExistingKeyFile,
+  ): Promise<{ address: string }> {
+    const profile: Profile = {
+      address: getAddress(address),
+      external: validateKeyFile(reference),
+    };
+    return this.withLock(async () => {
+      const previous = await this.readProfile();
+      if (previous && JSON.stringify(previous) !== JSON.stringify(profile))
+        throw new Error("A different wallet identity or signer already exists");
+      if (
+        !previous &&
+        (await readdir(this.directory)).some((name) => name !== "wallet.lock")
+      )
+        throw new Error(
+          "Use an empty dedicated directory to attach an existing wallet",
+        );
+      await verifyExistingSigner(
+        existingFileSigner(profile.address, profile.external!),
+      );
+      if (!previous) await this.writeProfile(profile);
+      return { address: profile.address };
+    });
   }
 
   async remove(): Promise<void> {
     await this.withLock(async () => {
-      await this.store.remove(this.id);
+      const profile = await this.readProfile();
+      if (!profile?.external) await this.store.remove(this.id);
       await rm(this.profilePath, { force: true });
     });
   }
@@ -130,7 +184,12 @@ export class WalletVault {
         await readFile(this.profilePath, "utf8"),
       );
       if (!isProfile(parsed)) throw new Error("Wallet profile is invalid");
-      return { address: getAddress(parsed.address) };
+      return {
+        address: getAddress(parsed.address),
+        ...("external" in parsed
+          ? { external: validateKeyFile(parsed.external) }
+          : {}),
+      };
     } catch (error) {
       if (isNotFound(error)) return null;
       throw error;
