@@ -71,3 +71,17 @@ New code is Apache-2.0 licensed. Dependency licenses remain with their packages.
 For Linux agents missing Node 24, start with the [public prerequisite bootstrap](docs/bootstrap.md). It installs a dedicated runtime without replacing the host's Node version. A standalone `node dist/cli.js wallet create` creates or reuses a protected identity without an endpoint; it still requires Node 24 and working protected storage.
 
 An existing local EOA file can now be attached without copying its key or using Secret Service. See [existing-wallet attachment](docs/existing-wallet.md). This is an explicit existing-wallet option; fresh wallets continue to require supported protected storage. Generic remote signer providers and contract-wallet onboarding remain separate work.
+
+## Setup entry point and Robinhood Chain preview
+
+Use the [setup-gossip skill and command](docs/setup-gossip.md) for wallet-first onboarding, additive host/skill installation, optional signed Gossip connection and default RPC configuration. All options can be orchestrated by the agent from that one skill. Encrypted-keystore migration continues through the existing local `wallet import` command, followed by `setup-gossip --wallet reuse`.
+
+The `network` commands validate chain 4663 and provide read-only balances, token decimals, allowances, receipts and fee data. RPC URLs are saved locally with owner-only file mode where supported; provider paths/query strings are omitted from diagnostic output. Keep provider credentials out of prompts and public configuration.
+
+The trading preview supports a single-pool Uniswap V3 exact-input ERC-20 swap using the officially documented SwapRouter02 and QuoterV2 deployments. `trade quote` returns unsigned intent. `trade authorize` requires local interactive confirmation for one exact account/trade and bounded gas; `trade execute` uses that permission. No standing autonomous trading policy is delivered yet. Use a separate state directory if the trading account differs from the Gossip Identity Wallet; the quoted account must match the wallet explicitly configured in that directory.
+
+Transactions are simulated before signing. Exact-amount approval is supported from zero allowance; nonzero insufficient allowances require owner handling. The local journal is persisted before broadcast; retries resend identical signed bytes and reconcile receipts. Revocation stops new signing and rebroadcast, but cannot revoke already broadcast transactions or token allowances. Processes using the same state directory are serialized; independent installations must not concurrently trade through the same account. After a crashed process, a stale `trade.lock` requires confirming that the process is gone before removing that lock.
+
+Spec #2 remains open: real host runs, the public engine and inherited standards dependencies are not supplied by this preview. Automatic fee replacement, externally consumed nonce recovery, complete reorg acceptance, contract-wallet execution, release provenance and real Uniswap fork acceptance remain pending. Tests use synthetic accounts/contracts, never production funds. Onboarding reports each standard separately instead of claiming universal wallet compliance.
+
+Authoritative deployment inventory: https://developers.uniswap.org/docs/protocols/v3/deployments/v3-robinhood-chain-deployments.md (chain 4663; SwapRouter02 uses standard ERC-20 approval, not Permit2).

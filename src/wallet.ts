@@ -134,6 +134,19 @@ export class WalletVault {
     });
   }
 
+  async transactionSigner(): Promise<Wallet> {
+    const profile = await this.readProfile();
+    if (!profile) throw new Error("Gossip identity wallet is not configured");
+    if (profile.external) {
+      const { loadLocalWallet } = await import("./local-file-signer.js");
+      return loadLocalWallet({ ...profile.external, address: profile.address });
+    }
+    const signer = await this.signer();
+    if (!(signer instanceof Wallet))
+      throw new Error("Transaction signing is unsupported for this wallet");
+    return signer;
+  }
+
   async backup(password: string): Promise<string> {
     const signer = await this.signer();
     if (!(signer instanceof Wallet))

@@ -197,3 +197,10 @@ if (
     process.exitCode = 1;
   }
 }
+
+export async function loadLocalWallet(args: SignerArguments): Promise<Wallet> {
+  const wallet = new Wallet(await readPrivateKey(args));
+  if (getAddress(wallet.address) !== getAddress(args.address))
+    throw new Error("key file address does not match selected wallet");
+  return wallet;
+}

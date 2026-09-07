@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { prepareConnection } from "./setup-connection.js";
 import { readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, resolve } from "node:path";
@@ -18,7 +19,6 @@ import { installHost, uninstallHost } from "./host-install.js";
 import { createStandardsCapabilityReport } from "./standards.js";
 
 const defaultDirectory = resolve(homedir(), ".gossip");
-const profiles = ["sherwood-eip191-personal-sign-v1", "erc8128"] as const;
 
 export async function main(argv = process.argv.slice(2)): Promise<void> {
   if (argv.length === 0 || argv[0] === "--help" || argv[0] === "help")
@@ -26,12 +26,24 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
   const command = argv[0];
   try {
     const directory = parseDirectory(argv);
+    if (command === "setup-gossip") {
+      const { onboardingCommand } = await import("./onboarding.js");
+      return await onboardingCommand(directory, argv.slice(1));
+    }
     if (command === "status") return await status(directory);
     if (command === "doctor") return await doctor(directory);
     if (Number(process.versions.node.split(".")[0]) < 24) {
       throw new Error(
         "Node.js 24 or newer is required. Install Node.js 24, then rerun this command.",
       );
+    }
+    if (command === "trade") {
+      const { tradingCommand } = await import("./trading.js");
+      return await tradingCommand(directory, argv.slice(1));
+    }
+    if (command === "network") {
+      const { networkCommand } = await import("./network.js");
+      return await networkCommand(directory, argv.slice(1));
     }
     if (command === "setup") return await setup(directory, argv.slice(1));
     if (command === "connect") return await connect(directory);
@@ -120,65 +132,11 @@ async function doctor(directory: string): Promise<void> {
 }
 
 async function setup(directory: string, args: string[]): Promise<void> {
-  const endpoint = option(args, "--endpoint");
-  const audience = option(args, "--audience");
-  const requestedProfile =
-    option(args, "--profile") ?? "sherwood-eip191-personal-sign-v1";
-  if (!endpoint || !audience || !isProfile(requestedProfile)) {
-    throw new Error(
-      "setup requires --endpoint, --audience, and a supported --profile",
-    );
-  }
-  let config: Configuration | null = null;
-  try {
-    config = await loadConfiguration(directory);
-  } catch (error) {
-    if (
-      !(error instanceof Error) ||
-      error.message !== "Gossip configuration is not initialized"
-    )
-      throw error;
-  }
-  if (!isSafeHttpsUrl(endpoint) || !isSafeHttpsUrl(audience)) {
-    throw new Error("setup requires valid HTTPS endpoint and audience URLs");
-  }
-  if (
-    config &&
-    (config.endpoint !== endpoint ||
-      config.audience !== audience ||
-      config.profile !== requestedProfile)
-  )
-    throw new Error(
-      "Existing Gossip configuration conflicts; refusing to overwrite it",
-    );
+  await prepareConnection(directory, args);
   const identity = await new WalletVault(
     directory,
     createCredentialStore(directory),
-  ).create();
-  const selected = await new WalletVault(
-    directory,
-    createCredentialStore(directory),
   ).identity();
-  if (
-    selected.signer === "existing-key-file" &&
-    requestedProfile !== "sherwood-eip191-personal-sign-v1"
-  ) {
-    throw new Error(
-      "Existing-file wallet supports only the legacy signing profile",
-    );
-  }
-  await saveConfiguration(
-    directory,
-    config ?? {
-      schemaVersion: 1,
-      endpoint,
-      audience,
-      profile: requestedProfile,
-      chainId: 4663,
-      enabled: false,
-      policy: { dailyCreditBudget: 0, submissionKinds: [] },
-    },
-  );
   console.log(
     JSON.stringify({
       installed: true,
@@ -390,24 +348,6 @@ function hostCommand(directory: string): [string, string[]] {
   ];
 }
 
-function isProfile(value: string): value is Configuration["profile"] {
-  return profiles.includes(value as (typeof profiles)[number]);
-}
-
-function isSafeHttpsUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return (
-      url.protocol === "https:" &&
-      url.username === "" &&
-      url.password === "" &&
-      url.hash === ""
-    );
-  } catch {
-    return false;
-  }
-}
-
 function parseHost(value: string): SupportedHost {
   if (value === "hermes" || value === "openclaw" || value === "grok-bot")
     return value;
@@ -431,7 +371,7 @@ function requiredOption(args: string[], name: string): string {
 }
 function printHelp(): void {
   console.log(
-    "gossip status|doctor|setup|connect|serve|disconnect|wallet|policy|host-config|host-install|host-uninstall|standards [--directory ABSOLUTE]",
+    "gossip status|doctor|setup-gossip|network|trade|setup|connect|serve|disconnect|wallet|policy|host-config|host-install|host-uninstall|standards [--directory ABSOLUTE]",
   );
 }
 
@@ -444,6 +384,8 @@ function safeError(error: unknown): string {
   if (!(error instanceof Error)) {
     return "Gossip command failed. Run `gossip doctor` and retry.";
   }
+  if (error.message === "Trade authorization requires an interactive terminal")
+    return error.message;
   if (/configuration/i.test(error.message)) {
     return "Configuration error. Run `gossip doctor` and review the local configuration.";
   }

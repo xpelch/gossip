@@ -1,9 +1,17 @@
 ---
 name: gossip
-description: Set up and verify the versioned Gossip Agent Kit on a supported agent host.
+description: Use the versioned Gossip Agent Kit after setup-gossip has prepared the host, wallet, and readiness checks.
 ---
 
-# Gossip Agent Kit
+# Gossip Agent Kit operations
+
+For one-prompt onboarding across runtime, wallet, host, network, standards, and
+trading readiness, use `skills/setup-gossip/SKILL.md`. The current orchestrator
+accepts `--host`, optional `--wallet`, `--endpoint`/`--audience`,
+`--network configure|check`, `--config`, and `--skills-directory`; it does not
+accept `--profile`. This skill covers the
+Gossip-specific operational steps after that orchestration, and remains useful
+when setup-gossip is unavailable.
 
 Use the versioned `@gossip/agent-kit` package already present in the host
 environment. Run its existing CLI commands in this order when available:
@@ -17,8 +25,9 @@ environment. Run its existing CLI commands in this order when available:
    the host integration. A missing wallet must be reported and confirmed by
    the user before creating a new identity.
    For deliberate reuse of an existing source wallet, use the local
-   `gossip wallet attach-file --file ABSOLUTE --format raw-hex|json-privateKey|json-private_key --address CHECKSUM --directory EMPTY_STATE`
-   flow when available. Select the exact format; never inspect or echo secret
+   `gossip wallet attach-file --file ABSOLUTE --format raw-hex --address CHECKSUM --directory EMPTY_STATE`
+   flow when available. The exact formats are `raw-hex`, `json-privateKey`,
+   and `json-private_key`; select one explicitly. Never inspect or echo secret
    contents in agent context. It links the source through a trusted host
    helper, preserves the source, uses no Secret Service copy, and does not
    support external signer providers. `wallet delete` removes only the Gossip
