@@ -1,0 +1,44 @@
+{
+  "name": "@gossip/agent-kit",
+  "version": "0.1.0-dev.1",
+  "description": "User-controlled Gossip identity and agent tools",
+  "type": "module",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "bin": {
+    "gossip": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "skills",
+    "README.md",
+    "LICENSE",
+    "scripts/install.mjs",
+    "docs"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "tsx --test --test-concurrency=1 test/*.test.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "@slicekit/erc8128": "0.4.1",
+    "ethers": "6.17.0",
+    "yaml": "2.9.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@foundry-rs/anvil": "1.7.1",
+    "@types/node": "24.13.3",
+    "solc": "0.8.36",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2"
+  },
+  "overrides": {
+    "tmp": "0.2.7"
+  },
+  "bundleDependencies": true
+}
