@@ -85,3 +85,11 @@ Transactions are simulated before signing. Exact-amount approval is supported fr
 Spec #2 remains open: real host runs, the public engine and inherited standards dependencies are not supplied by this preview. Automatic fee replacement, externally consumed nonce recovery, complete reorg acceptance, contract-wallet execution, release provenance and real Uniswap fork acceptance remain pending. Tests use synthetic accounts/contracts, never production funds. Onboarding reports each standard separately instead of claiming universal wallet compliance.
 
 Authoritative deployment inventory: https://developers.uniswap.org/docs/protocols/v3/deployments/v3-robinhood-chain-deployments.md (chain 4663; SwapRouter02 uses standard ERC-20 approval, not Permit2).
+
+## Product direction
+
+[Gossip Protocol v2](docs/proposals/gossip-protocol-v2.md) proposes the next
+protocol layer: typed evidence with provenance and freshness, durable receipts,
+server-side reconciliation, scoped identities, optional trust adapters, and an
+eventual bounded settlement plane. It is a design proposal, not implemented or
+accepted compatibility.
