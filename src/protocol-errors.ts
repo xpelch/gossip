@@ -20,6 +20,11 @@ const messages = Object.freeze({
   freshness_unmet: "The source facts do not meet the requested freshness.",
   finality_unmet: "The source facts do not meet the requested finality.",
   evidence_unavailable: "The requested evidence is unavailable.",
+  invalid_evidence: "The evidence does not match the protocol contract.",
+  invalid_receipt: "The receipt does not match the protocol contract.",
+  digest_mismatch: "The supplied content digest does not match the content.",
+  invalid_lineage: "The evidence lineage is invalid.",
+  operation_failed: "The accepted operation failed.",
 });
 
 export type ProtocolErrorCode = keyof typeof messages;

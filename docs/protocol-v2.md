@@ -1,13 +1,16 @@
 # Gossip v2 contract foundation
 
-This developer contract is the first implementation slice of
+This developer contract contains the first two implementation slices of
 [epic #3](https://github.com/xpelch/gossip/issues/3), tracked as
-[WS1 #4](https://github.com/xpelch/gossip/issues/4).
+[WS1 #4](https://github.com/xpelch/gossip/issues/4) and
+[WS2 #6](https://github.com/xpelch/gossip/issues/6).
 The revision is `gossip/2-draft.1`. It is a candidate for engine integration;
 there is no public v2 endpoint or active v2 tool in the kit.
 
-See the [2026-09-09 acceptance record](acceptance/v2-contract-foundation.md)
-for the tested artifact, results, and the Windows installer time-limit finding.
+See the 2026-09-09 acceptance records for the
+[contract foundation](acceptance/v2-contract-foundation.md) and
+[evidence and receipts](acceptance/v2-evidence-receipts.md) for tested artifacts,
+results, and explicit remaining gates.
 
 ## What is executable
 
@@ -20,11 +23,24 @@ for the tested artifact, results, and the Windows installer time-limit finding.
 - `negotiateCapabilities` compares a supplied report with an independently
   configured endpoint, audience, and profile. It returns selected revisions and
   limits. It performs no network call and grants no authority.
+- `parseEvidenceEnvelope` and `parseEvidenceGraph` validate immutable evidence,
+  complete bounded lineage, corrections, conflicts, and owner-compatible access.
+- `assessEvidenceGraph` evaluates declared freshness, expiry, canonicality, and
+  finality with an explicit clock. It does not query an RPC or prove that a
+  historical block remains canonical.
+- `parseResultManifest` binds result roots to a subject and
+  `validateResultPacket` checks those roots against a validated graph.
+- `parseSignedReceipt`, `validateReceiptConsultation`, and
+  `validateReceiptTransitionChain` check receipt encoding, content integrity,
+  request binding, economic invariants, and lifecycle transitions. They do not
+  authenticate the signature or choose a production signer.
 
 The exact fields, resource limits, and validation semantics are specified in
-[ADR 0003](adr/0003-v2-canonical-contract.md). Source modules and declarations are
-shipped under `dist/canonical.js`, `dist/protocol-v2.js`, and
-`dist/protocol-errors.js` after build. They are separate from `serve` and `setup`.
+[ADR 0003](adr/0003-v2-canonical-contract.md) and
+[ADR 0004](adr/0004-v2-evidence-and-receipts.md). Source modules and declarations
+are shipped under `dist/canonical.js`, `dist/protocol-v2.js`,
+`dist/evidence-v2.js`, `dist/receipts-v2.js`, and `dist/protocol-errors.js` after
+build. They are separate from `serve` and `setup`.
 
 ## Reproduce the contract checks
 
@@ -35,18 +51,21 @@ npm ci --ignore-scripts
 npm run build
 npm run test:protocol-v2
 npm run verify:protocol-v2
+npm run verify:evidence-v2
 ```
 
-The Python verifier uses only its standard library. It independently implements
-the restricted JSON profile and verifies stored canonical bytes and digests in
-`test/fixtures/v2-canonical.json`. Node consumes the same literal vectors through
-the public TypeScript boundary. The fixture and Python verifier are also included
-in the npm tarball, so an engine author can verify the installed artifact.
+The Python verifiers use only the standard library. They independently implement
+the restricted JSON profile and verify stored canonical bytes, digests, lineage,
+receipt states, and representative invalid cases in `test/fixtures`. Node
+consumes the same literal vectors through the public TypeScript boundary. The
+fixtures and verifiers are included in the npm tarball so an engine author can
+verify the installed artifact.
 
-Fixtures contain only synthetic addresses, reserved `.test` URLs, and fixed
-timestamps. They are conformance examples, not connection configuration or
-production trust anchors. The domain labels `evidence` and `receipt` test hash
-separation; their full schemas, signatures, and acceptance are subsequent work.
+Fixtures contain only synthetic addresses, reserved `.test` URLs, fixed
+timestamps, and explicitly synthetic signature bytes. They are conformance
+examples, not connection configuration or production trust anchors. Receipt
+signature algorithms, preimages, public keys, trust anchors, and rotation remain
+unapproved. The parser deliberately reports no authenticity verdict.
 
 ## Integration order
 
@@ -72,6 +91,7 @@ the observation window, freshness, finality, and explicit unknowns. A recent
 retrieval does not refresh old facts. Research heuristics retain their limitations
 until predictive validation is established by the engine's own evidence.
 
-WS1 module tests do not prove server idempotency, receipt signatures, exactly one
-charge, host support, or a public release. Those gates remain on epic #3 and the
-applicable acceptance dependencies in issues #1 and #2.
+These module tests do not prove server idempotency, receipt authenticity,
+exactly one durable charge, RPC revalidation, private evidence operations, host
+support, or a public release. Those gates remain on epic #3 and the applicable
+acceptance dependencies in issues #1 and #2.

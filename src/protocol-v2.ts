@@ -13,7 +13,7 @@ export const SCHEMA_REVISION = "2026-09-09" as const;
 export const AUTH_PROFILE = "gossip-eip191-v2" as const;
 export const MCP_REVISION = "2025-11-25" as const;
 
-const MAX_UNIX_SECONDS = 253_402_300_799;
+export const MAX_UNIX_SECONDS = 253_402_300_799;
 const UINT256_MAX = (1n << 256n) - 1n;
 const IDENTIFIER = /^[a-zA-Z0-9][a-zA-Z0-9._/-]{0,127}$/;
 const OPERATION_ID = /^[A-Za-z0-9_-]{1,64}$/;
@@ -84,14 +84,14 @@ const positiveDecimalUint256 = z
   .refine((value) => isUint256(value, true));
 const address = z.string().regex(ADDRESS);
 
-const actorSchema = z
+export const actorSchema = z
   .object({
     chain_id: positiveDecimalUint256,
     address,
   })
   .strict();
 
-const subjectSchema = z
+export const subjectSchema = z
   .object({
     kind: z.enum(["token", "wallet"]),
     chain_id: positiveDecimalUint256,
@@ -99,7 +99,7 @@ const subjectSchema = z
   })
   .strict();
 
-const qualitySchema = z
+export const qualitySchema = z
   .object({
     tier: z.enum(["standard", "enriched"]),
     max_age_seconds: z.number().int().min(0).max(86_400),
@@ -108,7 +108,7 @@ const qualitySchema = z
   })
   .strict();
 
-const maxCostSchema = z
+export const maxCostSchema = z
   .object({
     unit: z.literal("earned_credit"),
     amount: decimalUint256,
@@ -151,6 +151,13 @@ export const consultationSchema = z
   });
 
 export type Consultation = z.infer<typeof consultationSchema>;
+
+export const protocolIdentifierSchema = identifier;
+export const canonicalHttpsUrlSchema = canonicalUrl;
+export const uint256Schema = decimalUint256;
+export const positiveUint256Schema = positiveDecimalUint256;
+export const operationIdV2Schema = z.string().regex(OPERATION_ID);
+export const protocolTimeSchema = z.number().int().min(0).max(MAX_UNIX_SECONDS);
 
 const revisionArray = z
   .array(identifier)
