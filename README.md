@@ -93,3 +93,7 @@ protocol layer: typed evidence with provenance and freshness, durable receipts,
 server-side reconciliation, scoped identities, optional trust adapters, and an
 eventual bounded settlement plane. It is a design proposal, not implemented or
 accepted compatibility.
+
+Execution is tracked in [epic #3](https://github.com/xpelch/gossip/issues/3),
+with its dependency map and acceptance plan mirrored in
+[the repository documentation](docs/epics/gossip-protocol-v2.md).
