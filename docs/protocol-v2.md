@@ -1,9 +1,10 @@
 # Gossip v2 contract foundation
 
-This developer contract contains the first two implementation slices of
+This developer contract contains the first three implementation slices of
 [epic #3](https://github.com/xpelch/gossip/issues/3), tracked as
-[WS1 #4](https://github.com/xpelch/gossip/issues/4) and
-[WS2 #6](https://github.com/xpelch/gossip/issues/6).
+[WS1 #4](https://github.com/xpelch/gossip/issues/4),
+[WS2 #6](https://github.com/xpelch/gossip/issues/6), and the portable
+authenticity portion of [WS3 #9](https://github.com/xpelch/gossip/issues/9).
 The revision is `gossip/2-draft.1`. It is a candidate for engine integration;
 there is no public v2 endpoint or active v2 tool in the kit.
 
@@ -34,13 +35,20 @@ results, and explicit remaining gates.
   `validateReceiptTransitionChain` check receipt encoding, content integrity,
   request binding, economic invariants, and lifecycle transitions. They do not
   authenticate the signature or choose a production signer.
+- `parseReceiptTrustManifest`, `verifySignedReceipt`, and
+  `verifyReceiptTransitionChainAuthenticity` verify the separate
+  `gossip-eip191-receipt-v1` profile against an operator-pinned manifest,
+  including the exact EIP-191 message, low-S signature, recovery key, server,
+  profile, key ID, validity interval, and chain key pinning.
 
 The exact fields, resource limits, and validation semantics are specified in
 [ADR 0003](adr/0003-v2-canonical-contract.md) and
-[ADR 0004](adr/0004-v2-evidence-and-receipts.md). Source modules and declarations
+[ADR 0004](adr/0004-v2-evidence-and-receipts.md), and
+[ADR 0005](adr/0005-v2-receipt-authenticity.md). Source modules and declarations
 are shipped under `dist/canonical.js`, `dist/protocol-v2.js`,
-`dist/evidence-v2.js`, `dist/receipts-v2.js`, and `dist/protocol-errors.js` after
-build. They are separate from `serve` and `setup`.
+`dist/evidence-v2.js`, `dist/receipts-v2.js`, `dist/receipt-auth.js`, and
+`dist/protocol-errors.js` after build. They are separate from `serve` and
+`setup`.
 
 ## Reproduce the contract checks
 
@@ -62,10 +70,12 @@ fixtures and verifiers are included in the npm tarball so an engine author can
 verify the installed artifact.
 
 Fixtures contain only synthetic addresses, reserved `.test` URLs, fixed
-timestamps, and explicitly synthetic signature bytes. They are conformance
-examples, not connection configuration or production trust anchors. Receipt
-signature algorithms, preimages, public keys, trust anchors, and rotation remain
-unapproved. The parser deliberately reports no authenticity verdict.
+timestamps, and synthetic deterministic keys. They are conformance examples,
+not connection configuration or production trust anchors. The receipt verifier
+is offline and consumes a manifest supplied by the operator; it does not
+discover keys or perform TOFU. Server signing, manifest distribution,
+private-key loading, retention, and rotation-event enforcement remain
+unapproved.
 
 ## Integration order
 
@@ -91,7 +101,7 @@ the observation window, freshness, finality, and explicit unknowns. A recent
 retrieval does not refresh old facts. Research heuristics retain their limitations
 until predictive validation is established by the engine's own evidence.
 
-These module tests do not prove server idempotency, receipt authenticity,
+These module tests do not prove server idempotency,
 exactly one durable charge, RPC revalidation, private evidence operations, host
 support, or a public release. Those gates remain on epic #3 and the applicable
 acceptance dependencies in issues #1 and #2.

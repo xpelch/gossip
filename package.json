@@ -21,13 +21,15 @@
     "scripts/verify-v2-vectors.py",
     "scripts/verify-v2-evidence-receipts.py",
     "test/fixtures/v2-canonical.json",
-    "test/fixtures/v2-evidence-receipts.json"
+    "test/fixtures/v2-evidence-receipts.json",
+    "test/fixtures/v2-receipt-auth.json"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "tsx --test --test-concurrency=1 test/*.test.ts",
     "test:protocol-v2": "tsx --test test/canonical.test.ts test/protocol-v2.test.ts test/protocol-v2-vectors.test.ts",
+    "test:receipt-auth": "tsx --test test/receipt-auth.test.ts",
     "verify:protocol-v2": "python scripts/verify-v2-vectors.py",
     "verify:evidence-v2": "python scripts/verify-v2-evidence-receipts.py"
   },
