@@ -1,0 +1,77 @@
+# Gossip v2 contract foundation
+
+This developer contract is the first implementation slice of
+[epic #3](https://github.com/xpelch/gossip/issues/3), tracked as
+[WS1 #4](https://github.com/xpelch/gossip/issues/4).
+The revision is `gossip/2-draft.1`. It is a candidate for engine integration;
+there is no public v2 endpoint or active v2 tool in the kit.
+
+See the [2026-09-09 acceptance record](acceptance/v2-contract-foundation.md)
+for the tested artifact, results, and the Windows installer time-limit finding.
+
+## What is executable
+
+- `canonicalJson` encodes bounded JSON values without ambiguous number or
+  Unicode conversions. `parseCanonicalJson` accepts only those exact UTF-8 bytes.
+- `canonicalDigest` separates request, evidence, and receipt content hashes.
+  Hashing arbitrary data does not prove its truth or satisfy an evidence schema.
+- `parseConsultation` validates the candidate request and its deadline.
+  `consultationDigest` binds the validated envelope without consulting a clock.
+- `negotiateCapabilities` compares a supplied report with an independently
+  configured endpoint, audience, and profile. It returns selected revisions and
+  limits. It performs no network call and grants no authority.
+
+The exact fields, resource limits, and validation semantics are specified in
+[ADR 0003](adr/0003-v2-canonical-contract.md). Source modules and declarations are
+shipped under `dist/canonical.js`, `dist/protocol-v2.js`, and
+`dist/protocol-errors.js` after build. They are separate from `serve` and `setup`.
+
+## Reproduce the contract checks
+
+From this repository with Node 24 and Python 3:
+
+```sh
+npm ci --ignore-scripts
+npm run build
+npm run test:protocol-v2
+npm run verify:protocol-v2
+```
+
+The Python verifier uses only its standard library. It independently implements
+the restricted JSON profile and verifies stored canonical bytes and digests in
+`test/fixtures/v2-canonical.json`. Node consumes the same literal vectors through
+the public TypeScript boundary. The fixture and Python verifier are also included
+in the npm tarball, so an engine author can verify the installed artifact.
+
+Fixtures contain only synthetic addresses, reserved `.test` URLs, and fixed
+timestamps. They are conformance examples, not connection configuration or
+production trust anchors. The domain labels `evidence` and `receipt` test hash
+separation; their full schemas, signatures, and acceptance are subsequent work.
+
+## Integration order
+
+```mermaid
+flowchart LR
+    C[Canonical contract and vectors] --> S[Sherwood conformance]
+    C --> E[Evidence and receipt schemas]
+    S --> A[Atomic reservation and durable operations]
+    E --> A
+    A --> M[Authenticated v2 MCP and HTTP adapters]
+    M --> R[Real hosts and release acceptance]
+```
+
+Downstream adapters must enforce the smaller negotiated limits before sending,
+authenticate discovery, bind the selected revisions to a verified connection,
+and validate the actor against the real signer. A timeout is still unknown;
+a content digest or capability report cannot release a credit reservation.
+Fresh authentication nonces must not change a logical operation's digest.
+
+The protocol cannot promote an observation into a verified trading signal.
+Engine evidence must retain source revision, canonical block/transaction hashes,
+the observation window, freshness, finality, and explicit unknowns. A recent
+retrieval does not refresh old facts. Research heuristics retain their limitations
+until predictive validation is established by the engine's own evidence.
+
+WS1 module tests do not prove server idempotency, receipt signatures, exactly one
+charge, host support, or a public release. Those gates remain on epic #3 and the
+applicable acceptance dependencies in issues #1 and #2.

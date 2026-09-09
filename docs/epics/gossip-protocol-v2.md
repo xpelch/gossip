@@ -5,6 +5,8 @@ reconciliation.
 
 Design source: [Gossip Protocol v2 proposal](../proposals/gossip-protocol-v2.md).
 Tracking issue: [#3](https://github.com/xpelch/gossip/issues/3).
+First active child: [WS1 contract foundation #4](https://github.com/xpelch/gossip/issues/4),
+with [implementation notes](../protocol-v2.md).
 This epic specifies proposed work. It does not claim that v2, a public endpoint,
 or its optional standards are implemented.
 

@@ -17,12 +17,16 @@
     "LICENSE",
     "scripts/install.mjs",
     "docs",
-    "scripts/bootstrap-linux.sh"
+    "scripts/bootstrap-linux.sh",
+    "scripts/verify-v2-vectors.py",
+    "test/fixtures/v2-canonical.json"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "tsx --test --test-concurrency=1 test/*.test.ts"
+    "test": "tsx --test --test-concurrency=1 test/*.test.ts",
+    "test:protocol-v2": "tsx --test test/canonical.test.ts test/protocol-v2.test.ts test/protocol-v2-vectors.test.ts",
+    "verify:protocol-v2": "python scripts/verify-v2-vectors.py"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",
@@ -34,6 +38,7 @@
   "devDependencies": {
     "@foundry-rs/anvil": "1.7.1",
     "@types/node": "24.13.3",
+    "prettier": "3.6.2",
     "solc": "0.8.36",
     "tsx": "4.23.13",
     "typescript": "7.0.2"

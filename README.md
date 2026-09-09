@@ -97,3 +97,9 @@ accepted compatibility.
 Execution is tracked in [epic #3](https://github.com/xpelch/gossip/issues/3),
 with its dependency map and acceptance plan mirrored in
 [the repository documentation](docs/epics/gossip-protocol-v2.md).
+
+The first executable candidate is the [v2 contract foundation](docs/protocol-v2.md):
+bounded canonical JSON, consultation envelopes, explicit capability negotiation,
+and shared integrity vectors. It is development infrastructure; the live bridge
+still exposes the four v1 tools. It does not enable a v2 engine connection or
+change wallet permissions.
