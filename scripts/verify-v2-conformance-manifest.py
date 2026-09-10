@@ -160,7 +160,7 @@ exact_keys(
     },
 )
 assert statement["schema"] == "gossip.acceptance-statement.v1"
-assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-10"
+assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-10.1"
 assert statement["protocol"] == PROTOCOL
 assert statement["decision"] in {"verified", "blocked"}
 verify_integer(statement["generated_at"], 0, MAX_UNIX_SECONDS)
@@ -176,13 +176,28 @@ assert statement["artifacts"]["gossip"]["package"] == "@gossip/agent-kit"
 verify_version(statement["artifacts"]["gossip"]["version"])
 verify_sha256(statement["artifacts"]["gossip"]["sha256"])
 verify_integer(statement["artifacts"]["gossip"]["bytes"], 1, MAX_REFERENCE_BYTES)
-exact_keys(statement["artifacts"]["sherwood"], {"repository", "commit", "image_digest"})
+exact_keys(
+    statement["artifacts"]["sherwood"],
+    {"repository", "commit", "assembly", "image_digest"},
+)
 sherwood = statement["artifacts"]["sherwood"]
 assert sherwood["repository"] == "https://github.com/xpelch/sherwood"
-assert (sherwood["commit"] is None) == (sherwood["image_digest"] is None)
+assembly = sherwood["assembly"]
+if assembly is not None:
+    exact_keys(assembly, {"sha256", "bytes"})
+    verify_sha256(assembly["sha256"])
+    verify_integer(assembly["bytes"], 1, MAX_REFERENCE_BYTES)
+assert (
+    sherwood["commit"] is None and assembly is None and sherwood["image_digest"] is None
+) or (
+    sherwood["commit"] is not None
+    and (assembly is not None or sherwood["image_digest"] is not None)
+)
 if sherwood["commit"] is not None:
     assert re.fullmatch(r"[0-9a-f]{40}", sherwood["commit"])
+if sherwood["image_digest"] is not None:
     verify_sha256(sherwood["image_digest"])
+    assert sherwood["commit"] is not None
 
 exact_keys(
     statement["runtime"],
@@ -266,6 +281,19 @@ for scenario in scenarios.values():
         verify_short_text(scenario["reason"])
         verify_short_text(scenario["next_action"])
 
+process_evidence_required = any(
+    scenarios[scenario_id]["status"] == "verified"
+    for scenario_id in {"mcp_http_parity", "privacy_canary_scan"}
+)
+if process_evidence_required:
+    assert sherwood["commit"] is not None
+    assert assembly is not None
+    assert statement["runtime"]["dotnet"] is not None
+    assert statement["runtime"]["docker"] is not None
+    assert statement["runtime"]["postgresql"] is not None
+    assert statement["revisions"]["engine"] is not None
+    assert statement["revisions"]["database_migrations"] is not None
+
 assert isinstance(statement["capabilities"], list)
 assert len(statement["capabilities"]) == len(CAPABILITIES)
 capabilities = {item["name"]: item for item in statement["capabilities"]}
@@ -298,6 +326,7 @@ if statement["decision"] == "verified":
     assert all(item["status"] == "verified" for item in scenarios.values())
     assert all(capabilities[name]["state"] == "verified" for name in CORE_CAPABILITIES)
     assert sherwood["commit"] is not None
+    assert sherwood["image_digest"] is not None
     assert all(
         statement["runtime"][name] is not None
         for name in ["dotnet", "docker", "postgresql"]

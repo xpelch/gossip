@@ -40,6 +40,27 @@ capabilities exactly once. A verified capability cites verified scenarios.
 `installed`, `blocked`, and `not_applicable` entries contain a fixed reason and
 one actionable next step. Installation cannot satisfy a verified capability.
 
+The runner may receive an absolute clean local Sherwood checkout plus a
+40-character lowercase commit. It accepts only a canonical `xpelch/sherwood`
+HTTPS or SSH origin, rejects a reparse-point root or dirty source, clones
+without hardlinks, and verifies a clean detached checkout at that exact
+commit. This is an explicit source-execution trust boundary for the caller.
+The process slice records a strict Sherwood assembly digest and size separately
+from an optional production image digest. A source run may have an assembly
+without an image; an overall `verified` decision still requires the production
+image gate.
+
+The process slice runs the pinned external-process test with bounded stdout,
+stderr and TRX captures. Public evidence contains only hashes, sizes, test
+counters, measured runtimes, pinned revisions and boolean results. Restricted
+raw captures are scanned and deleted with the disposable checkout. A passing
+slice may mark only `mcp_http_parity` and `privacy_canary_scan` verified, and
+only when the manifest also contains the pinned Sherwood commit and assembly,
+measured .NET/Docker/PostgreSQL versions, and engine/migration revisions. It
+does not promote capabilities or imply exactly-once concurrency, fault
+recovery, TLS, image provenance, session authorization, private storage or a
+second clean replay.
+
 An overall `verified` decision requires:
 
 - exact Gossip and Sherwood artifact identities;

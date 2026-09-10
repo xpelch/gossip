@@ -329,3 +329,145 @@ test("TypeScript and Python enforce the same manifest bounds", () => {
     fs.rmSync(temporary, { recursive: true, force: true });
   }
 });
+
+test("TypeScript and Python enforce Sherwood assembly and process evidence prerequisites", () => {
+  const temporary = fs.mkdtempSync(
+    path.join(os.tmpdir(), "gossip-sherwood-schema-vector-"),
+  );
+
+  try {
+    const fixtureBytes = fs.readFileSync(
+      new URL("./fixtures/v2-canonical.json", import.meta.url),
+    );
+    const copiedFixture = path.join(
+      temporary,
+      "test",
+      "fixtures",
+      "v2-canonical.json",
+    );
+    fs.mkdirSync(path.dirname(copiedFixture), { recursive: true });
+    fs.writeFileSync(copiedFixture, fixtureBytes);
+
+    const processEvidence = path.join(temporary, "evidence", "process.json");
+    fs.mkdirSync(path.dirname(processEvidence), { recursive: true });
+    fs.writeFileSync(processEvidence, "process evidence\n");
+
+    const valid = structuredClone(fixture);
+    valid.statement.fixtures[0].sha256 = `sha256:${createHash("sha256").update(fixtureBytes).digest("hex")}`;
+    valid.statement.fixtures[0].bytes = fixtureBytes.byteLength;
+    for (const scenario of valid.statement.scenarios) {
+      if (scenario.status !== "verified") {
+        continue;
+      }
+      const evidenceBytes = Buffer.from(`evidence:${scenario.id}\n`);
+      const evidencePath = path.join(
+        temporary,
+        ...scenario.evidence[0].path.split("/"),
+      );
+      fs.mkdirSync(path.dirname(evidencePath), { recursive: true });
+      fs.writeFileSync(evidencePath, evidenceBytes);
+      scenario.evidence[0].sha256 = `sha256:${createHash("sha256").update(evidenceBytes).digest("hex")}`;
+      scenario.evidence[0].bytes = evidenceBytes.byteLength;
+    }
+    valid.statement.artifacts.sherwood.commit = "6f5739c5".repeat(5);
+    valid.statement.artifacts.sherwood.assembly = {
+      sha256: `sha256:${"1".repeat(64)}`,
+      bytes: 123,
+    };
+    valid.statement.runtime.dotnet = "10.0.11";
+    valid.statement.runtime.docker = "28.3.3";
+    valid.statement.runtime.postgresql = "17.6";
+    valid.statement.revisions.engine = "synthetic-v1";
+    valid.statement.revisions.database_migrations =
+      "git-tree-" + "2".repeat(40);
+    for (const scenarioId of ["mcp_http_parity", "privacy_canary_scan"]) {
+      const scenario = valid.statement.scenarios.find(
+        (candidate: Record<string, unknown>) => candidate.id === scenarioId,
+      );
+      assert.ok(scenario);
+      delete scenario.reason;
+      delete scenario.next_action;
+      scenario.status = "verified";
+      scenario.assertions = 10;
+      scenario.evidence = [
+        {
+          path: "evidence/process.json",
+          sha256: `sha256:${createHash("sha256").update("process evidence\n").digest("hex")}`,
+          bytes: 17,
+        },
+      ];
+    }
+    valid.content_address.digest = canonicalDigest(
+      "conformance",
+      valid.statement,
+    );
+    assert.doesNotThrow(() => parseConformanceEnvelope(valid));
+
+    const validPath = path.join(temporary, "valid-manifest.json");
+    fs.writeFileSync(validPath, JSON.stringify(valid));
+    const validPython = spawnSync(
+      "python",
+      ["scripts/verify-v2-conformance-manifest.py", "--manifest", validPath],
+      { encoding: "utf8" },
+    );
+    assert.equal(validPython.status, 0, validPython.stderr);
+
+    const invalidManifests = [
+      (() => {
+        const invalid = structuredClone(fixture);
+        invalid.statement.artifacts.sherwood.assembly = {
+          sha256: `sha256:${"1".repeat(64)}`,
+          bytes: 123,
+        };
+        return invalid;
+      })(),
+      (() => {
+        const invalid = structuredClone(fixture);
+        invalid.statement.artifacts.sherwood.commit = "6f5739c5".repeat(5);
+        return invalid;
+      })(),
+      (() => {
+        const invalid = structuredClone(fixture);
+        invalid.statement.artifacts.sherwood.image_digest = `sha256:${"1".repeat(64)}`;
+        return invalid;
+      })(),
+      (() => {
+        const invalid = structuredClone(valid);
+        invalid.statement.runtime.dotnet = null;
+        return invalid;
+      })(),
+      (() => {
+        const invalid = structuredClone(valid);
+        invalid.statement.decision = "verified";
+        invalid.statement.artifacts.sherwood.image_digest = null;
+        return invalid;
+      })(),
+    ];
+
+    for (const [index, invalid] of invalidManifests.entries()) {
+      invalid.content_address.digest = canonicalDigest(
+        "conformance",
+        invalid.statement,
+      );
+      expectCode(
+        () => parseConformanceEnvelope(invalid),
+        "invalid_conformance_manifest",
+      );
+
+      const manifestPath = path.join(temporary, `invalid-${index}.json`);
+      fs.writeFileSync(manifestPath, JSON.stringify(invalid));
+      const python = spawnSync(
+        "python",
+        [
+          "scripts/verify-v2-conformance-manifest.py",
+          "--manifest",
+          manifestPath,
+        ],
+        { encoding: "utf8" },
+      );
+      assert.notEqual(python.status, 0, `invalid Sherwood shape ${index}`);
+    }
+  } finally {
+    fs.rmSync(temporary, { recursive: true, force: true });
+  }
+});

@@ -7,7 +7,7 @@ export const ACCEPTANCE_ENVELOPE_SCHEMA =
 export const ACCEPTANCE_STATEMENT_SCHEMA =
   "gossip.acceptance-statement.v1" as const;
 export const CONFORMANCE_SUITE_REVISION =
-  "gossip-v2-conformance-2026-09-10" as const;
+  "gossip-v2-conformance-2026-09-10.1" as const;
 
 export const CONFORMANCE_SCENARIOS = [
   "artifact_install",
@@ -161,12 +161,23 @@ const acceptanceStatementSchema = z
           .object({
             repository: z.literal("https://github.com/xpelch/sherwood"),
             commit: z.string().regex(COMMIT).nullable(),
+            assembly: z
+              .object({
+                sha256: z.string().regex(DIGEST),
+                bytes: z.number().int().positive().max(1_000_000_000),
+              })
+              .strict()
+              .nullable(),
             image_digest: z.string().regex(DIGEST).nullable(),
           })
           .strict()
           .refine(
             (value) =>
-              (value.commit === null) === (value.image_digest === null),
+              (value.commit === null &&
+                value.assembly === null &&
+                value.image_digest === null) ||
+              (value.commit !== null &&
+                (value.assembly !== null || value.image_digest !== null)),
           ),
       })
       .strict(),
@@ -291,6 +302,28 @@ function validateStatement(statement: AcceptanceStatement): void {
       capability.evidence_scenarios.some(
         (scenarioId) => scenarios.get(scenarioId)?.status !== "verified",
       )
+    ) {
+      invalidManifest();
+    }
+  }
+
+  const processEvidenceRequired = [
+    "mcp_http_parity",
+    "privacy_canary_scan",
+  ] as const;
+  const requiresProcessEvidence = processEvidenceRequired.some(
+    (scenarioId) => scenarios.get(scenarioId)?.status === "verified",
+  );
+  if (requiresProcessEvidence) {
+    const sherwood = statement.artifacts.sherwood;
+    if (
+      sherwood.commit === null ||
+      sherwood.assembly === null ||
+      statement.runtime.dotnet === null ||
+      statement.runtime.docker === null ||
+      statement.runtime.postgresql === null ||
+      statement.revisions.engine === null ||
+      statement.revisions.database_migrations === null
     ) {
       invalidManifest();
     }

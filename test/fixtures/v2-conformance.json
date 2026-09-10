@@ -2,7 +2,7 @@
   "schema": "gossip.acceptance-envelope.v1",
   "statement": {
     "schema": "gossip.acceptance-statement.v1",
-    "suite_revision": "gossip-v2-conformance-2026-09-10",
+    "suite_revision": "gossip-v2-conformance-2026-09-10.1",
     "protocol": "gossip/2-draft.1",
     "generated_at": 1800000000,
     "source": {
@@ -20,6 +20,7 @@
       "sherwood": {
         "repository": "https://github.com/xpelch/sherwood",
         "commit": null,
+        "assembly": null,
         "image_digest": null
       }
     },
@@ -213,6 +214,6 @@
   },
   "content_address": {
     "algorithm": "sha256",
-    "digest": "sha256:a25db91abc836019471e33b98d90e77c814599607f1c942b1b4d59546a2f4d12"
+    "digest": "sha256:0f2f6698b9c2ef2d2221557b9740e8d9bc944691495a5acb44c053324a7618c9"
   }
 }
