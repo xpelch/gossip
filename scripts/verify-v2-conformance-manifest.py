@@ -43,6 +43,13 @@ CORE_CAPABILITIES = {
     "signed_receipts",
     "evidence",
 }
+PROCESS_EVIDENCE_SCENARIOS = {
+    "mcp_http_parity",
+    "privacy_canary_scan",
+    "operation_exactly_once",
+    "operation_conflict",
+    "authentication_fail_closed",
+}
 SHA256_PREFIX = "sha256:"
 MAX_UNIX_SECONDS = 253_402_300_799
 MAX_REFERENCE_BYTES = 1_000_000_000
@@ -160,7 +167,7 @@ exact_keys(
     },
 )
 assert statement["schema"] == "gossip.acceptance-statement.v1"
-assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-10.1"
+assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-10.2"
 assert statement["protocol"] == PROTOCOL
 assert statement["decision"] in {"verified", "blocked"}
 verify_integer(statement["generated_at"], 0, MAX_UNIX_SECONDS)
@@ -283,7 +290,7 @@ for scenario in scenarios.values():
 
 process_evidence_required = any(
     scenarios[scenario_id]["status"] == "verified"
-    for scenario_id in {"mcp_http_parity", "privacy_canary_scan"}
+    for scenario_id in PROCESS_EVIDENCE_SCENARIOS
 )
 if process_evidence_required:
     assert sherwood["commit"] is not None

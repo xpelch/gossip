@@ -50,16 +50,18 @@ from an optional production image digest. A source run may have an assembly
 without an image; an overall `verified` decision still requires the production
 image gate.
 
-The process slice runs the pinned external-process test with bounded stdout,
-stderr and TRX captures. Public evidence contains only hashes, sizes, test
-counters, measured runtimes, pinned revisions and boolean results. Restricted
-raw captures are scanned and deleted with the disposable checkout. A passing
-slice may mark only `mcp_http_parity` and `privacy_canary_scan` verified, and
-only when the manifest also contains the pinned Sherwood commit and assembly,
-measured .NET/Docker/PostgreSQL versions, and engine/migration revisions. It
-does not promote capabilities or imply exactly-once concurrency, fault
-recovery, TLS, image provenance, session authorization, private storage or a
-second clean replay.
+The process slice runs both pinned external-process tests in one bounded TRX,
+with bounded stdout and stderr captures. Public evidence contains only hashes,
+sizes, exact test FQNs and counters, measured runtimes, pinned revisions and
+boolean results. Restricted raw captures are scanned and deleted with the
+disposable checkout. A passing slice may mark `mcp_http_parity`,
+`privacy_canary_scan`, `operation_exactly_once`, `operation_conflict`, and
+`authentication_fail_closed` verified, and only when the manifest also
+contains the pinned Sherwood commit and assembly, measured
+.NET/Docker/PostgreSQL versions, and engine/migration revisions. It leaves
+`owner_isolation` blocked with partial non-enumeration evidence and does not
+promote capabilities or imply crash/timeout reconciliation, TLS, image
+provenance, session authorization, private storage, or a second clean replay.
 
 An overall `verified` decision requires:
 

@@ -20,15 +20,20 @@ import { promisify } from "node:util";
 import {
   isCanonicalSherwoodOrigin,
   parseConformanceArguments,
-  parseTrxResult,
+  parseTrxResults,
 } from "./conformance-runner-options.mjs";
 
 const execute = promisify(execFile);
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const repository = resolve(scriptDirectory, "..");
 const MAX_OUTPUT_BYTES = 1_048_576;
-const SHERWOOD_TEST_FQN =
-  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_signed_http_and_mcp_and_replays_after_restart";
+const SHERWOOD_TEST_FQNS = [
+  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_signed_http_and_mcp_and_replays_after_restart",
+  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_enforces_concurrency_conflicts_authentication_and_owner_isolation",
+];
+const SHERWOOD_TEST_FILTER =
+  "FullyQualifiedName=" + SHERWOOD_TEST_FQNS.join("|FullyQualifiedName=");
+const SHERWOOD_TEST_CLASS = "Sherwood.Tests.GossipV2ProcessConformanceTests";
 const SHERWOOD_CANARY_PREFIX = "PROCESS-CONFORMANCE-CANARY";
 const SHERWOOD_HANG_TIMEOUT = "5m";
 
@@ -154,8 +159,8 @@ async function runSherwoodConformance(
   );
   if (
     !testSource.includes("class GossipV2ProcessConformanceTests") ||
-    !testSource.includes(
-      "A_real_process_serves_signed_http_and_mcp_and_replays_after_restart",
+    !SHERWOOD_TEST_FQNS.every((fqn) =>
+      testSource.includes(fqn.slice(SHERWOOD_TEST_CLASS.length + 1)),
     ) ||
     !/ServerRevision\s*=\s*"synthetic-v1"/su.test(testSource) ||
     !postgresFixtureSource.includes('new PostgreSqlBuilder("postgres:17")')
@@ -214,7 +219,7 @@ async function runSherwoodConformance(
       "--no-build",
       "--no-restore",
       "--filter",
-      `FullyQualifiedName=${SHERWOOD_TEST_FQN}`,
+      SHERWOOD_TEST_FILTER,
       "--blame-hang-timeout",
       SHERWOOD_HANG_TIMEOUT,
       "--logger",
@@ -244,7 +249,8 @@ async function runSherwoodConformance(
   }
   const trx = await readFile(trxPath, "utf8");
   scanConformanceText(trx, [SHERWOOD_CANARY_PREFIX]);
-  const counters = parseTrxResult(trx, SHERWOOD_TEST_FQN);
+  const parsedResults = parseTrxResults(trx, SHERWOOD_TEST_FQNS);
+  const { tests, ...counters } = parsedResults;
   const runtime = await measureRuntime();
 
   return {
@@ -265,11 +271,18 @@ async function runSherwoodConformance(
         engine: "synthetic-v1",
         database_migrations: `git-tree-${migrationTree}`,
       },
-      test_fqn: SHERWOOD_TEST_FQN,
+      test_fqns: tests,
+      test_results: tests.map((fqn) => ({
+        fqn,
+        outcome: "passed",
+      })),
       counters,
       scenario_assertions: {
         mcp_http_parity: 6,
         privacy_canary_scan: 4,
+        operation_exactly_once: 7,
+        operation_conflict: 4,
+        authentication_fail_closed: 11,
       },
       transport: "loopback-http",
       logical_endpoint_scheme: "https",
@@ -277,6 +290,10 @@ async function runSherwoodConformance(
       signed_mcp_complete_zero_cost: true,
       canonical_transport_parity: true,
       durable_operation_singleton: true,
+      operation_exactly_once: true,
+      operation_conflict: true,
+      authentication_fail_closed: true,
+      owner_isolation_non_enumeration: true,
       receipt_chain_verified: true,
       restart_replay_exact: true,
       diagnostics_clean: true,
@@ -593,7 +610,7 @@ async function main() {
     ).stdout.trim();
     const statement = {
       schema: "gossip.acceptance-statement.v1",
-      suite_revision: "gossip-v2-conformance-2026-09-10.1",
+      suite_revision: "gossip-v2-conformance-2026-09-10.2",
       protocol: "gossip/2-draft.1",
       generated_at: Math.floor(Date.now() / 1000),
       source: {
@@ -790,21 +807,34 @@ async function main() {
       statement.revisions.engine = sherwoodEvidence.revisions.engine;
       statement.revisions.database_migrations =
         sherwoodEvidence.revisions.database_migrations;
-      statement.scenarios = statement.scenarios.map((scenario) =>
-        scenario.id === "mcp_http_parity" ||
-        scenario.id === "privacy_canary_scan"
-          ? {
-              id: scenario.id,
-              status: "verified",
-              assertions:
-                scenario.id === "mcp_http_parity"
-                  ? sherwoodEvidence.summary.scenario_assertions.mcp_http_parity
-                  : sherwoodEvidence.summary.scenario_assertions
-                      .privacy_canary_scan,
-              evidence: [processEvidence],
-            }
-          : scenario,
-      );
+      const processScenarioIds = [
+        "mcp_http_parity",
+        "privacy_canary_scan",
+        "operation_exactly_once",
+        "operation_conflict",
+        "authentication_fail_closed",
+      ];
+      statement.scenarios = statement.scenarios.map((scenario) => {
+        if (processScenarioIds.includes(scenario.id)) {
+          return {
+            id: scenario.id,
+            status: "verified",
+            assertions:
+              sherwoodEvidence.summary.scenario_assertions[scenario.id],
+            evidence: [processEvidence],
+          };
+        }
+
+        if (scenario.id === "owner_isolation") {
+          return blocked(
+            scenario.id,
+            "The process proved scalar-2 operation and receipt non-enumeration only; private lifecycle, export, deletion and audit remain unproven.",
+            "Exercise operation, receipt, evidence, export, deletion and audit isolation.",
+          );
+        }
+
+        return scenario;
+      });
     }
     const envelope = createConformanceEnvelope(statement);
     const manifest = `${JSON.stringify(envelope, null, 2)}\n`;

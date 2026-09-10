@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import {
   isCanonicalSherwoodOrigin,
   parseConformanceArguments,
+  parseTrxResults,
   parseTrxResult,
 } from "../scripts/conformance-runner-options.mjs";
 
@@ -150,4 +151,27 @@ test("accepts the xUnit TRX counter shape without an optional skipped attribute"
     () => parseTrxResult(trx.replace('passed="1"', 'passed="0"'), fqn),
     /pass contract/i,
   );
+});
+
+test("requires both exact Sherwood process test outcomes in one TRX", () => {
+  const first =
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_signed_http_and_mcp_and_replays_after_restart";
+  const second =
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_enforces_concurrency_conflicts_authentication_and_owner_isolation";
+  const trx = `
+    <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_serves_signed_http_and_mcp_and_replays_after_restart" />
+    <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_enforces_concurrency_conflicts_authentication_and_owner_isolation" />
+    <Counters total="2" executed="2" passed="2" failed="0" error="0" notExecuted="0" skipped="0" />`;
+
+  assert.deepEqual(parseTrxResults(trx, [first, second]), {
+    total: 2,
+    executed: 2,
+    passed: 2,
+    failed: 0,
+    error: 0,
+    notExecuted: 0,
+    skipped: 0,
+    tests: [first, second],
+  });
+  assert.throws(() => parseTrxResults(trx, [first]), /exact pass contract/i);
 });

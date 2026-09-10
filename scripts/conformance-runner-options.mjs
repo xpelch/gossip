@@ -63,6 +63,12 @@ export function isCanonicalSherwoodOrigin(origin) {
 }
 
 export function parseTrxResult(trx, expectedTestFqn) {
+  const parsed = parseTrxResults(trx, [expectedTestFqn]);
+  const { tests: _tests, ...counters } = parsed;
+  return counters;
+}
+
+export function parseTrxResults(trx, expectedTestFqns) {
   const countersTag = trx.match(/<Counters\b[^>]*>/u)?.[0];
   const testMethods = [
     ...trx.matchAll(
@@ -88,25 +94,30 @@ export function parseTrxResult(trx, expectedTestFqn) {
   const skipped = countersTag
     ? optionalIntegerAttribute(countersTag, "skipped")
     : null;
+  const testNames = testMethods.map(
+    (testMethod) => `${testMethod[1]}.${testMethod[2]}`,
+  );
+  const expectedNames = [...expectedTestFqns].sort();
+  const actualNames = [...testNames].sort();
   if (
     !counters ||
     Object.values(counters).some((value) => value === null) ||
-    counters.total !== 1 ||
-    counters.executed !== 1 ||
-    counters.passed !== 1 ||
+    counters.total !== expectedTestFqns.length ||
+    counters.executed !== expectedTestFqns.length ||
+    counters.passed !== expectedTestFqns.length ||
     counters.failed !== 0 ||
     counters.error !== 0 ||
     counters.notExecuted !== 0 ||
     skipped === null ||
     skipped !== 0 ||
-    testMethods.length !== 1 ||
-    `${testMethods[0][1]}.${testMethods[0][2]}` !== expectedTestFqn
+    testNames.length !== expectedTestFqns.length ||
+    JSON.stringify(actualNames) !== JSON.stringify(expectedNames)
   ) {
     throw new Error(
       "The Sherwood process test result did not meet the exact pass contract.",
     );
   }
-  return { ...counters, skipped };
+  return { ...counters, skipped, tests: testNames };
 }
 
 function integerAttribute(tag, name) {

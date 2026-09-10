@@ -36,27 +36,30 @@ The runner can execute the process-faithful Sherwood slice when the caller
 supplies an absolute, clean local checkout and an exact commit:
 
 ```powershell
-node scripts/run-v2-conformance.mjs --output C:\temp\gossip-v2-acceptance --sherwood-repository C:\src\sherwood --sherwood-commit 6f5739c5b1ae815f86aee3622ea2178352e9c3b6
+node scripts/run-v2-conformance.mjs --output C:\temp\gossip-v2-acceptance --sherwood-repository C:\src\sherwood --sherwood-commit 577a90c6e32a3419ca636d22dd43e37821ed4e8e
 ```
 
 The commit value must be 40 lowercase hexadecimal characters. The local
 checkout must have the canonical `xpelch/sherwood` HTTPS or SSH origin, no
 working-tree changes, and no reparse-point root. The runner clones it without
 hardlinks, detaches the requested commit, restores and builds the Sherwood
-test project in Release mode, then runs the exact
-`Sherwood.Tests.GossipV2ProcessConformanceTests` filter with a bounded TRX
-result. The supplied checkout is executable source code and therefore an
-explicit caller trust boundary.
+test project in Release mode, then runs both exact process test FQNs in one
+bounded TRX result. The supplied checkout is executable source code and
+therefore an explicit caller trust boundary; the commit must be the full
+40-character value resolved from that clean checkout.
 
 The public evidence summary records only hashes, sizes, counters, revisions,
 runtime versions and boolean assertions. Raw child output and TRX data remain
 in disposable restricted storage and are scanned before summary derivation;
 paths, remotes, requests, receipts, signatures, keys, connection strings and
-canaries are never published. The test directly promotes only
-`mcp_http_parity` and `privacy_canary_scan` to `verified`. It records restart
-replay and durable receipt observations as evidence, while
-`operation_exactly_once`, `zero_cost_reconciliation`, all capabilities, and
-the overall decision remain blocked or installed under the existing policy.
+canaries are never published. Passing both tests promotes
+`mcp_http_parity`, `privacy_canary_scan`, `operation_exactly_once`,
+`operation_conflict`, and `authentication_fail_closed` to `verified`.
+`owner_isolation` remains blocked with partial non-enumeration evidence because
+private lifecycle/export/delete/audit is absent. Zero-cost reconciliation
+remains blocked because crash/timeout recovery was not run; all capabilities
+and the overall decision remain blocked because the run produces an assembly
+but no production image.
 The process uses loopback HTTP while authenticating against logical HTTPS
 endpoint and audience values, so TLS, images, faults, sessions, private
 storage, and clean replay remain unverified. A timed `execFile` kill can leave

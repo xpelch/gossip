@@ -7,7 +7,7 @@ export const ACCEPTANCE_ENVELOPE_SCHEMA =
 export const ACCEPTANCE_STATEMENT_SCHEMA =
   "gossip.acceptance-statement.v1" as const;
 export const CONFORMANCE_SUITE_REVISION =
-  "gossip-v2-conformance-2026-09-10.1" as const;
+  "gossip-v2-conformance-2026-09-10.2" as const;
 
 export const CONFORMANCE_SCENARIOS = [
   "artifact_install",
@@ -43,6 +43,14 @@ const CORE_CAPABILITIES = [
   "durable_operations",
   "signed_receipts",
   "evidence",
+] as const;
+
+const PROCESS_EVIDENCE_SCENARIOS = [
+  "mcp_http_parity",
+  "privacy_canary_scan",
+  "operation_exactly_once",
+  "operation_conflict",
+  "authentication_fail_closed",
 ] as const;
 
 const DIGEST = /^sha256:[0-9a-f]{64}$/;
@@ -307,11 +315,7 @@ function validateStatement(statement: AcceptanceStatement): void {
     }
   }
 
-  const processEvidenceRequired = [
-    "mcp_http_parity",
-    "privacy_canary_scan",
-  ] as const;
-  const requiresProcessEvidence = processEvidenceRequired.some(
+  const requiresProcessEvidence = PROCESS_EVIDENCE_SCENARIOS.some(
     (scenarioId) => scenarios.get(scenarioId)?.status === "verified",
   );
   if (requiresProcessEvidence) {

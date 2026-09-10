@@ -156,6 +156,29 @@ test("requires verified capabilities to cite verified scenarios", () => {
   );
 });
 
+test("requires Sherwood process evidence for every process-proved scenario", () => {
+  const invalid = structuredClone(fixture);
+  const scenario = invalid.statement.scenarios.find(
+    (candidate: Record<string, unknown>) =>
+      candidate.id === "operation_exactly_once",
+  );
+  assert.ok(scenario);
+  delete scenario.reason;
+  delete scenario.next_action;
+  scenario.status = "verified";
+  scenario.assertions = 1;
+  scenario.evidence = [fixture.statement.scenarios[0].evidence[0]];
+  invalid.content_address.digest = canonicalDigest(
+    "conformance",
+    invalid.statement,
+  );
+
+  expectCode(
+    () => parseConformanceEnvelope(invalid),
+    "invalid_conformance_manifest",
+  );
+});
+
 test("rejects prohibited values from captured diagnostics before publication", () => {
   assert.doesNotThrow(() =>
     scanConformanceText("status=blocked duration_ms=12", ["canary-private"]),
@@ -440,6 +463,20 @@ test("TypeScript and Python enforce Sherwood assembly and process evidence prere
         const invalid = structuredClone(valid);
         invalid.statement.decision = "verified";
         invalid.statement.artifacts.sherwood.image_digest = null;
+        return invalid;
+      })(),
+      (() => {
+        const invalid = structuredClone(fixture);
+        const scenario = invalid.statement.scenarios.find(
+          (candidate: Record<string, unknown>) =>
+            candidate.id === "authentication_fail_closed",
+        );
+        assert.ok(scenario);
+        delete scenario.reason;
+        delete scenario.next_action;
+        scenario.status = "verified";
+        scenario.assertions = 1;
+        scenario.evidence = [fixture.statement.scenarios[0].evidence[0]];
         return invalid;
       })(),
     ];
