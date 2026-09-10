@@ -681,7 +681,7 @@ async function main() {
         ),
         blocked(
           "persistence_fault_recovery",
-          "No test-only persistence fault controls exist.",
+          "No packaged-process persistence fault scenario was exercised.",
           "Exercise frozen test-only persistence cut points.",
         ),
         blocked(
@@ -696,7 +696,7 @@ async function main() {
         ),
         blocked(
           "owner_isolation",
-          "Private owner operations are not implemented by Sherwood.",
+          "The complete private owner lifecycle is not implemented by Sherwood.",
           "Exercise operation, receipt, evidence, export, deletion and audit isolation.",
         ),
         blocked(

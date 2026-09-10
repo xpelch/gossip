@@ -114,7 +114,7 @@
       {
         "id": "persistence_fault_recovery",
         "status": "blocked",
-        "reason": "No test-only persistence fault controls exist.",
+        "reason": "No packaged-process persistence fault scenario was exercised.",
         "next_action": "Exercise frozen test-only persistence cut points."
       },
       {
@@ -132,7 +132,7 @@
       {
         "id": "owner_isolation",
         "status": "blocked",
-        "reason": "Private owner operations are not implemented by Sherwood.",
+        "reason": "The complete private owner lifecycle is not implemented by Sherwood.",
         "next_action": "Exercise operation, receipt, evidence, export, deletion and audit isolation."
       },
       {
@@ -214,6 +214,6 @@
   },
   "content_address": {
     "algorithm": "sha256",
-    "digest": "sha256:0f2f6698b9c2ef2d2221557b9740e8d9bc944691495a5acb44c053324a7618c9"
+    "digest": "sha256:90973aefa46698613f1a3936362bf1a63024fbedebd6d92c9f6751baf956b72c"
   }
 }
