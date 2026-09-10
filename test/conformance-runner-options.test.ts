@@ -136,6 +136,7 @@ test("accepts the xUnit TRX counter shape without an optional skipped attribute"
     "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_signed_http_and_mcp_and_replays_after_restart";
   const trx = `
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_serves_signed_http_and_mcp_and_replays_after_restart" />
+    <UnitTestResult testName="${fqn}" outcome="Passed" />
     <Counters total="1" executed="1" passed="1" failed="0" error="0" notExecuted="0" />`;
 
   assert.deepEqual(parseTrxResult(trx, fqn), {
@@ -161,6 +162,8 @@ test("requires both exact Sherwood process test outcomes in one TRX", () => {
   const trx = `
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_serves_signed_http_and_mcp_and_replays_after_restart" />
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_enforces_concurrency_conflicts_authentication_and_owner_isolation" />
+    <UnitTestResult testName="${first}" outcome="Passed" />
+    <UnitTestResult testName="${second}" outcome="Passed" />
     <Counters total="2" executed="2" passed="2" failed="0" error="0" notExecuted="0" skipped="0" />`;
 
   assert.deepEqual(parseTrxResults(trx, [first, second]), {
@@ -174,4 +177,22 @@ test("requires both exact Sherwood process test outcomes in one TRX", () => {
     tests: [first, second],
   });
   assert.throws(() => parseTrxResults(trx, [first]), /exact pass contract/i);
+
+  const failed = trx.replace(
+    `testName="${second}" outcome="Passed"`,
+    `testName="${second}" outcome="Failed"`,
+  );
+  assert.throws(
+    () => parseTrxResults(failed, [first, second]),
+    /exact pass contract/i,
+  );
+
+  const duplicate = trx.replace(
+    `<UnitTestResult testName="${second}" outcome="Passed" />`,
+    `<UnitTestResult testName="${first}" outcome="Passed" />`,
+  );
+  assert.throws(
+    () => parseTrxResults(duplicate, [first, second]),
+    /exact pass contract/i,
+  );
 });

@@ -75,6 +75,12 @@ export function parseTrxResults(trx, expectedTestFqns) {
       /<TestMethod\b(?=[^>]*\bclassName="([^"]+)")(?=[^>]*\bname="([^"]+)")[^>]*>/gu,
     ),
   ];
+  const unitTestResults = [...trx.matchAll(/<UnitTestResult\b[^>]*>/gu)].map(
+    (match) => ({
+      name: xmlAttribute(match[0], "testName"),
+      outcome: xmlAttribute(match[0], "outcome"),
+    }),
+  );
   const requiredNames = [
     "total",
     "executed",
@@ -99,6 +105,10 @@ export function parseTrxResults(trx, expectedTestFqns) {
   );
   const expectedNames = [...expectedTestFqns].sort();
   const actualNames = [...testNames].sort();
+  const resultNames = unitTestResults
+    .map((result) => result.name)
+    .filter((name) => name !== undefined)
+    .sort();
   if (
     !counters ||
     Object.values(counters).some((value) => value === null) ||
@@ -111,13 +121,16 @@ export function parseTrxResults(trx, expectedTestFqns) {
     skipped === null ||
     skipped !== 0 ||
     testNames.length !== expectedTestFqns.length ||
-    JSON.stringify(actualNames) !== JSON.stringify(expectedNames)
+    JSON.stringify(actualNames) !== JSON.stringify(expectedNames) ||
+    unitTestResults.length !== expectedTestFqns.length ||
+    unitTestResults.some((result) => result.outcome !== "Passed") ||
+    JSON.stringify(resultNames) !== JSON.stringify(expectedNames)
   ) {
     throw new Error(
       "The Sherwood process test result did not meet the exact pass contract.",
     );
   }
-  return { ...counters, skipped, tests: testNames };
+  return { ...counters, skipped, tests: [...expectedTestFqns] };
 }
 
 function integerAttribute(tag, name) {
