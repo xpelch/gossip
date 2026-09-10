@@ -14,7 +14,10 @@
       },
       "endpoint": "https://engine.test/mcp",
       "audience": "https://engine.test/",
-      "tools": ["gossip_consult_v2", "gossip_operation"],
+      "tools": [
+        "gossip_consult_v2",
+        "gossip_operation"
+      ],
       "submission_kinds": [],
       "max_cost": {
         "unit": "earned_credit",
@@ -44,7 +47,9 @@
       },
       "endpoint": "https://engine.test/mcp",
       "audience": "https://engine.test/",
-      "tools": ["gossip_operation"],
+      "tools": [
+        "gossip_operation"
+      ],
       "submission_kinds": [],
       "max_cost": {
         "unit": "earned_credit",
@@ -84,7 +89,7 @@
     "endpoint": "https://engine.test/mcp",
     "method": "POST",
     "target": "/mcp",
-    "body": "{\"cost\":{\"amount\":\"0\",\"unit\":\"earned_credit\"},\"key_id\":\"session-1\",\"payload\":{\"operation_id\":\"synthetic-operation\"},\"protocol\":\"gossip/2-draft.1\",\"root\":{\"address\":\"0x7e5f4552091a69125d5dfcb7b8c2659029395bdf\",\"chain_id\":\"4663\"},\"schema\":\"gossip.identity-session-request.v1\",\"submission_kind\":null,\"tool\":\"gossip_consult_v2\"}",
+    "body": "{\"cost\":{\"amount\":\"0\",\"unit\":\"earned_credit\"},\"key_id\":\"session-1\",\"payload\":{\"actor\":{\"address\":\"0x7e5f4552091a69125d5dfcb7b8c2659029395bdf\",\"chain_id\":\"4663\"},\"audience\":\"https://engine.test/\",\"auth_profile\":\"gossip-eip191-v2\",\"capability\":\"wallet_overview\",\"deadline\":1800000300,\"endpoint\":\"https://engine.test/mcp\",\"max_cost\":{\"amount\":\"0\",\"unit\":\"earned_credit\"},\"operation_id\":\"fixture-consultation\",\"protocol\":\"gossip/2-draft.1\",\"quality\":{\"allow_partial\":false,\"finality\":\"safe\",\"max_age_seconds\":0,\"tier\":\"standard\"},\"schema_revision\":\"2026-09-09\",\"subject\":{\"address\":\"0x2b5ad5c4795c026514f8317c7a215e218dccd6cf\",\"chain_id\":\"4663\",\"kind\":\"wallet\"}},\"protocol\":\"gossip/2-draft.1\",\"root\":{\"address\":\"0x7e5f4552091a69125d5dfcb7b8c2659029395bdf\",\"chain_id\":\"4663\"},\"schema\":\"gossip.identity-session-request.v1\",\"submission_kind\":null,\"tool\":\"gossip_consult_v2\"}",
     "nonce": "00000000-0000-4000-8000-000000000001",
     "expires": "1800000400",
     "request": {
@@ -102,13 +107,39 @@
         "amount": "0"
       },
       "payload": {
-        "operation_id": "synthetic-operation"
+        "protocol": "gossip/2-draft.1",
+        "schema_revision": "2026-09-09",
+        "auth_profile": "gossip-eip191-v2",
+        "operation_id": "fixture-consultation",
+        "actor": {
+          "chain_id": "4663",
+          "address": "0x7e5f4552091a69125d5dfcb7b8c2659029395bdf"
+        },
+        "subject": {
+          "kind": "wallet",
+          "chain_id": "4663",
+          "address": "0x2b5ad5c4795c026514f8317c7a215e218dccd6cf"
+        },
+        "capability": "wallet_overview",
+        "endpoint": "https://engine.test/mcp",
+        "audience": "https://engine.test/",
+        "quality": {
+          "tier": "standard",
+          "max_age_seconds": 0,
+          "finality": "safe",
+          "allow_partial": false
+        },
+        "max_cost": {
+          "unit": "earned_credit",
+          "amount": "0"
+        },
+        "deadline": 1800000300
       }
     },
-    "body_digest": "sha256:8505d27c3562e547e8b8f388459e910c988dfaa48d865650dcb8544d9de0a8c1",
-    "message": "Gossip request v2\ngossip/2-draft.1\ngossip-eip191-v2\nhttps://engine.test/\nhttps://engine.test/mcp\nPOST\n/mcp\nsha256:8505d27c3562e547e8b8f388459e910c988dfaa48d865650dcb8544d9de0a8c1\n00000000-0000-4000-8000-000000000001\n1800000400",
+    "body_digest": "sha256:90b5be098798ce89d92e5e14f843156e70817c930dd886abbf398e79c863addb",
+    "message": "Gossip request v2\ngossip/2-draft.1\ngossip-eip191-v2\nhttps://engine.test/\nhttps://engine.test/mcp\nPOST\n/mcp\nsha256:90b5be098798ce89d92e5e14f843156e70817c930dd886abbf398e79c863addb\n00000000-0000-4000-8000-000000000001\n1800000400",
     "public_key": "0x04c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee51ae168fea63dc339a3c58419466ceaeef7f632653266d0e1236431a950cfe52a",
     "address": "0x2b5ad5c4795c026514f8317c7a215e218dccd6cf",
-    "signature": "0xf5acff872d181a22b6c63d48df6976663c009aabea06c09b1d70d3a887a477561d32a0cf474e517077892498d6c3c758803dea9f5ba108d9c24ecaeaf5b5688b1c"
+    "signature": "0xad6da4e09bb3b02a9dc4358bc96eff1ea87b89edbbcdfbc0b36956a337b5acdd150b7295670a5371187a95a7894fbcc5485dd120548059e2d4bb1979ec1babb81c"
   }
 }

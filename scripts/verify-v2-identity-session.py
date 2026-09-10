@@ -88,7 +88,19 @@ verify_signature(
 )
 
 request_vector = fixture["session_request"]
-assert canonical_json(request_vector["request"]) == request_vector["body"]
+request = request_vector["request"]
+payload = request["payload"]
+assert request["tool"] == "gossip_consult_v2"
+assert payload["protocol"] == PROTOCOL
+assert payload["schema_revision"] == "2026-09-09"
+assert payload["auth_profile"] == "gossip-eip191-v2"
+assert payload["actor"] == request["root"]
+assert payload["endpoint"] == request_vector["endpoint"]
+assert payload["audience"] == request_vector["audience"]
+assert payload["max_cost"] == request["cost"]
+assert payload["subject"]["kind"] == "wallet"
+assert payload["capability"] == "wallet_overview"
+assert canonical_json(request) == request_vector["body"]
 body_digest = (
     "sha256:" + hashlib.sha256(request_vector["body"].encode("utf-8")).hexdigest()
 )

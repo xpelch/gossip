@@ -70,6 +70,33 @@ registry for grants, revocations, owner mappings, and replay nonces; protected
 session-key storage; transport wiring; privacy policy; and real version-pinned
 host acceptance.
 
+The frozen activation wire contract is `POST /v2/gossip/session` with the
+canonical identity-session request as the raw body. Its EIP-191 proof signs
+those exact bytes. MCP retains the six logical Gossip names and accepts one
+exclusive `session_request` argument containing that envelope; the proof signs
+the complete raw JSON-RPC body, and the adapter must match the envelope tool to
+the called MCP tool. Object-valued `_meta` framing is ignored; task-augmented
+calls are rejected. Capabilities map to `{}`, consultation maps to a bare v2
+consultation and uses exactly its `max_cost`, and operation/receipt map to
+`{operation_id}` at zero cost. Submission and feedback remain reserved and
+fail closed.
+
+Root-only grant management uses `POST /v2/gossip/sessions/grants` and
+`POST /v2/gossip/sessions/revocations`; response schemas remain a server
+activation concern. The outer management request uses the `gossip-eip191-v2`
+profile over its raw body, contains an inner signed record, and requires the
+outer and inner root identities to match. A grant covers exactly one endpoint,
+so `/mcp` and `/v2/gossip/session` require separate grants and may use separate
+audiences.
+
+The server must use root owner chain `4663`, enforce the grant interval and
+existing 24-hour lifetime, cap a root at sixteen grants, reject globally reused
+session public keys/addresses, and linearize replay at durable
+`(root, key_id, nonce)` insertion. Retired or revoked keys cannot authorize new
+reads or work, while accepted root-owned operations and receipts remain
+historical. These requirements describe future Sherwood activation and do not
+promote `session_keys` or any live endpoint to verified support.
+
 ERC-1271 contract-wallet continuity and draft execution-delegation standards
 remain separate specifications. This contract grants no payment, trading,
 arbitrary signing, transaction, calldata, allowance, or execution authority.

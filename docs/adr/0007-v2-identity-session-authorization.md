@@ -76,6 +76,41 @@ retired key, expired key, or effective revocation returns the same
 remains a mandatory server gate; the portable verifier does not claim that
 stateful guarantee.
 
+When a server activates this contract, direct session consultation uses
+`POST /v2/gossip/session` and transports the canonical
+`gossip.identity-session-request.v1` envelope as its complete body. The HTTP
+EIP-191 signature covers those exact bytes. MCP retains the six logical Gossip
+tool names; a session call supplies one exclusive `session_request` argument
+containing the same envelope, while the signature covers the complete raw MCP
+JSON-RPC body. The adapter must authorize the extracted envelope and verify
+that its `tool` is the called MCP tool. Standard object-valued `_meta` framing
+is ignored; task-augmented calls are outside this activation and rejected.
+
+Root-only management uses `POST /v2/gossip/sessions/grants` and
+`POST /v2/gossip/sessions/revocations`; their exact response schemas remain a
+server concern. The outer management request uses the `gossip-eip191-v2`
+profile over its raw body, contains an inner signed record, and requires the
+outer and inner root identities to match. Each grant covers exactly one
+endpoint, so `/mcp` and `/v2/gossip/session` require distinct grants and may
+use distinct audiences.
+
+The implemented session payload mapping is intentionally narrow:
+`gossip_capabilities` receives `{}`, `gossip_consult_v2` receives a bare v2
+consultation, and `gossip_operation` and `gossip_receipt_v2` receive
+`{operation_id}`. Consultation cost must equal the payload's `max_cost`; the
+other three implemented tools require zero cost. `gossip_submit_v2` and
+`gossip_feedback` remain reserved and fail closed. A request cannot provide
+both the root argument form and `session_request`.
+
+Sherwood activation must bind the root owner on chain `4663`, enforce
+`issued_at <= now < expires_at`, cap each root at sixteen grants and the
+24-hour grant lifetime, reject globally reused session public keys and
+addresses, and linearize authorization at a durable `(root, key_id, nonce)`
+insert. Retired or revoked keys cannot authorize new reads or work; the root
+owner remains the historical owner of accepted operations and receipts.
+These are activation requirements, not a claim that the public kit or a live
+Sherwood host implements them.
+
 ## Standards boundary
 
 The profile uses EIP-191 for EOA proof, consistent with the frozen v2 HTTP

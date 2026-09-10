@@ -51,6 +51,13 @@ results, and explicit remaining gates.
   payload. They do not register keys or authorize payment, trading, generic
   signing, or transaction execution.
 
+The frozen session transport contract uses `POST /v2/gossip/session` with the
+canonical session envelope as the complete signed body. MCP signs the complete
+raw JSON-RPC body and carries that envelope in an exclusive `session_request`
+argument for the called Gossip tool. The extracted envelope must name that
+same tool. These portable rules do not activate a server endpoint or establish
+the `session_keys` capability.
+
 The exact fields, resource limits, and validation semantics are specified in
 [ADR 0003](adr/0003-v2-canonical-contract.md) and
 [ADR 0004](adr/0004-v2-evidence-and-receipts.md), and

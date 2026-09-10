@@ -14,8 +14,10 @@ import {
   verifyGossipV2HttpRequest,
   type GossipV2HttpRequest,
   type GossipV2HttpVerifierConfiguration,
+  type VerifiedGossipV2HttpRequest,
 } from "./http-auth-v2.js";
 import { ProtocolError } from "./protocol-errors.js";
+import { consultationSchema, operationIdV2Schema } from "./protocol-v2.js";
 
 export const IDENTITY_SESSION_SCHEMA = "gossip.identity-session.v1" as const;
 export const IDENTITY_SESSION_REVOCATION_SCHEMA =
@@ -43,8 +45,8 @@ export const IDENTITY_SESSION_SUBMISSION_KINDS = [
   "feedback",
 ] as const;
 
-type IdentitySessionTool = (typeof IDENTITY_SESSION_TOOLS)[number];
-type IdentitySessionSubmissionKind =
+export type IdentitySessionTool = (typeof IDENTITY_SESSION_TOOLS)[number];
+export type IdentitySessionSubmissionKind =
   (typeof IDENTITY_SESSION_SUBMISSION_KINDS)[number];
 
 export type IdentitySessionGrant = {
@@ -109,9 +111,33 @@ export type IdentitySessionAuthorization = {
   verifier: GossipV2HttpVerifierConfiguration;
 };
 
+export type IdentitySessionMcpAuthorization = IdentitySessionAuthorization & {
+  actualTool: IdentitySessionTool;
+};
+
 export type AuthorizedIdentitySessionRequest = {
   grant: SignedIdentitySessionGrant;
   request: IdentitySessionRequest;
+};
+
+export type VerifiedIdentitySessionTransport = VerifiedGossipV2HttpRequest;
+
+type IdentitySessionSemanticAuthorization = {
+  grants: unknown[];
+  revocations: unknown[];
+  now: number;
+  request: IdentitySessionRequest;
+  authenticated: VerifiedGossipV2HttpRequest;
+  endpoint: string;
+  audience: string;
+};
+
+type IdentitySessionToolMappingInput = Pick<
+  IdentitySessionRequest,
+  "root" | "tool" | "cost" | "payload"
+> & {
+  endpoint?: string;
+  audience?: string;
 };
 
 const ADDRESS = /^0x[0-9a-f]{40}$/;
@@ -593,6 +619,345 @@ export function parseIdentitySessionRequest(
   };
 }
 
+export function verifyIdentitySessionTransport(
+  request: GossipV2HttpRequest,
+  now: number,
+  verifier: GossipV2HttpVerifierConfiguration,
+): VerifiedIdentitySessionTransport {
+  return verifyGossipV2HttpRequest(request, now, verifier);
+}
+
+export function parseIdentitySessionMcpArguments(
+  input: unknown,
+  actualTool: IdentitySessionTool,
+): {
+  session_request: IdentitySessionRequest;
+} {
+  const value = exactObject(input, ["session_request"]);
+  const sessionRequest = parseIdentitySessionRequest(
+    new TextEncoder().encode(canonicalJson(value.session_request)),
+  );
+  if (sessionRequest.tool !== actualTool) {
+    invalid();
+  }
+  return {
+    session_request: sessionRequest,
+  };
+}
+
+function parseIdentitySessionMcpBody(
+  input: string | Uint8Array,
+  actualTool: IdentitySessionTool,
+): IdentitySessionRequest {
+  const value = exactObject(parseIdentitySessionMcpJson(input), [
+    "jsonrpc",
+    "id",
+    "method",
+    "params",
+  ]);
+  if (value.jsonrpc !== "2.0" || value.method !== "tools/call") {
+    invalid();
+  }
+
+  const params = parseIdentitySessionMcpParams(value.params);
+  if (params.name !== actualTool) {
+    invalid();
+  }
+
+  return parseIdentitySessionMcpArguments(params.arguments, actualTool)
+    .session_request;
+}
+
+function parseIdentitySessionMcpParams(
+  input: unknown,
+): Record<string, unknown> {
+  const params = object(input);
+  const keys = Object.keys(params);
+  if (
+    !keys.includes("name") ||
+    !keys.includes("arguments") ||
+    keys.some((key) => !["name", "arguments", "_meta"].includes(key))
+  ) {
+    invalid();
+  }
+  if (Object.prototype.hasOwnProperty.call(params, "_meta")) {
+    object(params._meta);
+  }
+  return params;
+}
+
+function parseIdentitySessionMcpJson(input: string | Uint8Array): unknown {
+  let text: string;
+  try {
+    text =
+      typeof input === "string"
+        ? input
+        : new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
+            input,
+          );
+    rejectDuplicateJsonKeys(text);
+    return JSON.parse(text) as unknown;
+  } catch {
+    invalid();
+  }
+}
+
+function rejectDuplicateJsonKeys(text: string): void {
+  let index = 0;
+
+  function skipWhitespace(): void {
+    while (index < text.length) {
+      const character = text[index];
+      if (character === undefined || !/\s/u.test(character)) {
+        return;
+      }
+      index += 1;
+    }
+  }
+
+  function parseString(): string {
+    const start = index;
+    index += 1;
+    while (index < text.length) {
+      const character = text[index];
+      if (character === undefined) {
+        invalid();
+      }
+      index += 1;
+      if (character === "\\") {
+        if (index >= text.length) {
+          invalid();
+        }
+        index += 1;
+      } else if (character === '"') {
+        try {
+          const value = JSON.parse(text.slice(start, index)) as unknown;
+          if (typeof value !== "string") {
+            invalid();
+          }
+          return value;
+        } catch {
+          invalid();
+        }
+      } else if (character < " ") {
+        invalid();
+      }
+    }
+    invalid();
+  }
+
+  function parseValue(): void {
+    skipWhitespace();
+    const character = text[index];
+    if (character === undefined) {
+      invalid();
+    }
+    if (character === '"') {
+      parseString();
+    } else if (character === "{") {
+      parseObject();
+    } else if (character === "[") {
+      parseArray();
+    } else {
+      const start = index;
+      while (index < text.length) {
+        const character = text[index];
+        if (character === undefined || /[\s,\]}]/u.test(character)) {
+          break;
+        }
+        index += 1;
+      }
+      if (start === index) {
+        invalid();
+      }
+    }
+  }
+
+  function parseObject(): void {
+    const keys = new Set<string>();
+    index += 1;
+    skipWhitespace();
+    if (text[index] === "}") {
+      index += 1;
+      return;
+    }
+
+    while (true) {
+      skipWhitespace();
+      if (text[index] !== '"') {
+        invalid();
+      }
+      const key = parseString();
+      if (keys.has(key)) {
+        invalid();
+      }
+      keys.add(key);
+      skipWhitespace();
+      if (text[index] !== ":") {
+        invalid();
+      }
+      index += 1;
+      parseValue();
+      skipWhitespace();
+      if (text[index] === "}") {
+        index += 1;
+        return;
+      }
+      if (text[index] !== ",") {
+        invalid();
+      }
+      index += 1;
+    }
+  }
+
+  function parseArray(): void {
+    index += 1;
+    skipWhitespace();
+    if (text[index] === "]") {
+      index += 1;
+      return;
+    }
+
+    while (true) {
+      parseValue();
+      skipWhitespace();
+      if (text[index] === "]") {
+        index += 1;
+        return;
+      }
+      if (text[index] !== ",") {
+        invalid();
+      }
+      index += 1;
+    }
+  }
+
+  parseValue();
+  skipWhitespace();
+  if (index !== text.length) {
+    invalid();
+  }
+}
+
+export function mapIdentitySessionToolPayload(
+  input: IdentitySessionToolMappingInput,
+): unknown {
+  switch (input.tool) {
+    case "gossip_capabilities":
+      requireZeroCost(input.cost.amount);
+      return exactObject(input.payload, []);
+    case "gossip_consult_v2": {
+      const parsed = consultationSchema.safeParse(input.payload);
+      if (!parsed.success || !sameRoot(parsed.data.actor, input.root)) {
+        invalid();
+      }
+      if (
+        (input.endpoint !== undefined &&
+          parsed.data.endpoint !== input.endpoint) ||
+        (input.audience !== undefined &&
+          parsed.data.audience !== input.audience)
+      ) {
+        unauthorized();
+      }
+      if (
+        parsed.data.max_cost.unit !== input.cost.unit ||
+        parsed.data.max_cost.amount !== input.cost.amount
+      ) {
+        unauthorized();
+      }
+      return parsed.data;
+    }
+    case "gossip_operation":
+    case "gossip_receipt_v2": {
+      requireZeroCost(input.cost.amount);
+      const payload = exactObject(input.payload, ["operation_id"]);
+      if (!operationIdV2Schema.safeParse(payload.operation_id).success) {
+        invalid();
+      }
+      return { operation_id: payload.operation_id };
+    }
+    case "gossip_submit_v2":
+    case "gossip_feedback":
+      throw new ProtocolError("unsupported_capability");
+  }
+}
+
+function sameRoot(
+  actor: { chain_id: string; address: string },
+  root: { chain_id: string; address: string },
+): boolean {
+  return actor.chain_id === root.chain_id && actor.address === root.address;
+}
+
+function requireZeroCost(amount: string): void {
+  if (amount !== "0") {
+    unauthorized();
+  }
+}
+
+function authorizeExtractedIdentitySessionCore(
+  value: IdentitySessionSemanticAuthorization,
+): AuthorizedIdentitySessionRequest {
+  if (
+    !Array.isArray(value.grants) ||
+    !Array.isArray(value.revocations) ||
+    value.revocations.length > 16
+  ) {
+    invalid();
+  }
+
+  const now = unixTime(value.now);
+  const signedRequest = value.request;
+  const authenticatedRequest = value.authenticated;
+  const verifiedChain = verifyIdentitySessionChain(value.grants);
+  const active = verifiedChain.active;
+  const grant = active.grant;
+  if (
+    now < grant.issued_at ||
+    now >= grant.expires_at ||
+    value.endpoint !== grant.endpoint ||
+    value.audience !== grant.audience ||
+    signedRequest.root.chain_id !== grant.root.chain_id ||
+    signedRequest.root.address !== grant.root.address ||
+    signedRequest.key_id !== grant.session.key_id ||
+    authenticatedRequest.publicKey !== grant.session.public_key ||
+    authenticatedRequest.address !== grant.session.address ||
+    !grant.tools.includes(signedRequest.tool) ||
+    BigInt(signedRequest.cost.amount) > BigInt(grant.max_cost.amount)
+  ) {
+    unauthorized();
+  }
+
+  if (
+    signedRequest.submission_kind !== null &&
+    !grant.submission_kinds.includes(signedRequest.submission_kind)
+  ) {
+    unauthorized();
+  }
+
+  mapIdentitySessionToolPayload({
+    ...signedRequest,
+    endpoint: value.endpoint,
+    audience: value.audience,
+  });
+
+  const isRevoked = value.revocations.some((candidate) => {
+    const revocation = verifyIdentitySessionRevocation(candidate).revocation;
+    return (
+      revocation.root.chain_id === grant.root.chain_id &&
+      revocation.root.address === grant.root.address &&
+      revocation.key_id === grant.session.key_id &&
+      revocation.grant_digest === active.grant_digest &&
+      revocation.revoked_at <= now
+    );
+  });
+  if (isRevoked) {
+    unauthorized();
+  }
+
+  return { grant: active, request: signedRequest };
+}
+
 export function authorizeIdentitySession(
   input: unknown,
 ): AuthorizedIdentitySessionRequest {
@@ -616,52 +981,54 @@ export function authorizeIdentitySession(
   const verifier = object(
     value.verifier,
   ) as unknown as GossipV2HttpVerifierConfiguration;
-  const authenticatedRequest = verifyGossipV2HttpRequest(
-    request,
-    now,
-    verifier,
-  );
+  const authenticated = verifyIdentitySessionTransport(request, now, verifier);
   const signedRequest = parseIdentitySessionRequest(request.body);
-
-  const verifiedChain = verifyIdentitySessionChain(value.grants);
-  const active = verifiedChain.active;
-  const grant = active.grant;
-  if (
-    now < grant.issued_at ||
-    now >= grant.expires_at ||
-    signedRequest.root.chain_id !== grant.root.chain_id ||
-    signedRequest.root.address !== grant.root.address ||
-    signedRequest.key_id !== grant.session.key_id ||
-    authenticatedRequest.publicKey !== grant.session.public_key ||
-    authenticatedRequest.address !== grant.session.address ||
-    request.endpoint !== grant.endpoint ||
-    request.audience !== grant.audience ||
-    !grant.tools.includes(signedRequest.tool) ||
-    BigInt(signedRequest.cost.amount) > BigInt(grant.max_cost.amount)
-  ) {
-    unauthorized();
-  }
-
-  if (
-    signedRequest.submission_kind !== null &&
-    !grant.submission_kinds.includes(signedRequest.submission_kind)
-  ) {
-    unauthorized();
-  }
-
-  const isRevoked = value.revocations.some((candidate) => {
-    const revocation = verifyIdentitySessionRevocation(candidate).revocation;
-    return (
-      revocation.root.chain_id === grant.root.chain_id &&
-      revocation.root.address === grant.root.address &&
-      revocation.key_id === grant.session.key_id &&
-      revocation.grant_digest === active.grant_digest &&
-      revocation.revoked_at <= now
-    );
+  return authorizeExtractedIdentitySessionCore({
+    grants: value.grants,
+    revocations: value.revocations,
+    now,
+    request: signedRequest,
+    authenticated,
+    endpoint: request.endpoint,
+    audience: request.audience,
   });
-  if (isRevoked) {
-    unauthorized();
+}
+
+export function authorizeIdentitySessionMcp(
+  input: unknown,
+): AuthorizedIdentitySessionRequest {
+  const value = exactObject(input, [
+    "grants",
+    "revocations",
+    "now",
+    "request",
+    "verifier",
+    "actualTool",
+  ]);
+  if (
+    !IDENTITY_SESSION_TOOLS.includes(value.actualTool as IdentitySessionTool)
+  ) {
+    invalid();
   }
 
-  return { grant: active, request: signedRequest };
+  const now = unixTime(value.now);
+  const request = object(value.request) as GossipV2HttpRequest;
+  const verifier = object(
+    value.verifier,
+  ) as unknown as GossipV2HttpVerifierConfiguration;
+  const authenticated = verifyIdentitySessionTransport(request, now, verifier);
+  const signedRequest = parseIdentitySessionMcpBody(
+    request.body,
+    value.actualTool as IdentitySessionTool,
+  );
+
+  return authorizeExtractedIdentitySessionCore({
+    grants: value.grants as unknown[],
+    revocations: value.revocations as unknown[],
+    now,
+    request: signedRequest,
+    authenticated,
+    endpoint: request.endpoint,
+    audience: request.audience,
+  });
 }
