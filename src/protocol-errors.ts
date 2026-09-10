@@ -31,6 +31,10 @@ const messages = Object.freeze({
   privacy_unavailable: "The requested private resource is unavailable.",
   unsafe_telemetry:
     "The telemetry event contains an unsupported field or value.",
+  invalid_conformance_manifest:
+    "The conformance manifest does not match the protocol contract.",
+  unsafe_conformance_artifact:
+    "The conformance artifact contains prohibited diagnostic content.",
   operation_failed: "The accepted operation failed.",
 });
 

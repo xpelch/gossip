@@ -146,10 +146,14 @@ export function parseCanonicalJson(input: string | Uint8Array): unknown {
 }
 
 export function canonicalDigest(
-  domain: "request" | "evidence" | "receipt" | "identity",
+  domain: "request" | "evidence" | "receipt" | "identity" | "conformance",
   value: unknown,
 ): string {
-  if (!["request", "evidence", "receipt", "identity"].includes(domain)) {
+  if (
+    !["request", "evidence", "receipt", "identity", "conformance"].includes(
+      domain,
+    )
+  ) {
     throw new ProtocolError("invalid_request");
   }
   const bytes = `${PROTOCOL_REVISION}\n${domain}\n${canonicalJson(value)}`;

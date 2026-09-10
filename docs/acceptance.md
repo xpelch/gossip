@@ -16,6 +16,9 @@ This preview is partial implementation, not release acceptance.
   closed observability schemas. Private submission remains blocked until the
   Sherwood and product-policy gates in `docs/acceptance/v2-private-evidence.md`
   pass.
+- Content-addressed Gossip v2 acceptance-manifest contract and clean-checkout
+  offline runner for the packaged artifact. Engine/process scenarios remain
+  blocked as documented in `docs/acceptance/v2-conformance-foundation.md`.
 
 ## Required before closing #1
 

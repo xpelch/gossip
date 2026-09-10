@@ -91,8 +91,8 @@ Authoritative deployment inventory: https://developers.uniswap.org/docs/protocol
 [Gossip Protocol v2](docs/proposals/gossip-protocol-v2.md) proposes the next
 protocol layer: typed evidence with provenance and freshness, durable receipts,
 server-side reconciliation, scoped identities, optional trust adapters, and an
-eventual bounded settlement plane. It is a design proposal, not implemented or
-accepted compatibility.
+eventual bounded settlement plane. Its contracts are implemented incrementally
+as inactive candidates; none establish accepted live server or host support.
 
 Execution is tracked in [epic #3](https://github.com/xpelch/gossip/issues/3),
 with its dependency map and acceptance plan mirrored in
@@ -103,3 +103,9 @@ bounded canonical JSON, consultation envelopes, explicit capability negotiation,
 and shared integrity vectors. It is development infrastructure; the live bridge
 still exposes the four v1 tools. It does not enable a v2 engine connection or
 change wallet permissions.
+
+The [v2 conformance harness](docs/conformance-v2.md) installs the packaged kit,
+runs its independent verifiers, and emits a content-addressed acceptance
+manifest. Until the packaged Sherwood, fault, privacy, and clean-replay
+scenarios pass, that manifest deliberately reports live capabilities as
+installed or blocked rather than verified.

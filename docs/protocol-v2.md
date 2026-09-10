@@ -77,6 +77,7 @@ npm run verify:protocol-v2
 npm run verify:evidence-v2
 npm run verify:identity-session-v2
 npm run verify:privacy-v2
+npm run verify:conformance-v2
 ```
 
 The Python verifiers use only the standard library. They independently implement
@@ -93,6 +94,11 @@ is offline and consumes a manifest supplied by the operator; it does not
 discover keys or perform TOFU. Server signing, manifest distribution,
 private-key loading, retention, and rotation-event enforcement remain
 unapproved.
+
+The WS7 candidate adds the domain-separated `conformance` digest and the closed
+acceptance envelope documented in [ADR 0009](adr/0009-v2-conformance-evidence.md).
+It records reproducible blocked results without converting installed code into
+verified support. See [the harness guide](conformance-v2.md).
 
 ## Integration order
 

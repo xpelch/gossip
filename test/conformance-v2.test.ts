@@ -1,0 +1,331 @@
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import test from "node:test";
+import { canonicalDigest } from "../src/canonical.js";
+import {
+  CONFORMANCE_CAPABILITIES,
+  CONFORMANCE_SCENARIOS,
+  conformanceStatementDigest,
+  createConformanceEnvelope,
+  parseConformanceEnvelope,
+  scanConformanceText,
+} from "../src/conformance-v2.js";
+import { ProtocolError } from "../src/protocol-errors.js";
+
+const fixture = JSON.parse(
+  fs.readFileSync(
+    new URL("./fixtures/v2-conformance.json", import.meta.url),
+    "utf8",
+  ),
+) as Record<string, any>;
+
+function expectCode(action: () => unknown, code: ProtocolError["code"]): void {
+  assert.throws(action, (error: unknown) => {
+    assert.ok(error instanceof ProtocolError);
+    assert.equal(error.code, code);
+    return true;
+  });
+}
+
+test("verifies the literal blocked acceptance envelope and its content address", () => {
+  const envelope = parseConformanceEnvelope(fixture);
+
+  assert.equal(envelope.statement.decision, "blocked");
+  assert.equal(
+    conformanceStatementDigest(envelope.statement),
+    envelope.content_address.digest,
+  );
+  assert.deepEqual(
+    envelope.statement.scenarios.map((scenario) => scenario.id).sort(),
+    [...CONFORMANCE_SCENARIOS].sort(),
+  );
+  assert.deepEqual(
+    envelope.statement.capabilities.map((capability) => capability.name).sort(),
+    [...CONFORMANCE_CAPABILITIES].sort(),
+  );
+});
+
+test("creates a content-addressed envelope from a validated statement", () => {
+  assert.deepEqual(createConformanceEnvelope(fixture.statement), fixture);
+  assert.notEqual(
+    canonicalDigest("conformance", fixture.statement),
+    canonicalDigest("identity", fixture.statement),
+  );
+});
+
+test("rejects tampering, incomplete catalogs, and duplicate entries", () => {
+  expectCode(
+    () =>
+      parseConformanceEnvelope({
+        ...fixture,
+        statement: {
+          ...fixture.statement,
+          generated_at: fixture.statement.generated_at + 1,
+        },
+      }),
+    "invalid_conformance_manifest",
+  );
+  expectCode(
+    () =>
+      parseConformanceEnvelope({
+        ...fixture,
+        statement: {
+          ...fixture.statement,
+          scenarios: fixture.statement.scenarios.slice(1),
+        },
+      }),
+    "invalid_conformance_manifest",
+  );
+  expectCode(
+    () =>
+      parseConformanceEnvelope({
+        ...fixture,
+        statement: {
+          ...fixture.statement,
+          capabilities: [
+            ...fixture.statement.capabilities,
+            fixture.statement.capabilities[0],
+          ],
+        },
+      }),
+    "invalid_conformance_manifest",
+  );
+  expectCode(() => {
+    const duplicatedFixture = structuredClone(fixture);
+    duplicatedFixture.statement.fixtures.push({
+      ...duplicatedFixture.statement.fixtures[0],
+      name: "duplicate-fixture",
+    });
+    duplicatedFixture.content_address.digest = canonicalDigest(
+      "conformance",
+      duplicatedFixture.statement,
+    );
+    return parseConformanceEnvelope(duplicatedFixture);
+  }, "invalid_conformance_manifest");
+});
+
+test("does not convert installed code into verified capability support", () => {
+  const promoted = structuredClone(fixture);
+  promoted.statement.decision = "verified";
+  promoted.statement.capabilities = promoted.statement.capabilities.map(
+    (capability: Record<string, unknown>) => {
+      const {
+        reason: _reason,
+        next_action: _nextAction,
+        ...identity
+      } = capability;
+      return {
+        ...identity,
+        state: "verified",
+        evidence_revision: "local-install-only",
+        evidence_scenarios: ["artifact_install"],
+      };
+    },
+  );
+  promoted.content_address.digest = canonicalDigest(
+    "conformance",
+    promoted.statement,
+  );
+
+  expectCode(
+    () => parseConformanceEnvelope(promoted),
+    "invalid_conformance_manifest",
+  );
+});
+
+test("requires verified capabilities to cite verified scenarios", () => {
+  const promoted = structuredClone(fixture);
+  const capability = promoted.statement.capabilities[0];
+  delete capability.reason;
+  delete capability.next_action;
+  capability.state = "verified";
+  capability.evidence_revision = "engine-conformance-1";
+  capability.evidence_scenarios = ["operation_exactly_once"];
+  promoted.content_address.digest = canonicalDigest(
+    "conformance",
+    promoted.statement,
+  );
+
+  expectCode(
+    () => parseConformanceEnvelope(promoted),
+    "invalid_conformance_manifest",
+  );
+});
+
+test("rejects prohibited values from captured diagnostics before publication", () => {
+  assert.doesNotThrow(() =>
+    scanConformanceText("status=blocked duration_ms=12", ["canary-private"]),
+  );
+  for (const captured of [
+    "Authorization: Bearer opaque",
+    "private_key=0x1234",
+    "signature=0xabcd",
+    "source_url=https://private.test/account/1",
+    "prompt=buy this token",
+    '{"authorization":"Bearer opaque"}',
+    '{"private_key":"0x1234"}',
+    '{"signature":"0xabcd"}',
+    '{"auth_token":"opaque"}',
+    "token_value=opaque",
+    "tokenValue=opaque",
+    "accessTokenId=opaque",
+    "privateKeyMaterial=opaque",
+    "serverSigningSecret=opaque",
+    "authorizationHeader=opaque",
+    "sourceUrlPath=https://private.test/account/1",
+    '{"token.value":"opaque"}',
+    '{"private.key.material":"opaque"}',
+    `${"x".repeat(80)}TokenValue=opaque`,
+    '"token=opaque"',
+    '["private.key.material=opaque"]',
+    "canary-private",
+  ]) {
+    expectCode(
+      () => scanConformanceText(captured, ["canary-private"]),
+      "unsafe_conformance_artifact",
+    );
+  }
+});
+
+test("TypeScript and Python reject ambiguous fixture paths", () => {
+  const temporary = fs.mkdtempSync(
+    path.join(os.tmpdir(), "gossip-path-vector-"),
+  );
+
+  try {
+    for (const fixturePath of ["a//b", "a/./b", "C:fixture.json"]) {
+      const invalid = structuredClone(fixture);
+      invalid.statement.fixtures[0].path = fixturePath;
+      invalid.content_address.digest = canonicalDigest(
+        "conformance",
+        invalid.statement,
+      );
+
+      expectCode(
+        () => parseConformanceEnvelope(invalid),
+        "invalid_conformance_manifest",
+      );
+
+      const manifestPath = path.join(temporary, "acceptance-manifest.json");
+      fs.writeFileSync(manifestPath, JSON.stringify(invalid));
+      const python = spawnSync(
+        "python",
+        [
+          "scripts/verify-v2-conformance-manifest.py",
+          "--manifest",
+          manifestPath,
+        ],
+        { encoding: "utf8" },
+      );
+      assert.notEqual(python.status, 0, fixturePath);
+    }
+  } finally {
+    fs.rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("TypeScript and Python enforce the same manifest bounds", () => {
+  const temporary = fs.mkdtempSync(
+    path.join(os.tmpdir(), "gossip-schema-vector-"),
+  );
+
+  try {
+    const fixtureBytes = fs.readFileSync(
+      new URL("./fixtures/v2-canonical.json", import.meta.url),
+    );
+    const copiedFixture = path.join(
+      temporary,
+      "test",
+      "fixtures",
+      "v2-canonical.json",
+    );
+    fs.mkdirSync(path.dirname(copiedFixture), { recursive: true });
+    fs.writeFileSync(copiedFixture, fixtureBytes);
+
+    const validBase = structuredClone(fixture);
+    validBase.statement.fixtures[0].sha256 = `sha256:${createHash("sha256").update(fixtureBytes).digest("hex")}`;
+    validBase.statement.fixtures[0].bytes = fixtureBytes.byteLength;
+    for (const scenario of validBase.statement.scenarios) {
+      if (scenario.status !== "verified") {
+        continue;
+      }
+      const evidenceBytes = Buffer.from(`evidence:${scenario.id}\n`, "utf8");
+      const evidencePath = path.join(
+        temporary,
+        ...scenario.evidence[0].path.split("/"),
+      );
+      fs.mkdirSync(path.dirname(evidencePath), { recursive: true });
+      fs.writeFileSync(evidencePath, evidenceBytes);
+      scenario.evidence[0].sha256 = `sha256:${createHash("sha256").update(evidenceBytes).digest("hex")}`;
+      scenario.evidence[0].bytes = evidenceBytes.byteLength;
+    }
+    validBase.content_address.digest = canonicalDigest(
+      "conformance",
+      validBase.statement,
+    );
+    const validManifestPath = path.join(temporary, "valid-manifest.json");
+    fs.writeFileSync(validManifestPath, JSON.stringify(validBase));
+    const validPython = spawnSync(
+      "python",
+      [
+        "scripts/verify-v2-conformance-manifest.py",
+        "--manifest",
+        validManifestPath,
+      ],
+      { encoding: "utf8" },
+    );
+    assert.equal(validPython.status, 0, validPython.stderr);
+
+    const invalidManifests = [
+      (() => {
+        const invalid = structuredClone(validBase);
+        invalid.statement.fixtures = [];
+        return invalid;
+      })(),
+      (() => {
+        const invalid = structuredClone(validBase);
+        invalid.statement.runtime.os = 123;
+        return invalid;
+      })(),
+      (() => {
+        const invalid = structuredClone(validBase);
+        const blocked = invalid.statement.scenarios.find(
+          (scenario: Record<string, unknown>) => scenario.status === "blocked",
+        );
+        assert.ok(blocked);
+        blocked.reason = "x".repeat(257);
+        return invalid;
+      })(),
+    ];
+
+    for (const [index, invalid] of invalidManifests.entries()) {
+      invalid.content_address.digest = canonicalDigest(
+        "conformance",
+        invalid.statement,
+      );
+      expectCode(
+        () => parseConformanceEnvelope(invalid),
+        "invalid_conformance_manifest",
+      );
+
+      const manifestPath = path.join(temporary, `manifest-${index}.json`);
+      fs.writeFileSync(manifestPath, JSON.stringify(invalid));
+      const python = spawnSync(
+        "python",
+        [
+          "scripts/verify-v2-conformance-manifest.py",
+          "--manifest",
+          manifestPath,
+        ],
+        { encoding: "utf8" },
+      );
+      assert.notEqual(python.status, 0, `malformed manifest ${index}`);
+    }
+  } finally {
+    fs.rmSync(temporary, { recursive: true, force: true });
+  }
+});
