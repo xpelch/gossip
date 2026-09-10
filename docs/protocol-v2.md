@@ -93,6 +93,11 @@ Downstream adapters must enforce the smaller negotiated limits before sending,
 authenticate discovery, bind the selected revisions to a verified connection,
 and validate the actor against the real signer. A timeout is still unknown;
 a content digest or capability report cannot release a credit reservation.
+
+The v2 HTTP verifier requires operator-trusted audience and endpoint
+configuration. It must not infer either value from `Host`, `Forwarded`, or
+unvalidated `X-Forwarded-*` headers. The verifier hashes the raw `Uint8Array`
+body; text decoding belongs after authentication.
 Fresh authentication nonces must not change a logical operation's digest.
 
 The protocol cannot promote an observation into a verified trading signal.
