@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import {
   isCanonicalSherwoodOrigin,
   parseConformanceArguments,
+  parseTrxResult,
 } from "../scripts/conformance-runner-options.mjs";
 
 const commit = "6f5739c5".repeat(5);
@@ -127,4 +128,26 @@ test("accepts only canonical Sherwood HTTPS and SSH origins", () => {
   ]) {
     assert.equal(isCanonicalSherwoodOrigin(origin), false, origin);
   }
+});
+
+test("accepts the xUnit TRX counter shape without an optional skipped attribute", () => {
+  const fqn =
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_signed_http_and_mcp_and_replays_after_restart";
+  const trx = `
+    <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_serves_signed_http_and_mcp_and_replays_after_restart" />
+    <Counters total="1" executed="1" passed="1" failed="0" error="0" notExecuted="0" />`;
+
+  assert.deepEqual(parseTrxResult(trx, fqn), {
+    total: 1,
+    executed: 1,
+    passed: 1,
+    failed: 0,
+    error: 0,
+    notExecuted: 0,
+    skipped: 0,
+  });
+  assert.throws(
+    () => parseTrxResult(trx.replace('passed="1"', 'passed="0"'), fqn),
+    /pass contract/i,
+  );
 });

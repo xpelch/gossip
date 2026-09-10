@@ -20,6 +20,7 @@ import { promisify } from "node:util";
 import {
   isCanonicalSherwoodOrigin,
   parseConformanceArguments,
+  parseTrxResult,
 } from "./conformance-runner-options.mjs";
 
 const execute = promisify(execFile);
@@ -243,7 +244,7 @@ async function runSherwoodConformance(
   }
   const trx = await readFile(trxPath, "utf8");
   scanConformanceText(trx, [SHERWOOD_CANARY_PREFIX]);
-  const counters = parseTrxResult(trx);
+  const counters = parseTrxResult(trx, SHERWOOD_TEST_FQN);
   const runtime = await measureRuntime();
 
   return {
@@ -388,53 +389,6 @@ function versionValue(value) {
     throw new Error("A runtime version could not be measured safely.");
   }
   return version;
-}
-
-function parseTrxResult(trx) {
-  const countersTag = trx.match(/<Counters\b[^>]*>/u)?.[0];
-  const testMethods = [
-    ...trx.matchAll(
-      /<TestMethod\b(?=[^>]*\bclassName="([^"]+)")(?=[^>]*\bname="([^"]+)")[^>]*>/gu,
-    ),
-  ];
-  const counters = countersTag
-    ? Object.fromEntries(
-        [
-          "total",
-          "executed",
-          "passed",
-          "failed",
-          "error",
-          "skipped",
-          "notExecuted",
-        ].map((name) => {
-          const value = Number(xmlAttribute(countersTag, name));
-          return [name, Number.isInteger(value) && value >= 0 ? value : null];
-        }),
-      )
-    : null;
-  if (
-    !counters ||
-    Object.values(counters).some((value) => value === null) ||
-    counters.total !== 1 ||
-    counters.executed !== 1 ||
-    counters.passed !== 1 ||
-    counters.failed !== 0 ||
-    counters.error !== 0 ||
-    counters.skipped !== 0 ||
-    counters.notExecuted !== 0 ||
-    testMethods.length !== 1 ||
-    `${testMethods[0][1]}.${testMethods[0][2]}` !== SHERWOOD_TEST_FQN
-  ) {
-    throw new Error(
-      "The Sherwood process test result did not meet the exact pass contract.",
-    );
-  }
-  return counters;
-}
-
-function xmlAttribute(tag, name) {
-  return tag.match(new RegExp(`\\b${name}="([^"]*)"`, "u"))?.[1];
 }
 
 async function main() {

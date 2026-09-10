@@ -62,6 +62,71 @@ export function isCanonicalSherwoodOrigin(origin) {
   return HTTPS_ORIGIN.test(origin) || SSH_ORIGIN.test(origin);
 }
 
+export function parseTrxResult(trx, expectedTestFqn) {
+  const countersTag = trx.match(/<Counters\b[^>]*>/u)?.[0];
+  const testMethods = [
+    ...trx.matchAll(
+      /<TestMethod\b(?=[^>]*\bclassName="([^"]+)")(?=[^>]*\bname="([^"]+)")[^>]*>/gu,
+    ),
+  ];
+  const requiredNames = [
+    "total",
+    "executed",
+    "passed",
+    "failed",
+    "error",
+    "notExecuted",
+  ];
+  const counters = countersTag
+    ? Object.fromEntries(
+        requiredNames.map((name) => [
+          name,
+          integerAttribute(countersTag, name),
+        ]),
+      )
+    : null;
+  const skipped = countersTag
+    ? optionalIntegerAttribute(countersTag, "skipped")
+    : null;
+  if (
+    !counters ||
+    Object.values(counters).some((value) => value === null) ||
+    counters.total !== 1 ||
+    counters.executed !== 1 ||
+    counters.passed !== 1 ||
+    counters.failed !== 0 ||
+    counters.error !== 0 ||
+    counters.notExecuted !== 0 ||
+    skipped === null ||
+    skipped !== 0 ||
+    testMethods.length !== 1 ||
+    `${testMethods[0][1]}.${testMethods[0][2]}` !== expectedTestFqn
+  ) {
+    throw new Error(
+      "The Sherwood process test result did not meet the exact pass contract.",
+    );
+  }
+  return { ...counters, skipped };
+}
+
+function integerAttribute(tag, name) {
+  const value = xmlAttribute(tag, name);
+  if (value === undefined || !/^(?:0|[1-9][0-9]*)$/u.test(value)) {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) ? parsed : null;
+}
+
+function optionalIntegerAttribute(tag, name) {
+  const value = xmlAttribute(tag, name);
+  return value === undefined ? 0 : integerAttribute(tag, name);
+}
+
+function xmlAttribute(tag, name) {
+  return tag.match(new RegExp(`\\b${name}="([^"]*)"`, "u"))?.[1];
+}
+
 export function usage() {
   return "Usage: node scripts/run-v2-conformance.mjs --output /absolute/new/directory [--sherwood-repository /absolute/clean/checkout --sherwood-commit 40lowerhex]";
 }
