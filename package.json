@@ -21,10 +21,12 @@
     "scripts/verify-v2-vectors.py",
     "scripts/verify-v2-evidence-receipts.py",
     "scripts/verify-v2-http-auth.py",
+    "scripts/verify-v2-identity-session.py",
     "test/fixtures/v2-canonical.json",
     "test/fixtures/v2-evidence-receipts.json",
     "test/fixtures/v2-receipt-auth.json",
-    "test/fixtures/v2-http-auth.json"
+    "test/fixtures/v2-http-auth.json",
+    "test/fixtures/v2-identity-session.json"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -34,7 +36,8 @@
     "test:receipt-auth": "tsx --test test/receipt-auth.test.ts",
     "verify:protocol-v2": "python scripts/verify-v2-vectors.py",
     "verify:evidence-v2": "python scripts/verify-v2-evidence-receipts.py",
-    "verify:http-auth-v2": "python scripts/verify-v2-http-auth.py"
+    "verify:http-auth-v2": "python scripts/verify-v2-http-auth.py",
+    "verify:identity-session-v2": "python scripts/verify-v2-identity-session.py"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",

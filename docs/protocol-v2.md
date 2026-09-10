@@ -5,6 +5,9 @@ This developer contract contains the first three implementation slices of
 [WS1 #4](https://github.com/xpelch/gossip/issues/4),
 [WS2 #6](https://github.com/xpelch/gossip/issues/6), and the portable
 authenticity portion of [WS3 #9](https://github.com/xpelch/gossip/issues/9).
+The portable session-authorization portion of
+[WS6 #15](https://github.com/xpelch/gossip/issues/15) is also executable but
+remains inactive.
 The revision is `gossip/2-draft.1`. It is a candidate for engine integration;
 there is no public v2 endpoint or active v2 tool in the kit.
 
@@ -40,14 +43,23 @@ results, and explicit remaining gates.
   `gossip-eip191-receipt-v1` profile against an operator-pinned manifest,
   including the exact EIP-191 message, low-S signature, recovery key, server,
   profile, key ID, validity interval, and chain key pinning.
+- `verifyIdentitySessionGrant`, `verifyIdentitySessionChain`,
+  `verifyIdentitySessionRevocation`, and `authorizeIdentitySession` validate
+  root-signed, information-only session grants, explicit rotation scope,
+  revocation, expiry, destination, and canonical signed request envelopes whose
+  bytes bind the tool, submission kind, earned-credit ceiling, and complete
+  payload. They do not register keys or authorize payment, trading, generic
+  signing, or transaction execution.
 
 The exact fields, resource limits, and validation semantics are specified in
 [ADR 0003](adr/0003-v2-canonical-contract.md) and
 [ADR 0004](adr/0004-v2-evidence-and-receipts.md), and
-[ADR 0005](adr/0005-v2-receipt-authenticity.md). Source modules and declarations
+[ADR 0005](adr/0005-v2-receipt-authenticity.md),
+[ADR 0006](adr/0006-v2-http-authentication.md), and
+[ADR 0007](adr/0007-v2-identity-session-authorization.md). Source modules and declarations
 are shipped under `dist/canonical.js`, `dist/protocol-v2.js`,
 `dist/evidence-v2.js`, `dist/receipts-v2.js`, `dist/receipt-auth.js`, and
-`dist/protocol-errors.js` after build. They are separate from `serve` and
+`dist/identity-session.js` after build. They are separate from `serve` and
 `setup`.
 
 ## Reproduce the contract checks
@@ -60,6 +72,7 @@ npm run build
 npm run test:protocol-v2
 npm run verify:protocol-v2
 npm run verify:evidence-v2
+npm run verify:identity-session-v2
 ```
 
 The Python verifiers use only the standard library. They independently implement

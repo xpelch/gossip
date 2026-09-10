@@ -24,6 +24,7 @@ test("content digests bind the protocol domain and preserve Unicode distinctions
   );
   assert.notEqual(request, canonicalDigest("evidence", {}));
   assert.notEqual(request, canonicalDigest("receipt", {}));
+  assert.notEqual(request, canonicalDigest("identity", {}));
   assert.equal(
     canonicalDigest("request", { a: 1, b: 2 }),
     canonicalDigest("request", { b: 2, a: 1 }),

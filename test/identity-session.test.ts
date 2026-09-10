@@ -1,0 +1,509 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import test from "node:test";
+import { Wallet } from "ethers";
+import {
+  gossipV2AuthHeaders,
+  gossipV2AuthMessage,
+  type GossipV2HttpRequest,
+} from "../src/http-auth-v2.js";
+import { canonicalJson } from "../src/canonical.js";
+import {
+  authorizeIdentitySession,
+  identitySessionGrantDigest,
+  identitySessionGrantMessage,
+  identitySessionRevocationDigest,
+  identitySessionRevocationMessage,
+  verifyIdentitySessionChain,
+  verifyIdentitySessionGrant,
+  verifyIdentitySessionRevocation,
+} from "../src/identity-session.js";
+import { ProtocolError } from "../src/protocol-errors.js";
+
+const root = new Wallet(`0x${"00".repeat(31)}01`);
+const sessionOne = new Wallet(`0x${"00".repeat(31)}02`);
+const sessionTwo = new Wallet(`0x${"00".repeat(31)}03`);
+const secp256k1Order =
+  0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+const fixture = JSON.parse(
+  fs.readFileSync(
+    new URL("./fixtures/v2-identity-session.json", import.meta.url),
+    "utf8",
+  ),
+) as Record<string, Record<string, unknown>>;
+
+function grant(
+  session: Wallet,
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
+  return {
+    schema: "gossip.identity-session.v1",
+    protocol: "gossip/2-draft.1",
+    root: {
+      chain_id: "4663",
+      address: root.address.toLowerCase(),
+    },
+    session: {
+      key_id: session === sessionOne ? "session-1" : "session-2",
+      public_key: session.signingKey.publicKey,
+      address: session.address.toLowerCase(),
+    },
+    endpoint: "https://engine.test/mcp",
+    audience: "https://engine.test/",
+    tools: [
+      "gossip_capabilities",
+      "gossip_consult_v2",
+      "gossip_operation",
+      "gossip_receipt_v2",
+    ],
+    submission_kinds: [],
+    max_cost: { unit: "earned_credit", amount: "0" },
+    issued_at: 1_800_000_000,
+    expires_at: 1_800_003_600,
+    previous: null,
+    ...overrides,
+  };
+}
+
+async function signedGrant(
+  value: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  const digest = identitySessionGrantDigest(value);
+  return {
+    grant: value,
+    grant_digest: digest,
+    root_public_key: root.signingKey.publicKey,
+    signature: await root.signMessage(identitySessionGrantMessage(digest)),
+  };
+}
+
+async function signedRevocation(
+  value: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  const digest = identitySessionRevocationDigest(value);
+  return {
+    revocation: value,
+    revocation_digest: digest,
+    root_public_key: root.signingKey.publicKey,
+    signature: await root.signMessage(identitySessionRevocationMessage(digest)),
+  };
+}
+
+async function authenticatedRequest(
+  signer: Wallet,
+  context: Record<string, unknown> = requestContext(),
+  expires = "1800000400",
+): Promise<GossipV2HttpRequest> {
+  const body = new TextEncoder().encode(canonicalJson(context));
+  const request = {
+    audience: "https://engine.test/",
+    endpoint: "https://engine.test/mcp",
+    method: "POST",
+    target: "/mcp",
+    body,
+    nonce: "00000000-0000-4000-8000-000000000001",
+    expires,
+  };
+  const signature = await signer.signMessage(gossipV2AuthMessage(request));
+  return {
+    ...request,
+    headers: gossipV2AuthHeaders({
+      publicKey: signer.signingKey.publicKey,
+      signature,
+      nonce: request.nonce,
+      expires: request.expires,
+    }),
+  };
+}
+
+function requestContext(
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
+  return {
+    schema: "gossip.identity-session-request.v1",
+    protocol: "gossip/2-draft.1",
+    root: { chain_id: "4663", address: root.address.toLowerCase() },
+    key_id: "session-1",
+    tool: "gossip_consult_v2",
+    submission_kind: null,
+    cost: { unit: "earned_credit", amount: "0" },
+    payload: { operation_id: "synthetic-operation" },
+    ...overrides,
+  };
+}
+
+function expectCode(action: () => unknown, code: ProtocolError["code"]): void {
+  assert.throws(action, (error: unknown) => {
+    assert.ok(error instanceof ProtocolError);
+    assert.equal(error.code, code);
+    return true;
+  });
+}
+
+test("verifies a root-signed, information-only session grant", async () => {
+  const value = grant(sessionOne);
+  const signed = await signedGrant(value);
+  const verified = verifyIdentitySessionGrant(signed);
+
+  assert.equal(verified.grant_digest, identitySessionGrantDigest(value));
+  assert.equal(verified.grant.root.address, root.address.toLowerCase());
+  assert.equal(
+    verified.grant.session.address,
+    sessionOne.address.toLowerCase(),
+  );
+});
+
+test("verifies literal grant, rotation, and revocation vectors", () => {
+  const first = verifyIdentitySessionGrant(fixture.first_grant);
+  const rotated = verifyIdentitySessionGrant(fixture.rotated_grant);
+  const revocation = verifyIdentitySessionRevocation(fixture.revocation);
+
+  assert.equal(
+    identitySessionGrantMessage(first.grant_digest),
+    fixture.first_message,
+  );
+  assert.equal(
+    identitySessionGrantMessage(rotated.grant_digest),
+    fixture.rotated_message,
+  );
+  assert.equal(
+    identitySessionRevocationMessage(revocation.revocation_digest),
+    fixture.revocation_message,
+  );
+  assert.equal(
+    verifyIdentitySessionChain([fixture.first_grant, fixture.rotated_grant])
+      .active.grant.session.key_id,
+    "session-2",
+  );
+
+  const requestVector = fixture.session_request;
+  const authorized = authorizeIdentitySession({
+    grants: [fixture.first_grant],
+    revocations: [],
+    now: 1_800_000_200,
+    request: {
+      audience: String(requestVector.audience),
+      endpoint: String(requestVector.endpoint),
+      method: String(requestVector.method),
+      target: String(requestVector.target),
+      body: new TextEncoder().encode(String(requestVector.body)),
+      nonce: String(requestVector.nonce),
+      expires: String(requestVector.expires),
+      headers: gossipV2AuthHeaders({
+        publicKey: String(requestVector.public_key),
+        signature: String(requestVector.signature),
+        nonce: String(requestVector.nonce),
+        expires: String(requestVector.expires),
+      }),
+    },
+    verifier: {
+      endpoint: String(requestVector.endpoint),
+      audience: String(requestVector.audience),
+    },
+  });
+  assert.equal(authorized.request.tool, "gossip_consult_v2");
+});
+
+test("rejects scope and signature tampering", async () => {
+  const signed = await signedGrant(grant(sessionOne));
+  const changedScope = structuredClone(signed);
+  const changedGrant = changedScope.grant as Record<string, unknown>;
+  changedGrant.max_cost = { unit: "earned_credit", amount: "1" };
+
+  expectCode(() => verifyIdentitySessionGrant(changedScope), "digest_mismatch");
+
+  const changedSignature = structuredClone(signed);
+  changedSignature.signature = `0x${"00".repeat(65)}`;
+  expectCode(
+    () => verifyIdentitySessionGrant(changedSignature),
+    "unauthorized",
+  );
+
+  const highS = structuredClone(signed);
+  const signatureBytes = Buffer.from(String(highS.signature).slice(2), "hex");
+  const originalS = BigInt(
+    `0x${signatureBytes.subarray(32, 64).toString("hex")}`,
+  );
+  signatureBytes.set(
+    Buffer.from(
+      (secp256k1Order - originalS).toString(16).padStart(64, "0"),
+      "hex",
+    ),
+    32,
+  );
+  highS.signature = `0x${signatureBytes.toString("hex")}`;
+  expectCode(() => verifyIdentitySessionGrant(highS), "unauthorized");
+
+  expectCode(
+    () =>
+      identitySessionGrantDigest(
+        grant(sessionOne, { tools: ["gossip_trade"] }),
+      ),
+    "invalid_request",
+  );
+});
+
+test("rejects the wrong root, destination, key, and time", async () => {
+  const chain = verifyIdentitySessionChain([
+    await signedGrant(grant(sessionOne)),
+  ]);
+  const request = await authenticatedRequest(sessionOne);
+  const valid = {
+    grants: chain.grants,
+    revocations: [],
+    now: 1_800_000_200,
+    request,
+    verifier: {
+      endpoint: "https://engine.test/mcp",
+      audience: "https://engine.test/",
+    },
+  };
+  const invalid = [
+    { ...valid, now: 1_799_999_999 },
+    { ...valid, now: 1_800_003_600 },
+    {
+      ...valid,
+      request: await authenticatedRequest(
+        sessionOne,
+        requestContext({
+          root: { chain_id: "1", address: root.address.toLowerCase() },
+        }),
+      ),
+    },
+    {
+      ...valid,
+      request: await authenticatedRequest(
+        sessionOne,
+        requestContext({ key_id: "unknown-session" }),
+      ),
+    },
+    {
+      ...valid,
+      request: await authenticatedRequest(sessionTwo),
+    },
+    {
+      ...valid,
+      request: { ...request, endpoint: "https://other.test/mcp" },
+    },
+    {
+      ...valid,
+      request: { ...request, audience: "https://other.test/" },
+    },
+    {
+      ...valid,
+      request: {
+        ...request,
+        body: new TextEncoder().encode(
+          canonicalJson(requestContext({ tool: "gossip_operation" })),
+        ),
+      },
+    },
+  ];
+
+  for (const input of invalid) {
+    expectCode(() => authorizeIdentitySession(input), "unauthorized");
+  }
+
+  expectCode(() => authorizeIdentitySession({}), "invalid_request");
+});
+
+test("rotation replaces scope instead of inheriting it", async () => {
+  const first = await signedGrant(
+    grant(sessionOne, {
+      tools: ["gossip_consult_v2", "gossip_operation"],
+    }),
+  );
+  const firstDigest = first.grant_digest as string;
+  const second = await signedGrant(
+    grant(sessionTwo, {
+      tools: ["gossip_operation"],
+      issued_at: 1_800_000_100,
+      expires_at: 1_800_003_700,
+      previous: { key_id: "session-1", grant_digest: firstDigest },
+    }),
+  );
+  const chain = verifyIdentitySessionChain([first, second]);
+  const requestTwoConsult = await authenticatedRequest(
+    sessionTwo,
+    requestContext({ key_id: "session-2" }),
+  );
+  const requestTwoOperation = await authenticatedRequest(
+    sessionTwo,
+    requestContext({ key_id: "session-2", tool: "gossip_operation" }),
+  );
+
+  const brokenSuccessor = await signedGrant(
+    grant(sessionTwo, {
+      tools: ["gossip_operation"],
+      issued_at: 1_800_000_100,
+      expires_at: 1_800_003_700,
+      previous: {
+        key_id: "session-1",
+        grant_digest: `sha256:${"0".repeat(64)}`,
+      },
+    }),
+  );
+  expectCode(
+    () => verifyIdentitySessionChain([first, brokenSuccessor]),
+    "invalid_request",
+  );
+
+  assert.equal(chain.active.grant.session.key_id, "session-2");
+  expectCode(
+    () =>
+      authorizeIdentitySession({
+        grants: chain.grants,
+        revocations: [],
+        now: 1_800_000_200,
+        request: requestTwoConsult,
+        verifier: {
+          endpoint: "https://engine.test/mcp",
+          audience: "https://engine.test/",
+        },
+      }),
+    "unauthorized",
+  );
+
+  assert.doesNotThrow(() =>
+    authorizeIdentitySession({
+      grants: chain.grants,
+      revocations: [],
+      now: 1_800_000_200,
+      request: requestTwoOperation,
+      verifier: {
+        endpoint: "https://engine.test/mcp",
+        audience: "https://engine.test/",
+      },
+    }),
+  );
+
+  const requestOne = await authenticatedRequest(
+    sessionOne,
+    requestContext({ tool: "gossip_operation" }),
+  );
+  expectCode(
+    () =>
+      authorizeIdentitySession({
+        grants: chain.grants,
+        revocations: [],
+        now: 1_800_000_200,
+        request: requestOne,
+        verifier: {
+          endpoint: "https://engine.test/mcp",
+          audience: "https://engine.test/",
+        },
+      }),
+    "unauthorized",
+  );
+});
+
+test("revocation is terminal for new authorization", async () => {
+  const first = await signedGrant(grant(sessionOne));
+  const revocationValue = {
+    schema: "gossip.identity-session-revocation.v1",
+    protocol: "gossip/2-draft.1",
+    root: {
+      chain_id: "4663",
+      address: root.address.toLowerCase(),
+    },
+    key_id: "session-1",
+    grant_digest: first.grant_digest,
+    revoked_at: 1_800_000_100,
+  };
+  const revocation = await signedRevocation(revocationValue);
+
+  assert.equal(
+    verifyIdentitySessionRevocation(revocation).revocation.key_id,
+    "session-1",
+  );
+
+  const chain = verifyIdentitySessionChain([first]);
+  const request = await authenticatedRequest(sessionOne);
+  expectCode(
+    () =>
+      authorizeIdentitySession({
+        grants: chain.grants,
+        revocations: [revocation],
+        now: 1_800_000_200,
+        request,
+        verifier: {
+          endpoint: "https://engine.test/mcp",
+          audience: "https://engine.test/",
+        },
+      }),
+    "unauthorized",
+  );
+
+  expectCode(
+    () =>
+      authorizeIdentitySession({
+        grants: chain.grants,
+        revocations: Array.from({ length: 17 }, () => revocation),
+        now: 1_800_000_200,
+        request,
+        verifier: {
+          endpoint: "https://engine.test/mcp",
+          audience: "https://engine.test/",
+        },
+      }),
+    "invalid_request",
+  );
+});
+
+test("submission kinds and earned-credit ceilings are enforced", async () => {
+  const value = grant(sessionOne, {
+    tools: ["gossip_submit_v2"],
+    submission_kinds: ["chain_observation"],
+    max_cost: { unit: "earned_credit", amount: "2" },
+  });
+  const chain = verifyIdentitySessionChain([await signedGrant(value)]);
+  const submissionRequest = (
+    submissionKind: string,
+    amount: string,
+  ): Promise<GossipV2HttpRequest> =>
+    authenticatedRequest(
+      sessionOne,
+      requestContext({
+        tool: "gossip_submit_v2",
+        submission_kind: submissionKind,
+        cost: { unit: "earned_credit", amount },
+      }),
+    );
+  const authenticatedRequests = {
+    valid: await submissionRequest("chain_observation", "2"),
+    wrongKind: await submissionRequest("research_heuristic", "2"),
+    excessiveCost: await submissionRequest("chain_observation", "3"),
+  };
+  const common = {
+    grants: chain.grants,
+    revocations: [],
+    now: 1_800_000_200,
+    verifier: {
+      endpoint: "https://engine.test/mcp",
+      audience: "https://engine.test/",
+    },
+  };
+
+  assert.doesNotThrow(() =>
+    authorizeIdentitySession({
+      ...common,
+      request: authenticatedRequests.valid,
+    }),
+  );
+  expectCode(
+    () =>
+      authorizeIdentitySession({
+        ...common,
+        request: authenticatedRequests.wrongKind,
+      }),
+    "unauthorized",
+  );
+  expectCode(
+    () =>
+      authorizeIdentitySession({
+        ...common,
+        request: authenticatedRequests.excessiveCost,
+      }),
+    "unauthorized",
+  );
+});
