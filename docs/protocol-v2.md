@@ -123,6 +123,12 @@ unvalidated `X-Forwarded-*` headers. The verifier hashes the raw `Uint8Array`
 body; text decoding belongs after authentication.
 Fresh authentication nonces must not change a logical operation's digest.
 
+The installed package exports `createV2SignedFetch` as the matching client-side
+MCP transport primitive. It signs only the exact configured canonical HTTPS
+endpoint, rejects caller-supplied legacy or v2 authentication headers, and
+verifies that an external signer represents the configured identity. This does
+not activate v2 tools in the local bridge or prove an engine deployment.
+
 The protocol cannot promote an observation into a verified trading signal.
 Engine evidence must retain source revision, canonical block/transaction hashes,
 the observation window, freshness, finality, and explicit unknowns. A recent

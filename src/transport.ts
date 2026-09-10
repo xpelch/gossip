@@ -1,6 +1,7 @@
 import { createSignerClient } from "@slicekit/erc8128";
 import { createHash, randomUUID } from "node:crypto";
 import { computeAddress, getAddress, hashMessage, SigningKey } from "ethers";
+import { gossipV2AuthHeaders, gossipV2AuthMessage } from "./http-auth-v2.js";
 
 export interface IdentitySigner {
   readonly address: string;
@@ -12,6 +13,81 @@ export interface Connection {
   audience: string;
   profile?: "sherwood-eip191-personal-sign-v1" | "erc8128";
   chainId?: number;
+}
+
+function canonicalHttpsUrl(value: string, label: string): URL {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`${label} must be a canonical HTTPS URL.`);
+  }
+  if (
+    url.protocol !== "https:" ||
+    url.username ||
+    url.password ||
+    url.hash ||
+    url.href !== value ||
+    /[\s\u0000-\u001f\u007f-\u009f]/u.test(value)
+  ) {
+    throw new Error(`${label} must be a canonical HTTPS URL.`);
+  }
+  return url;
+}
+
+export function createV2SignedFetch(
+  wallet: IdentitySigner,
+  connection: Pick<Connection, "endpoint" | "audience">,
+  send: typeof fetch = fetch,
+): typeof fetch {
+  const endpoint = canonicalHttpsUrl(connection.endpoint, "Endpoint");
+  const audience = canonicalHttpsUrl(connection.audience, "Audience");
+
+  return async (input, init) => {
+    const request = new Request(input, { ...init, redirect: "error" });
+    if (request.url !== endpoint.href) {
+      throw new Error(
+        "Signing destination does not match the configured MCP endpoint.",
+      );
+    }
+    if (
+      [...request.headers.keys()].some((name) => {
+        const normalized = name.toLowerCase();
+        return (
+          normalized === "authorization" ||
+          normalized.startsWith("x-gossip-") ||
+          normalized.startsWith("x-sherwood-")
+        );
+      })
+    ) {
+      throw new Error("Caller-supplied authentication headers are forbidden.");
+    }
+
+    const body = new Uint8Array(await request.clone().arrayBuffer());
+    const nonce = randomUUID();
+    const expires = String(Math.floor(Date.now() / 1000) + 240);
+    const target = endpoint.pathname + endpoint.search;
+    const message = gossipV2AuthMessage({
+      audience: audience.href,
+      endpoint: endpoint.href,
+      method: request.method,
+      target,
+      body,
+      nonce,
+      expires,
+    });
+    const proof = await checkedSignature(wallet, message);
+    const headers = gossipV2AuthHeaders({
+      publicKey: proof.publicKey,
+      signature: proof.signature,
+      nonce,
+      expires,
+    });
+    for (const [name, value] of Object.entries(headers)) {
+      request.headers.set(name, value);
+    }
+    return send(request);
+  };
 }
 
 export function createSignedFetch(
