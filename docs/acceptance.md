@@ -11,6 +11,11 @@ This preview is partial implementation, not release acceptance.
 - Additive host config editing, conflict protection, explicit removal and local disconnect.
 - EIP-55 vectors, ERC-8004 metadata/read validation and AgentWalletSet typed-data preparation, actual local ERC-1271 contract fixture.
 - Checksum-verified local artifact installer; package build and isolated process tests.
+- Draft Gossip v2 private-evidence contract with exhaustive synthetic retention,
+  owner operations, minimal tombstones, root-signed publication consent, and
+  closed observability schemas. Private submission remains blocked until the
+  Sherwood and product-policy gates in `docs/acceptance/v2-private-evidence.md`
+  pass.
 
 ## Required before closing #1
 

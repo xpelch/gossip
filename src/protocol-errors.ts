@@ -24,6 +24,13 @@ const messages = Object.freeze({
   invalid_receipt: "The receipt does not match the protocol contract.",
   digest_mismatch: "The supplied content digest does not match the content.",
   invalid_lineage: "The evidence lineage is invalid.",
+  invalid_privacy_contract:
+    "The privacy value does not match the protocol contract.",
+  privacy_consent_required:
+    "Fresh explicit consent is required for the requested disclosure.",
+  privacy_unavailable: "The requested private resource is unavailable.",
+  unsafe_telemetry:
+    "The telemetry event contains an unsupported field or value.",
   operation_failed: "The accepted operation failed.",
 });
 

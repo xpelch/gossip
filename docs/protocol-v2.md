@@ -56,11 +56,14 @@ The exact fields, resource limits, and validation semantics are specified in
 [ADR 0004](adr/0004-v2-evidence-and-receipts.md), and
 [ADR 0005](adr/0005-v2-receipt-authenticity.md),
 [ADR 0006](adr/0006-v2-http-authentication.md), and
-[ADR 0007](adr/0007-v2-identity-session-authorization.md). Source modules and declarations
+[ADR 0007](adr/0007-v2-identity-session-authorization.md), and
+[ADR 0008](adr/0008-v2-private-evidence-lifecycle.md). Source modules and declarations
 are shipped under `dist/canonical.js`, `dist/protocol-v2.js`,
 `dist/evidence-v2.js`, `dist/receipts-v2.js`, `dist/receipt-auth.js`, and
-`dist/identity-session.js` after build. They are separate from `serve` and
-`setup`.
+`dist/identity-session.js` after build. The synthetic private-evidence policy,
+root-signed publication consent, owner operations, tombstones, and closed
+observability schemas are shipped under `dist/privacy-v2.js`. They are separate
+from `serve` and `setup`, and do not activate private submission.
 
 ## Reproduce the contract checks
 
@@ -73,6 +76,7 @@ npm run test:protocol-v2
 npm run verify:protocol-v2
 npm run verify:evidence-v2
 npm run verify:identity-session-v2
+npm run verify:privacy-v2
 ```
 
 The Python verifiers use only the standard library. They independently implement
@@ -123,3 +127,9 @@ These module tests do not prove server idempotency,
 exactly one durable charge, RPC revalidation, private evidence operations, host
 support, or a public release. Those gates remain on epic #3 and the applicable
 acceptance dependencies in issues #1 and #2.
+
+The private-evidence contract and synthetic retention values are documented in
+`docs/privacy-v2.md`. Adapters must keep `private_submission` blocked until the
+engine proves encrypted owner-scoped storage, complete deletion across every
+copy, durable access audit, crash-safe owner operations, zero telemetry leakage,
+and an approved production policy revision.

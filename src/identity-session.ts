@@ -359,7 +359,7 @@ export function identitySessionGrantMessage(grantDigest: string): string {
   ].join("\n");
 }
 
-function validateSignature(
+export function verifyIdentitySignature(
   publicKey: string,
   signature: string,
   message: string,
@@ -413,7 +413,7 @@ export function verifyIdentitySessionGrant(
 
   const rootPublicKey = text(value.root_public_key, PUBLIC_KEY);
   const signature = text(value.signature, SIGNATURE);
-  validateSignature(
+  verifyIdentitySignature(
     rootPublicKey,
     signature,
     identitySessionGrantMessage(grantDigest),
@@ -490,7 +490,7 @@ export function verifyIdentitySessionRevocation(
 
   const rootPublicKey = text(value.root_public_key, PUBLIC_KEY);
   const signature = text(value.signature, SIGNATURE);
-  validateSignature(
+  verifyIdentitySignature(
     rootPublicKey,
     signature,
     identitySessionRevocationMessage(revocationDigest),
