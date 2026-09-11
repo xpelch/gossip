@@ -80,6 +80,7 @@ VERSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.+_-]{0,63}$")
 parser = argparse.ArgumentParser()
 parser.add_argument("--manifest", type=Path)
 parser.add_argument("--replay-manifest", type=Path)
+parser.add_argument("--write-replay-attestation", type=Path)
 arguments = parser.parse_args()
 manifest_path = (
     arguments.manifest.resolve()
@@ -96,6 +97,8 @@ replay_manifest_path = (
 
 if replay_manifest_path is not None and arguments.manifest is None:
     raise AssertionError("--replay-manifest requires --manifest")
+if arguments.write_replay_attestation is not None and replay_manifest_path is None:
+    raise AssertionError("--write-replay-attestation requires --replay-manifest")
 
 
 def exact_keys(value, expected):
@@ -182,7 +185,7 @@ exact_keys(
     },
 )
 assert statement["schema"] == "gossip.acceptance-statement.v1"
-assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-11.5"
+assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-11.6"
 assert statement["protocol"] == PROTOCOL
 assert statement["decision"] in {"verified", "blocked"}
 verify_integer(statement["generated_at"], 0, MAX_UNIX_SECONDS)
@@ -394,6 +397,37 @@ def replay_projection(value):
     }
 
 
+def write_replay_attestation(primary_fixture, replay_fixture):
+    """Persist the content-addressed proof derived from two verified manifests."""
+    attestation = {
+        "schema": "gossip.replay-attestation.v1",
+        "protocol": PROTOCOL,
+        "suite_revision": primary_fixture["statement"]["suite_revision"],
+        "primary_manifest": primary_fixture["content_address"]["digest"],
+        "replay_manifest": replay_fixture["content_address"]["digest"],
+        "projection_digest": digest(
+            {
+                "schema": "gossip.replay-projection.v1",
+                "projection": replay_projection(primary_fixture["statement"]),
+            }
+        ),
+        "result": "matched",
+    }
+    envelope = {
+        "schema": "gossip.replay-attestation-envelope.v1",
+        "attestation": attestation,
+        "content_address": {
+            "algorithm": "sha256",
+            "digest": digest(attestation),
+        },
+    }
+    output_path = arguments.write_replay_attestation.resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("x", encoding="utf-8", newline="\n") as output:
+        json.dump(envelope, output, ensure_ascii=False, indent=2)
+        output.write("\n")
+
+
 if replay_manifest_path is None:
     print(f"v2 content-addressed acceptance manifest verified: {statement['decision']}")
 else:
@@ -415,4 +449,6 @@ else:
     assert replay_projection(statement) == replay_projection(
         replay_fixture["statement"]
     ), "clean-checkout replay changed the acceptance decision or deterministic inputs"
+    if arguments.write_replay_attestation is not None:
+        write_replay_attestation(fixture, replay_fixture)
     print("v2 acceptance manifests independently verified and replay matched")

@@ -301,6 +301,12 @@ async function runSherwoodConformance(
       mcp_structured_content_parity: true,
       private_payload_canary_scanned: true,
       foreign_private_partition_excluded: true,
+      stale_evidence_refused: true,
+      wrong_chain_refused: true,
+      wrong_boundary_refused: true,
+      reorged_source_refused: true,
+      rejected_evidence_transport_parity: true,
+      rejected_without_partial_evidence: true,
       durable_operation_singleton: true,
       operation_exactly_once: true,
       operation_conflict: true,
@@ -634,7 +640,7 @@ async function main() {
     ).stdout.trim();
     const statement = {
       schema: "gossip.acceptance-statement.v1",
-      suite_revision: "gossip-v2-conformance-2026-09-11.5",
+      suite_revision: "gossip-v2-conformance-2026-09-11.6",
       protocol: "gossip/2-draft.1",
       generated_at: Math.floor(Date.now() / 1000),
       source: {
@@ -729,8 +735,10 @@ async function main() {
         ),
         blocked(
           "evidence_finality_reorg",
-          "Controlled evidence faults were not run through both transports.",
-          "Run stale, wrong-chain, missing-source and reorg fixtures.",
+          sherwoodEvidence
+            ? "The process proved stale, wrong-chain, wrong block/hash and source-reorged refusals; missing-source and post-publication quarantine remain unproven."
+            : "Controlled evidence faults were not run through both transports.",
+          "Prove missing-source refusal and post-publication reorg quarantine through the packaged process.",
         ),
         blocked(
           "correction_supersession",
@@ -790,7 +798,7 @@ async function main() {
           "evidence",
           "installed",
           sherwoodEvidence
-            ? "Retained evidence and transactional fault rollback passed without controlled reorg or correction reproduction."
+            ? "Retained evidence, controlled refusal and transactional rollback passed without missing-source, post-publication reorg or correction reproduction."
             : "Evidence contracts are installed without end-to-end reproduction.",
           "Pass controlled evidence and independent reproduction scenarios.",
         ),

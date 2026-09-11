@@ -15,6 +15,7 @@ export const SHERWOOD_PROCESS_TEST_FQNS = Object.freeze([
   "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_keeps_private_export_owner_scoped_and_matches_http_with_mcp",
   "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_keeps_private_lifecycle_owner_scoped_and_matches_http_with_mcp",
   "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rolls_back_private_faults_and_retries_after_restart",
+  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rejects_stale_wrong_chain_wrong_boundary_and_reorged_source_over_http_and_mcp",
 ]);
 
 export function sherwoodDeterministicBuildProperties(checkout) {

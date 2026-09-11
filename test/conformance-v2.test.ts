@@ -311,6 +311,10 @@ test("TypeScript and Python enforce the same manifest bounds", () => {
     );
     const replayManifestPath = path.join(temporary, "replay-manifest.json");
     fs.writeFileSync(replayManifestPath, JSON.stringify(replay));
+    const replayAttestationPath = path.join(
+      temporary,
+      "replay-attestation.json",
+    );
 
     const replayPython = spawnSync(
       "python",
@@ -320,10 +324,54 @@ test("TypeScript and Python enforce the same manifest bounds", () => {
         validManifestPath,
         "--replay-manifest",
         replayManifestPath,
+        "--write-replay-attestation",
+        replayAttestationPath,
       ],
       { encoding: "utf8" },
     );
     assert.equal(replayPython.status, 0, replayPython.stderr);
+    const replayAttestation = JSON.parse(
+      fs.readFileSync(replayAttestationPath, "utf8"),
+    );
+    assert.deepEqual(replayAttestation, {
+      schema: "gossip.replay-attestation-envelope.v1",
+      attestation: {
+        schema: "gossip.replay-attestation.v1",
+        protocol: "gossip/2-draft.1",
+        suite_revision: validBase.statement.suite_revision,
+        primary_manifest: validBase.content_address.digest,
+        replay_manifest: replay.content_address.digest,
+        projection_digest: replayAttestation.attestation.projection_digest,
+        result: "matched",
+      },
+      content_address: {
+        algorithm: "sha256",
+        digest: replayAttestation.content_address.digest,
+      },
+    });
+    assert.match(
+      replayAttestation.attestation.projection_digest,
+      /^sha256:[0-9a-f]{64}$/,
+    );
+    assert.equal(
+      replayAttestation.content_address.digest,
+      canonicalDigest("conformance", replayAttestation.attestation),
+    );
+
+    const overwriteAttestation = spawnSync(
+      "python",
+      [
+        "scripts/verify-v2-conformance-manifest.py",
+        "--manifest",
+        validManifestPath,
+        "--replay-manifest",
+        replayManifestPath,
+        "--write-replay-attestation",
+        replayAttestationPath,
+      ],
+      { encoding: "utf8" },
+    );
+    assert.notEqual(overwriteAttestation.status, 0);
 
     const differentRuntime = structuredClone(replay);
     differentRuntime.statement.runtime.node = "25.0.0";

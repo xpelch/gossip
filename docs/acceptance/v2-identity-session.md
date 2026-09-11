@@ -75,7 +75,7 @@ subscribers and cannot downgrade into root authentication through Gossip v2 or
 legacy `X-Sherwood-*` headers.
 
 The public process gate starts real Kestrel instances against disposable
-PostgreSQL 17 and runs nine exact tests listed in
+PostgreSQL 17 and runs ten exact tests listed in
 [the conformance runbook](../conformance-v2.md). These two tests establish the
 session portion:
 

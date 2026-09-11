@@ -44,7 +44,7 @@ checkout must have the canonical `xpelch/sherwood` HTTPS or SSH origin, no
 working-tree changes, and no reparse-point root. The runner clones it without
 hardlinks, detaches the requested commit, restores and builds the Sherwood
 test project in Release mode with continuous-integration determinism enabled
-and the temporary source root mapped to `/_/`. It then runs all nine exact
+and the temporary source root mapped to `/_/`. It then runs all ten exact
 process test FQNs in one bounded TRX result. The stable source mapping keeps the
 assembly digest independent of the temporary clone path. The supplied checkout
 is executable source code and therefore an explicit caller trust boundary; the
@@ -54,7 +54,7 @@ The public evidence summary records only hashes, sizes, counters, revisions,
 runtime versions and boolean assertions. Raw child output and TRX data remain
 in disposable restricted storage and are scanned before summary derivation;
 paths, remotes, requests, receipts, signatures, keys, connection strings and
-canaries are never published. Passing all nine tests promotes
+canaries are never published. Passing all ten tests promotes
 `mcp_http_parity`, `privacy_canary_scan`, `operation_exactly_once`,
 `operation_conflict`, `authentication_fail_closed`,
 `session_scope_escape`, `zero_cost_reconciliation`, and
@@ -99,7 +99,8 @@ published manifests:
 ```powershell
 python scripts/verify-v2-conformance-manifest.py `
   --manifest C:\temp\gossip-v2-acceptance\acceptance-manifest.json `
-  --replay-manifest C:\temp\gossip-v2-acceptance-replay\acceptance-manifest.json
+  --replay-manifest C:\temp\gossip-v2-acceptance-replay\acceptance-manifest.json `
+  --write-replay-attestation C:\temp\gossip-v2-replay-attestation.json
 ```
 
 The verifier independently checks both manifests, their referenced file
@@ -109,14 +110,22 @@ status, verified assertion count, capability state, and the overall decision.
 Generated timestamps and dynamic process-evidence bytes are allowed to differ
 between runs.
 
+After both inputs pass, the optional output is a content-addressed
+`gossip.replay-attestation-envelope.v1`. It binds both source manifest content
+addresses to the digest of the stable comparison projection and records
+`result: matched`. The verifier creates this file only after the comparison and
+refuses to replace an existing file. Each source manifest keeps
+`clean_checkout_reproduction` blocked because one run cannot prove its own
+independent replay; the separate attestation is the aggregate proof.
+
 ## Remaining process harness
 
-The next slice extends the pinned Sherwood process with controlled chain
-fixtures. It must cover stale, wrong-chain, missing-source, reorg, correction,
-supersession, private owner lifecycle, and independent clean replay without
-weakening the nine existing process gates.
+The controlled-source slice now proves stale, wrong-chain, wrong block/hash and
+source-reorged refusals through both transports. The next slice must cover
+missing-source injection, post-publication reorg quarantine, correction, and
+supersession without weakening the ten existing process gates.
 
-Protected session-key storage, encrypted private-evidence operations,
-production receipt trust, and high-trust independent reproduction remain
-blocked until their respective gates pass. Real Grok Bot, Hermes, OpenClaw,
-and public endpoint claims belong to issue #18.
+Protected session-key storage, production privacy operations, production receipt
+trust, and high-trust independent reproduction remain blocked until their
+respective gates pass. Real Grok Bot, Hermes, OpenClaw, and public endpoint
+claims belong to issue #18.
