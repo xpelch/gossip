@@ -1,6 +1,6 @@
 {
-  "artifact_sha256": "sha256:e7a88b4c1c204120b361012683a0a3800190089d508eb6c33ef89e87a3f09932",
-  "artifact_bytes": 15088556,
+  "artifact_sha256": "sha256:7f52f30a0d68895b50ebf0dc71f36ad936eba8e6735c405f95722868826b5a05",
+  "artifact_bytes": 15091963,
   "package": "@gossip/agent-kit",
   "version": "0.1.0-dev.1",
   "installer": "scripts/install.mjs",

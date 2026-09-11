@@ -4,13 +4,13 @@
     "schema": "gossip.replay-attestation.v1",
     "protocol": "gossip/2-draft.1",
     "suite_revision": "gossip-v2-conformance-2026-09-11.12",
-    "primary_manifest": "sha256:263bdb8b21f6525994e178254c7a11e3da327ace02ea05b2f9c256958a4515f0",
-    "replay_manifest": "sha256:0f57921e75237ca498a070eff4ff5256f11d31b300cad7a10d299ce706aaf5b1",
-    "projection_digest": "sha256:a8e22baa45c4e921376fdee2a50378faf624ba8f8a57c5bcead6afc4bcc2b8ef",
+    "primary_manifest": "sha256:94eb14d2dd600c7b15fb5c6cc4d63f45b1b88c8ef6da347f5ec876d63b62e0ed",
+    "replay_manifest": "sha256:29acd5dd2672fe4a3053d84eefb8f1a96cd42e30db168556ac295aada77e923f",
+    "projection_digest": "sha256:46a4c270b241e95377edc691ec5bbb1cf446b31ade4d6361fd9aed8923696c86",
     "result": "matched"
   },
   "content_address": {
     "algorithm": "sha256",
-    "digest": "sha256:045bb4b0bd46c61d270e189cdb20a5300b6ed793bb030c31600c3f459e3ead47"
+    "digest": "sha256:f6fc8c93096eb8c271c2296443ce8ddae38ae010e4f7935012117a41dbe02df4"
   }
 }

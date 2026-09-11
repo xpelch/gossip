@@ -19,15 +19,17 @@ Public evidence submission costs zero earned credit. `private_submission`,
 
 The coordinated pull requests use branch `codex/gossip-v2-conformance-final`:
 
-- [Gossip #28](https://github.com/xpelch/gossip/pull/28), published-evidence commit
-  `25124f6d684d57afaee1c5d84a9c83e07c1c72d0`;
+- [Gossip #28](https://github.com/xpelch/gossip/pull/28), tested package commit
+  `88779d3dbf4e5dc46c16bbf2abcbcda9b5394268`;
 - [Sherwood #464](https://github.com/xpelch/sherwood/pull/464), branch head
-  `3432ed1421854954dd6f1db74335bc24cf42a720` and tested engine commit
-  `017e592401b5a79edfbf9b2b7c8df01bd2cd555b`.
+  `bfcd2200a1cca4c8a4f78ec9f3c7357973bb7533` and tested engine commit
+  `bfcd2200a1cca4c8a4f78ec9f3c7357973bb7533`.
 
 The public package freezes canonical v2 consultation, evidence, receipt,
-identity-session, and public-submission contracts. Its conformance runner now
-pins Sherwood `017e592401b5a79edfbf9b2b7c8df01bd2cd555b` and thirteen
+identity-session, and public-submission contracts. Its installable
+`gossip-eip191-v2` profile connects the signed v2 transport and exposes the six
+v2 agent tools. Its conformance runner now
+pins Sherwood `bfcd2200a1cca4c8a4f78ec9f3c7357973bb7533` and thirteen
 real-process tests. Sherwood implements the
 durable operations, signed receipts, public evidence graph, root and scoped
 session authorization, and equivalent HTTP and MCP surfaces.
@@ -44,7 +46,7 @@ revision `.12`; the resulting evidence bundle is published below.
 
 The public package passed:
 
-- 193 tests, with two expected platform-specific skips and zero failures;
+- 195 tests, with two expected platform-specific skips and zero failures;
 - `npm run build`;
 - `npm run typecheck`;
 - all nine independent Python verifiers.
@@ -62,12 +64,12 @@ PostgreSQL and Kestrel instances.
 
 The stable replay comparison matched:
 
-- run A: `sha256:263bdb8b21f6525994e178254c7a11e3da327ace02ea05b2f9c256958a4515f0`;
-- run B: `sha256:0f57921e75237ca498a070eff4ff5256f11d31b300cad7a10d299ce706aaf5b1`;
+- run A: `sha256:94eb14d2dd600c7b15fb5c6cc4d63f45b1b88c8ef6da347f5ec876d63b62e0ed`;
+- run B: `sha256:29acd5dd2672fe4a3053d84eefb8f1a96cd42e30db168556ac295aada77e923f`;
 - comparison projection:
-  `sha256:a8e22baa45c4e921376fdee2a50378faf624ba8f8a57c5bcead6afc4bcc2b8ef`;
+  `sha256:46a4c270b241e95377edc691ec5bbb1cf446b31ade4d6361fd9aed8923696c86`;
 - replay attestation:
-  `sha256:045bb4b0bd46c61d270e189cdb20a5300b6ed793bb030c31600c3f459e3ead47`.
+  `sha256:f6fc8c93096eb8c271c2296443ce8ddae38ae010e4f7935012117a41dbe02df4`.
 
 The redacted, independently verifiable evidence is published under
 [`docs/acceptance/evidence/gossip-v2-2026-09-11`](../acceptance/evidence/gossip-v2-2026-09-11/README.md).
@@ -108,7 +110,7 @@ HTTP 200 and unauthenticated `POST /mcp` returns HTTP 401, while
 `GET /v2/gossip/capabilities` returns HTTP 404.
 
 The deployed commit does not contain the tested Gossip v2 branch commit
-`017e592401b5a79edfbf9b2b7c8df01bd2cd555b`. No Gossip v2 endpoint or audience
+`bfcd2200a1cca4c8a4f78ec9f3c7357973bb7533`. No Gossip v2 endpoint or audience
 is therefore active on the public service. GitHub records no Gossip repository
 deployment and neither repository has a GitHub release. This proves that the
 existing Sherwood deployment is healthy but cannot be promoted to Gossip v2

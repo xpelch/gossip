@@ -4,25 +4,25 @@
     "schema": "gossip.acceptance-statement.v1",
     "suite_revision": "gossip-v2-conformance-2026-09-11.12",
     "protocol": "gossip/2-draft.1",
-    "generated_at": 1789157107,
+    "generated_at": 1789160313,
     "source": {
       "repository": "https://github.com/xpelch/gossip",
-      "commit": "30c30676fcc2f601db63181fbcd1326bf17e5926",
+      "commit": "88779d3dbf4e5dc46c16bbf2abcbcda9b5394268",
       "dirty": false
     },
     "artifacts": {
       "gossip": {
         "package": "@gossip/agent-kit",
         "version": "0.1.0-dev.1",
-        "sha256": "sha256:e7a88b4c1c204120b361012683a0a3800190089d508eb6c33ef89e87a3f09932",
-        "bytes": 15088556
+        "sha256": "sha256:7f52f30a0d68895b50ebf0dc71f36ad936eba8e6735c405f95722868826b5a05",
+        "bytes": 15091963
       },
       "sherwood": {
         "repository": "https://github.com/xpelch/sherwood",
-        "commit": "017e592401b5a79edfbf9b2b7c8df01bd2cd555b",
+        "commit": "bfcd2200a1cca4c8a4f78ec9f3c7357973bb7533",
         "assembly": {
-          "sha256": "sha256:16ee8ebd41c1ecdaee46a322eba74d5db13b2015f895dd7d1549212b78378974",
-          "bytes": 7807488
+          "sha256": "sha256:06a31ce5b7d8f85ed5b92a64037992411b1049dd6784bd7fbc5024657c88271d",
+          "bytes": 7808512
         },
         "image_digest": null
       }
@@ -115,7 +115,7 @@
         "evidence": [
           {
             "path": "evidence/artifact-install.json",
-            "sha256": "sha256:27ff1e07ae03ec1000e2cb780f69532d450711bccafe25612427244cc38ed795",
+            "sha256": "sha256:cdce59315dadbd264718a9696169ee6242f8c77a2d093b6db26cadbf3424c41a",
             "bytes": 264
           }
         ]
@@ -139,12 +139,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -156,12 +156,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -173,12 +173,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -190,12 +190,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -207,12 +207,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -224,12 +224,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -241,12 +241,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -258,12 +258,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -275,12 +275,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -292,12 +292,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -309,12 +309,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -326,12 +326,12 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:516dd73d21bb1a6aa32553370bfe71255158dfa600f817f63b05fcf6949e952f",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
             "bytes": 8157
           },
           {
             "path": "evidence/sherwood-process-capture.json",
-            "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
             "bytes": 1658
           }
         ]
@@ -415,6 +415,6 @@
   },
   "content_address": {
     "algorithm": "sha256",
-    "digest": "sha256:263bdb8b21f6525994e178254c7a11e3da327ace02ea05b2f9c256958a4515f0"
+    "digest": "sha256:94eb14d2dd600c7b15fb5c6cc4d63f45b1b88c8ef6da347f5ec876d63b62e0ed"
   }
 }

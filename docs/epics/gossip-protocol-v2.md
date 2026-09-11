@@ -15,9 +15,9 @@ The portable protocol and the Sherwood implementation are complete on the
 coordinated review branches:
 
 - [Gossip #28](https://github.com/xpelch/gossip/pull/28), tested source commit
-  `30c30676fcc2f601db63181fbcd1326bf17e5926`;
+  `88779d3dbf4e5dc46c16bbf2abcbcda9b5394268`;
 - [Sherwood #464](https://github.com/xpelch/sherwood/pull/464), tested engine
-  commit `017e592401b5a79edfbf9b2b7c8df01bd2cd555b`.
+  commit `bfcd2200a1cca4c8a4f78ec9f3c7357973bb7533`.
 
 The public suite passes 193 tests with two expected Windows skips. The Sherwood
 Gossip v2 and wallet-authentication suite passes 361 tests. Two clean-source conformance runs each pass

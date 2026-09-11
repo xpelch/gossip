@@ -1,10 +1,10 @@
 {
   "result": "passed",
   "repository": "https://github.com/xpelch/sherwood",
-  "commit": "017e592401b5a79edfbf9b2b7c8df01bd2cd555b",
+  "commit": "bfcd2200a1cca4c8a4f78ec9f3c7357973bb7533",
   "assembly": {
-    "sha256": "sha256:16ee8ebd41c1ecdaee46a322eba74d5db13b2015f895dd7d1549212b78378974",
-    "bytes": 7807488
+    "sha256": "sha256:06a31ce5b7d8f85ed5b92a64037992411b1049dd6784bd7fbc5024657c88271d",
+    "bytes": 7808512
   },
   "runtime": {
     "dotnet": "10.0.301",
@@ -96,7 +96,7 @@
   "process_capture": {
     "schema": "sherwood.gossip-v2-process-capture.v1",
     "redaction_profile": "digests-and-counts-only",
-    "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
+    "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
     "bytes": 1658
   },
   "scenario_assertions": {
@@ -167,12 +167,12 @@
   "diagnostics_clean": true,
   "test_source_sha256": "sha256:aae2fed16f2d46f4c4f1481dcff3ef037e9091459d57236e66d218e3297c2006",
   "test_source_bytes": 179605,
-  "runbook_source_sha256": "sha256:7b3ae481d406fe58f561d0594be9792a60ac156b3b65c9c0f28b46c66421fbe6",
-  "runbook_source_bytes": 25422,
-  "stdout_sha256": "sha256:9e8f6a5470674716aab91181156f1ca9ed550bd9e1f5c692a2a35843f2fde405",
+  "runbook_source_sha256": "sha256:935fe5779ce2154cd7c0fee85b76002f20c9e3663b96b8493f6578a40d5a11f9",
+  "runbook_source_bytes": 25426,
+  "stdout_sha256": "sha256:ee401fdcb2db1bc0fb2c0b28ba57f5de95be98432dbeea42e8414274a3114a51",
   "stdout_bytes": 575,
   "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "stderr_bytes": 0,
-  "trx_sha256": "sha256:77a1a31524d22f4697ebef24ff0eb074ee412066c88641672be718bc49202924",
+  "trx_sha256": "sha256:17d84d13bf9bba75dbce2e061fd82867cc104f1a1acd83aecd79fdc8e5227c1a",
   "trx_bytes": 24280
 }
