@@ -6,12 +6,20 @@ import {
   parseConformanceArguments,
   parseTrxResults,
   parseTrxResult,
+  sherwoodDeterministicBuildProperties,
   SHERWOOD_PROCESS_TEST_FQNS,
 } from "../scripts/conformance-runner-options.mjs";
 
 const commit = "6f5739c5".repeat(5);
 const output = resolve("gossip-v2-acceptance");
 const sherwoodRepository = resolve("sherwood");
+
+test("maps clean Sherwood builds to one deterministic source root", () => {
+  assert.deepEqual(sherwoodDeterministicBuildProperties(sherwoodRepository), [
+    "-p:ContinuousIntegrationBuild=true",
+    `-p:PathMap=${sherwoodRepository}=/_/`,
+  ]);
+});
 
 test("parses an exact local Sherwood source and commit in either option order", () => {
   assert.deepEqual(

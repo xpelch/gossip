@@ -36,7 +36,8 @@ process-output digest while still reproducing the acceptance decision and the
 pinned inputs that determine it. Runtime versions must remain identical because
 they are part of the reproducible execution boundary. Evidence files are verified
 independently by each manifest invocation before the deterministic projection
-is compared.
+is compared. Sherwood builds use a stable `/_/` source mapping so two clean
+temporary clone paths produce the same assembly digest.
 
 ## Replay check
 

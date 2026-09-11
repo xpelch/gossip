@@ -21,6 +21,7 @@ import {
   isCanonicalSherwoodOrigin,
   parseConformanceArguments,
   parseTrxResults,
+  sherwoodDeterministicBuildProperties,
   SHERWOOD_PROCESS_TEST_FQNS,
 } from "./conformance-runner-options.mjs";
 
@@ -191,6 +192,7 @@ async function runSherwoodConformance(
       "--configuration",
       "Release",
       "--no-restore",
+      ...sherwoodDeterministicBuildProperties(checkout),
     ],
     { cwd: checkout },
   );

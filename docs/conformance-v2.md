@@ -43,10 +43,12 @@ The commit value must be 40 lowercase hexadecimal characters. The local
 checkout must have the canonical `xpelch/sherwood` HTTPS or SSH origin, no
 working-tree changes, and no reparse-point root. The runner clones it without
 hardlinks, detaches the requested commit, restores and builds the Sherwood
-test project in Release mode, then runs all seven exact process test FQNs in one
-bounded TRX result. The supplied checkout is executable source code and
-therefore an explicit caller trust boundary; the commit must be the full
-40-character value resolved from that clean checkout.
+test project in Release mode with continuous-integration determinism enabled
+and the temporary source root mapped to `/_/`. It then runs all seven exact
+process test FQNs in one bounded TRX result. The stable source mapping keeps the
+assembly digest independent of the temporary clone path. The supplied checkout
+is executable source code and therefore an explicit caller trust boundary; the
+commit must be the full 40-character value resolved from that clean checkout.
 
 The public evidence summary records only hashes, sizes, counters, revisions,
 runtime versions and boolean assertions. Raw child output and TRX data remain

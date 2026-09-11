@@ -15,6 +15,10 @@ export const SHERWOOD_PROCESS_TEST_FQNS = Object.freeze([
   "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_keeps_private_export_owner_scoped_and_matches_http_with_mcp",
 ]);
 
+export function sherwoodDeterministicBuildProperties(checkout) {
+  return ["-p:ContinuousIntegrationBuild=true", `-p:PathMap=${checkout}=/_/`];
+}
+
 export function parseConformanceArguments(args) {
   let output;
   let sherwoodRepository;
