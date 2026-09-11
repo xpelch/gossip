@@ -133,8 +133,10 @@ Fresh authentication nonces must not change a logical operation's digest.
 The installed package exports `createV2SignedFetch` as the matching client-side
 MCP transport primitive. It signs only the exact configured canonical HTTPS
 endpoint, rejects caller-supplied legacy or v2 authentication headers, and
-verifies that an external signer represents the configured identity. This does
-not activate v2 tools in the local bridge or prove an engine deployment.
+verifies that an external signer represents the configured identity. Selecting
+the `gossip-eip191-v2` setup profile activates the six v2 bridge tools only
+after the engine's tool list and `gossip_capabilities` report pass validation.
+A successful local negotiation still does not prove a public deployment.
 
 The protocol cannot promote an observation into a verified trading signal.
 Engine evidence must retain source revision, canonical block/transaction hashes,

@@ -5,7 +5,11 @@ import {
   saveConfiguration,
   type Configuration,
 } from "./configuration.js";
-const profiles = ["sherwood-eip191-personal-sign-v1", "erc8128"] as const;
+const profiles = [
+  "sherwood-eip191-personal-sign-v1",
+  "gossip-eip191-v2",
+  "erc8128",
+] as const;
 function option(args: string[], name: string): string | undefined {
   const index = args.indexOf(name);
   return index < 0 ? undefined : args[index + 1];
@@ -52,10 +56,11 @@ export async function prepareConnection(
   ).identity();
   if (
     selected.signer === "existing-key-file" &&
-    requestedProfile !== "sherwood-eip191-personal-sign-v1"
+    requestedProfile !== "sherwood-eip191-personal-sign-v1" &&
+    requestedProfile !== "gossip-eip191-v2"
   ) {
     throw new Error(
-      "Existing-file wallet supports only the legacy signing profile",
+      "Existing-file wallet supports only EIP-191 signing profiles",
     );
   }
   await saveConfiguration(

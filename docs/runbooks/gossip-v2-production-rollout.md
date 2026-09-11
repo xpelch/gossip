@@ -46,6 +46,7 @@ The canonical candidate values for the existing Railway domain are:
 
 ```text
 Sherwood__AgentAccess__Enabled=true
+Sherwood__AgentAccess__LegacySubmissionEnabled=false
 Sherwood__GossipV2__Endpoint=https://engine-production-c4d8.up.railway.app/mcp
 Sherwood__GossipV2__HttpBaseUrl=https://engine-production-c4d8.up.railway.app/
 Sherwood__GossipV2__Audience=https://engine-production-c4d8.up.railway.app/

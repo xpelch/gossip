@@ -40,7 +40,7 @@ Passwords are entered through a hidden local terminal, never a CLI argument or a
 
 ## Agent integration
 
-The bridge exposes exactly `agent_access`, `agent_consult`, `gossip_submit`, and `gossip_receipt`. Generate a fragment with `host-config --host hermes` or `--host openclaw`. Explicit host installation requires an absolute user-selected config path:
+The legacy bridge exposes exactly `agent_access`, `agent_consult`, `gossip_submit`, and `gossip_receipt`. A setup using `--profile gossip-eip191-v2` selects the v2 bridge, which exposes exactly `gossip_capabilities`, `gossip_consult_v2`, `gossip_submit_v2`, `gossip_operation`, `gossip_receipt_v2`, and `gossip_feedback`. Generate a fragment with `host-config --host hermes` or `--host openclaw`. Explicit host installation requires an absolute user-selected config path:
 
 ```sh
 node dist/cli.js host-install --host hermes --config /absolute/hermes-config.yaml
@@ -100,9 +100,9 @@ with its dependency map and acceptance plan mirrored in
 
 The first executable candidate is the [v2 contract foundation](docs/protocol-v2.md):
 bounded canonical JSON, consultation envelopes, explicit capability negotiation,
-and shared integrity vectors. It is development infrastructure; the live bridge
-still exposes the four v1 tools. It does not enable a v2 engine connection or
-change wallet permissions.
+and shared integrity vectors. Selecting the `gossip-eip191-v2` setup profile
+enables the signed v2 engine connection and six-tool bridge after capability
+negotiation; it does not change wallet permissions.
 
 The [v2 conformance harness](docs/conformance-v2.md) installs the packaged kit,
 runs its independent verifiers, and emits a content-addressed acceptance

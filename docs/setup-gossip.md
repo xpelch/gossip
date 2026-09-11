@@ -45,12 +45,13 @@ node dist/cli.js setup-gossip --host hermes --network check --directory ABSOLUTE
 node dist/cli.js setup-gossip --host hermes --endpoint https://ENGINE/mcp --audience https://ENGINE --directory ABSOLUTE_STATE
 ```
 
-`--endpoint` and `--audience` attempt signed connection verification. The
-current authentication profile is legacy Sherwood EIP-191; `--profile` is not a
-supported setup-gossip option. A missing endpoint leaves Gossip connection
-pending. RPC configuration validates HTTPS, chain 4663, fresh block reads and
-timeouts; retain a working explicit RPC and report a failing one before any
-replacement.
+`--endpoint` and `--audience` attempt signed connection verification.
+`setup-gossip` accepts `--profile gossip-eip191-v2` to select the signed v2
+engine and six-tool bridge; legacy setup remains the default. It continues to
+orchestrate wallet, host, and RPC readiness and
+leaves a missing endpoint connection pending. RPC configuration validates
+HTTPS, chain 4663, fresh block reads and timeouts; retain a working explicit RPC
+and report a failing one before any replacement.
 
 Hermes and OpenClaw require a real documented configuration path and additive
 conflict-safe host installation. Grok Bot MCP loading remains unverified; use a

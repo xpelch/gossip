@@ -5,6 +5,7 @@ import { promisify } from "node:util";
 import { mkdtemp, rm, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { loadConfiguration } from "../src/configuration.js";
 const run = promisify(execFile);
 const cli = [
   join(process.cwd(), "node_modules/tsx/dist/cli.mjs"),
@@ -29,7 +30,9 @@ test("setup-gossip inspection reports missing prerequisites without creating a w
     assert.equal(report.trading.executionAuthorized, false);
     for (const standard of ["EIP-55", "EIP-191"]) {
       assert.match(
-        report.standards.find((item: { standard: string }) => item.standard === standard).nextStep,
+        report.standards.find(
+          (item: { standard: string }) => item.standard === standard,
+        ).nextStep,
         /select.*wallet/i,
       );
     }
@@ -161,11 +164,17 @@ test("setup-gossip keeps a verified wallet when the configured engine is unavail
       "https://127.0.0.1:1/mcp",
       "--audience",
       "https://127.0.0.1:1",
+      "--profile",
+      "gossip-eip191-v2",
     ]);
     const report = JSON.parse(result.stdout);
     assert.equal(report.wallet.status, "verified");
     assert.equal(report.gossip.connected, false);
     assert.equal(report.gossip.configured, true);
+    assert.equal(
+      (await loadConfiguration(join(directory, "state"))).profile,
+      "gossip-eip191-v2",
+    );
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

@@ -11,7 +11,7 @@ export interface IdentitySigner {
 export interface Connection {
   endpoint: string;
   audience: string;
-  profile?: "sherwood-eip191-personal-sign-v1" | "erc8128";
+  profile?: "sherwood-eip191-personal-sign-v1" | "gossip-eip191-v2" | "erc8128";
   chainId?: number;
 }
 
@@ -116,12 +116,7 @@ export function createSignedFetch(
   ) {
     throw new Error("Invalid HTTPS audience.");
   }
-  if (
-    connection.profile &&
-    !["sherwood-eip191-personal-sign-v1", "erc8128"].includes(
-      connection.profile,
-    )
-  ) {
+  if (connection.profile === "gossip-eip191-v2") {
     throw new Error("Unsupported signing profile.");
   }
   if (
