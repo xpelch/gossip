@@ -116,6 +116,9 @@ acceptance.
 
 ## Resume sequence
 
+Follow the exact [production rollout runbook](../runbooks/gossip-v2-production-rollout.md)
+for configuration, acceptance, promotion, and rollback.
+
 1. Review and merge the two stacks from their `main` bases upward so their
    pinned contracts remain aligned. Gossip order: #5, #7, #10, #13, #19,
    #20, #21, #22, #23, #24, #25, #26, #27, #28. Sherwood order: #449,
