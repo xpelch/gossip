@@ -20,15 +20,22 @@ Public evidence submission costs zero earned credit. `private_submission`,
 The coordinated pull requests use branch `codex/gossip-v2-conformance-final`:
 
 - [Gossip #28](https://github.com/xpelch/gossip/pull/28), public commit
-  `3445338f09e33a25d3b0d53e6f256d481a364707`;
+  `15a09683a2b0d90ca2bbd9adf148e222213b73b3`;
 - [Sherwood #464](https://github.com/xpelch/sherwood/pull/464), engine commit
-  `b0a083b23998f978ef837d655ce59f753436807a`.
+  `f724066489e84dacda282ff741ee639f9e77e94b`.
 
 The public package freezes canonical v2 consultation, evidence, receipt,
-identity-session, and public-submission contracts. Its conformance runner pins
-the exact Sherwood commit and eleven real-process tests. Sherwood implements the
+identity-session, and public-submission contracts. Its current conformance
+runner still pins Sherwood `b0a083b23998f978ef837d655ce59f753436807a` and
+eleven real-process tests. Sherwood implements the
 durable operations, signed receipts, public evidence graph, root and scoped
 session authorization, and equivalent HTTP and MCP surfaces.
+
+The latest Sherwood commit extends the real-process matrix with public conflict
+lineage, missing retained-source refusal, retained-source dependency outage,
+idempotent post-publication reorg quarantine, and rollback at every terminal
+persistence cut point. The public runner and evidence bundle have not yet been
+repinned to that commit; this is the first task in the resume sequence below.
 
 ## Verification
 
@@ -39,7 +46,7 @@ The public package passed:
 - `npm run typecheck`;
 - all nine independent Python verifiers.
 
-The final Sherwood Gossip v2 suite passed 336 of 336 tests. The application
+The latest Sherwood Gossip v2 suite passed 338 of 338 tests. The application
 facade and exact public-submission process slice passed 17 of 17 tests after the
 final capability and diagnostics review. The Sherwood build completed with no
 warnings or errors.
@@ -88,10 +95,16 @@ private data handling or transaction execution.
 
 ## Resume sequence
 
-1. Review and merge Gossip #28 and Sherwood #464 together so their pinned
+1. Repin the public conformance runner to Sherwood `f7240664`, expand it to the
+   new exact-process matrix, and advance the suite revision.
+2. Add a redacted process-capture artifact for canonical requests, responses,
+   evidence, receipts, durable state, diagnostics, and telemetry.
+3. Run the complete public checks and two clean-source conformance executions,
+   compare their stable projections, and publish the refreshed evidence.
+4. Review and merge Gossip #28 and Sherwood #464 together so their pinned
    contracts remain aligned.
-2. Provision the public endpoint and release artifact, then record their exact
+5. Provision the public endpoint and release artifact, then record their exact
    identities and provenance.
-3. Run the published conformance command on each advertised host.
-4. Approve the numeric SLOs and production trust policies.
-5. Publish a new final WS7 manifest and release decision, then close epic #3.
+6. Run the published conformance command on each advertised host.
+7. Approve the numeric SLOs and production trust policies.
+8. Publish a new final WS7 manifest and release decision, then close epic #3.
