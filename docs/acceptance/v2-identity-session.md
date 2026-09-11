@@ -73,7 +73,7 @@ canonical body authenticated by `gossip-eip191-v2`.
 
 ## Sherwood server activation
 
-Sherwood commit `0752939896b2f7b97d51767d4b6206329d76e14e`
+Sherwood commit `017e592401b5a79edfbf9b2b7c8df01bd2cd555b`
 includes the server side from draft PR
 [#458](https://github.com/xpelch/sherwood/pull/458) and its stacked process-fault
 gate from draft PR [#460](https://github.com/xpelch/sherwood/pull/460). It

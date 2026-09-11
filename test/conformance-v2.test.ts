@@ -624,6 +624,8 @@ test("TypeScript and Python enforce Sherwood assembly and process evidence prere
         "public_submission_transport",
         "zero_cost_reconciliation",
         "persistence_fault_recovery",
+        "evidence_finality_reorg",
+        "correction_supersession",
         "owner_isolation",
       ].map((scenarioId) => {
         const invalid = structuredClone(fixture);

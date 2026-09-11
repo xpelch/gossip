@@ -17,7 +17,7 @@ coordinated review branches:
 - [Gossip #28](https://github.com/xpelch/gossip/pull/28), tested source commit
   `e715ce044bd72484b3218da36e2f749a51e9a704`;
 - [Sherwood #464](https://github.com/xpelch/sherwood/pull/464), tested engine
-  commit `0752939896b2f7b97d51767d4b6206329d76e14e`.
+  commit `017e592401b5a79edfbf9b2b7c8df01bd2cd555b`.
 
 The public suite passes 193 tests with two expected Windows skips. The Sherwood
 Gossip v2 suite passes 338 tests. Two clean-source conformance runs each pass

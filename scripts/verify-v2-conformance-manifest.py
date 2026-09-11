@@ -57,6 +57,8 @@ PROCESS_EVIDENCE_SCENARIOS = {
     "public_submission_transport",
     "zero_cost_reconciliation",
     "persistence_fault_recovery",
+    "evidence_finality_reorg",
+    "correction_supersession",
     "owner_isolation",
 }
 SHA256_PREFIX = "sha256:"
