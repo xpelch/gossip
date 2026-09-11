@@ -185,7 +185,7 @@ exact_keys(
     },
 )
 assert statement["schema"] == "gossip.acceptance-statement.v1"
-assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-11.6"
+assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-11.7"
 assert statement["protocol"] == PROTOCOL
 assert statement["decision"] in {"verified", "blocked"}
 verify_integer(statement["generated_at"], 0, MAX_UNIX_SECONDS)

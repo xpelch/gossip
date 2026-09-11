@@ -549,6 +549,7 @@ async function main() {
       "verify-v2-http-auth.py",
       "verify-v2-identity-session.py",
       "verify-v2-privacy.py",
+      "verify-v2-public-submission.py",
       "verify-v2-conformance-manifest.py",
     ];
     for (const verifier of verifierNames) {
@@ -620,6 +621,7 @@ async function main() {
       "v2-http-auth.json",
       "v2-identity-session.json",
       "v2-privacy.json",
+      "v2-public-submission.json",
       "v2-conformance.json",
     ];
     const fixtures = [];
@@ -640,7 +642,7 @@ async function main() {
     ).stdout.trim();
     const statement = {
       schema: "gossip.acceptance-statement.v1",
-      suite_revision: "gossip-v2-conformance-2026-09-11.6",
+      suite_revision: "gossip-v2-conformance-2026-09-11.7",
       protocol: "gossip/2-draft.1",
       generated_at: Math.floor(Date.now() / 1000),
       source: {
