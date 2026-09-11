@@ -12,6 +12,8 @@ ROOT = Path(__file__).parent.parent
 PROTOCOL = "gossip/2-draft.1"
 POLICY_SCHEMA = "gossip.privacy-policy.v1"
 CONSENT_SCHEMA = "gossip.publication-consent.v1"
+DELETION_RESULT_SCHEMA = "gossip.privacy-deletion-result.v1"
+CORRECTION_RESULT_SCHEMA = "gossip.privacy-correction-result.v1"
 DATA_CLASSES = {
     "private_payload",
     "public_envelope",
@@ -112,6 +114,11 @@ def identity_digest(value: object) -> str:
     return "sha256:" + hashlib.sha256(payload).hexdigest()
 
 
+def request_digest(value: object) -> str:
+    payload = f"{PROTOCOL}\nrequest\n{canonical_json(value)}".encode("utf-8")
+    return "sha256:" + hashlib.sha256(payload).hexdigest()
+
+
 fixture = json.loads(
     (ROOT / "test" / "fixtures" / "v2-privacy.json").read_text(encoding="utf-8")
 )
@@ -142,6 +149,75 @@ assert all(
 for entry in policy["owner_operations"]:
     assert entry["outcomes"] == EXPECTED_OPERATION_OUTCOMES[entry["action"]]
 
+operation_vectors = fixture["operation_vectors"]
+assert len(operation_vectors) == len(OWNER_OPERATIONS)
+assert {
+    json.loads(vector["canonical"])["action"]["kind"]
+    for vector in operation_vectors
+} == OWNER_OPERATIONS
+for vector in operation_vectors:
+    operation = json.loads(vector["canonical"])
+    assert canonical_json(operation) == vector["canonical"]
+    assert request_digest(operation) == vector["digest"]
+
+result_vectors = fixture["result_vectors"]
+assert len(result_vectors) == 5
+assert {vector["kind"] for vector in result_vectors} == {"deletion", "correction"}
+for vector in result_vectors:
+    result = json.loads(vector["canonical"])
+    assert canonical_json(result) == vector["canonical"]
+    assert result["protocol"] == PROTOCOL
+    assert result["policy_revision"] == policy["revision"]
+    assert result["owner"] == {
+        "address": "0x1111111111111111111111111111111111111111",
+        "chain_id": "4663",
+    }
+    if vector["kind"] == "deletion":
+        assert result["schema"] == DELETION_RESULT_SCHEMA
+        assert result["outcome"] in {"deleted", "already_deleted", "held"}
+        if result["outcome"] == "held":
+            assert set(result) == {
+                "schema",
+                "protocol",
+                "policy_revision",
+                "owner",
+                "operation_id",
+                "outcome",
+            }
+        else:
+            assert set(result) == {
+                "schema",
+                "protocol",
+                "policy_revision",
+                "owner",
+                "operation_id",
+                "outcome",
+                "tombstone",
+            }
+            assert result["tombstone"]["schema"] == "gossip.privacy-tombstone.v1"
+            assert result["tombstone"]["owner"] == result["owner"]
+            assert result["tombstone"]["deletion_operation_id"] == result[
+                "operation_id"
+            ]
+    else:
+        assert vector["kind"] == "correction"
+        assert result["schema"] == CORRECTION_RESULT_SCHEMA
+        assert result["outcome"] in {"corrected", "already_corrected"}
+        assert set(result) == {
+            "schema",
+            "protocol",
+            "policy_revision",
+            "owner",
+            "operation_id",
+            "outcome",
+            "correction_digests",
+        }
+        assert len(result["correction_digests"]) > 0
+        assert len(result["correction_digests"]) <= 64
+        assert len(set(result["correction_digests"])) == len(
+            result["correction_digests"]
+        )
+
 signed_consent = fixture["signed_consent"]
 consent = signed_consent["consent"]
 assert consent["schema"] == CONSENT_SCHEMA
@@ -164,4 +240,4 @@ verify_signature(
     signed_consent["signature"],
 )
 
-print("v2 private-evidence policy and signed publication consent verified")
+print("v2 private-evidence policy, operations, and signed consent verified")

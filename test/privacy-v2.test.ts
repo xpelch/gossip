@@ -11,7 +11,11 @@ import {
   bindPrivacyOperation,
   buildOwnerAccessAudit,
   buildOwnerPrivacyExport,
+  buildPrivateEvidenceCorrectionResult,
+  buildPrivateEvidenceDeletionResult,
   parsePrivacyAuditEvent,
+  parsePrivacyCorrectionResult,
+  parsePrivacyDeletionResult,
   parsePrivacyPolicy,
   parsePrivacyTelemetryEvent,
   planPrivateEvidenceDeletion,
@@ -22,6 +26,7 @@ import {
   verifyPublicationConsent,
 } from "../src/privacy-v2.js";
 import { ProtocolError } from "../src/protocol-errors.js";
+import { canonicalJson } from "../src/canonical.js";
 
 const owner = {
   chain_id: "4663",
@@ -129,6 +134,15 @@ test("matches the independent policy and signed-consent literals", () => {
     publicationConsentMessage(signedConsent.consent_digest),
     fixture.consent_message,
   );
+});
+
+test("freezes canonical owner-operation vectors for engine parity", () => {
+  for (const vector of fixture.operation_vectors) {
+    const operation = JSON.parse(vector.canonical);
+
+    assert.equal(canonicalJson(operation), vector.canonical);
+    assert.equal(privacyOperationDigest(operation), vector.digest);
+  }
 });
 
 test("rejects incomplete policy vectors and unapproved activation", () => {
@@ -412,6 +426,160 @@ test("appends corrections without rewriting prior lineage", () => {
     appendPrivateEvidenceCorrection(rootPrincipal, operation, corrected),
     corrected,
   );
+});
+
+test("builds strict deletion wire results without exposing held lifecycle data", () => {
+  const operation = privacyOperation({
+    kind: "delete",
+    evidence_digest: evidenceDigest,
+  });
+  const deleted = buildPrivateEvidenceDeletionResult(
+    rootPrincipal,
+    operation,
+    lifecycleRecord(),
+    1_800_000_010,
+  );
+
+  assert.equal(deleted.outcome, "deleted");
+  assert.deepEqual(Object.keys(deleted).sort(), [
+    "operation_id",
+    "outcome",
+    "owner",
+    "policy_revision",
+    "protocol",
+    "schema",
+    "tombstone",
+  ]);
+  assert.deepEqual(parsePrivacyDeletionResult(deleted), deleted);
+
+  const retry = buildPrivateEvidenceDeletionResult(
+    rootPrincipal,
+    operation,
+    deleted.tombstone,
+    1_800_000_020,
+  );
+  assert.equal(retry.outcome, "already_deleted");
+  assert.deepEqual(retry.tombstone, deleted.tombstone);
+
+  const held = buildPrivateEvidenceDeletionResult(
+    rootPrincipal,
+    operation,
+    {
+      ...lifecycleRecord(),
+      hold: { kind: "legal", placed_at: 1_800_000_001 },
+    },
+    1_800_000_010,
+  );
+  assert.deepEqual(held, {
+    schema: "gossip.privacy-deletion-result.v1",
+    protocol: "gossip/2-draft.1",
+    policy_revision: SYNTHETIC_PRIVATE_EVIDENCE_POLICY.revision,
+    owner,
+    operation_id: operation.operation_id,
+    outcome: "held",
+  });
+  assert.deepEqual(parsePrivacyDeletionResult(held), held);
+  expectCode(
+    () => parsePrivacyDeletionResult({ ...held, record: lifecycleRecord() }),
+    "invalid_privacy_contract",
+  );
+  expectCode(
+    () => parsePrivacyDeletionResult({ ...held, tombstone: deleted.tombstone }),
+    "invalid_privacy_contract",
+  );
+  expectCode(
+    () =>
+      parsePrivacyDeletionResult({
+        ...deleted,
+        tombstone: { ...deleted.tombstone, deletion_operation_id: "other" },
+      }),
+    "invalid_privacy_contract",
+  );
+  expectCode(
+    () =>
+      parsePrivacyDeletionResult({
+        ...deleted,
+        policy_revision: "future-policy",
+      }),
+    "invalid_privacy_contract",
+  );
+});
+
+test("builds correction wire results with explicit idempotent outcomes", () => {
+  const operation = privacyOperation({
+    kind: "correct",
+    evidence_digest: evidenceDigest,
+    correction_digest: correctionDigest,
+  });
+  const first = buildPrivateEvidenceCorrectionResult(
+    rootPrincipal,
+    operation,
+    lifecycleRecord(),
+  );
+  assert.deepEqual(first, {
+    schema: "gossip.privacy-correction-result.v1",
+    protocol: "gossip/2-draft.1",
+    policy_revision: SYNTHETIC_PRIVATE_EVIDENCE_POLICY.revision,
+    owner,
+    operation_id: operation.operation_id,
+    outcome: "corrected",
+    correction_digests: [correctionDigest],
+  });
+  assert.deepEqual(parsePrivacyCorrectionResult(first), first);
+
+  const retry = buildPrivateEvidenceCorrectionResult(
+    rootPrincipal,
+    operation,
+    firstCorrectionRecord(first),
+  );
+  assert.equal(retry.outcome, "already_corrected");
+  assert.deepEqual(retry.correction_digests, [correctionDigest]);
+  expectCode(
+    () =>
+      parsePrivacyCorrectionResult({
+        ...first,
+        correction_digests: [],
+      }),
+    "invalid_privacy_contract",
+  );
+  expectCode(
+    () =>
+      parsePrivacyCorrectionResult({
+        ...first,
+        correction_digests: [correctionDigest, correctionDigest],
+      }),
+    "invalid_privacy_contract",
+  );
+  expectCode(
+    () =>
+      parsePrivacyCorrectionResult({
+        ...first,
+        policy_revision: "future-policy",
+      }),
+    "invalid_privacy_contract",
+  );
+});
+
+function firstCorrectionRecord(
+  result: ReturnType<typeof buildPrivateEvidenceCorrectionResult>,
+) {
+  return {
+    ...lifecycleRecord(),
+    correction_digests: result.correction_digests,
+  };
+}
+
+test("matches canonical deletion and correction result vectors", () => {
+  for (const vector of fixture.result_vectors) {
+    const result = JSON.parse(vector.canonical);
+    const parsed =
+      vector.kind === "deletion"
+        ? parsePrivacyDeletionResult(result)
+        : parsePrivacyCorrectionResult(result);
+
+    assert.deepEqual(parsed, result);
+    assert.equal(canonicalJson(parsed), vector.canonical);
+  }
 });
 
 test("builds deterministic owner exports and rejects server-only material", () => {

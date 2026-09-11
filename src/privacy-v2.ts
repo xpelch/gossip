@@ -19,6 +19,19 @@ export const PUBLICATION_CONSENT_SCHEMA =
 export const PRIVATE_EVIDENCE_LIFECYCLE_SCHEMA =
   "gossip.private-evidence-lifecycle.v1" as const;
 export const PRIVACY_TOMBSTONE_SCHEMA = "gossip.privacy-tombstone.v1" as const;
+export const PRIVACY_DELETION_RESULT_SCHEMA =
+  "gossip.privacy-deletion-result.v1" as const;
+export const PRIVACY_CORRECTION_RESULT_SCHEMA =
+  "gossip.privacy-correction-result.v1" as const;
+export const PRIVACY_DELETION_OUTCOMES = [
+  "deleted",
+  "already_deleted",
+  "held",
+] as const;
+export const PRIVACY_CORRECTION_OUTCOMES = [
+  "corrected",
+  "already_corrected",
+] as const;
 export const PRIVACY_AUDIT_SCHEMA = "gossip.privacy-audit.v1" as const;
 export const PRIVACY_TELEMETRY_SCHEMA = "gossip.privacy-telemetry.v1" as const;
 export const SYNTHETIC_PRIVACY_POLICY_REVISION =
@@ -658,7 +671,7 @@ export function planPrivateEvidenceDeletion(
       schema: PRIVACY_TOMBSTONE_SCHEMA,
       owner: record.owner,
       evidence_digest: record.evidence_digest,
-      policy_revision: operation.policy_revision,
+      policy_revision: SYNTHETIC_PRIVACY_POLICY_REVISION,
       reason: "owner_deletion",
       deleted_at: now,
       deletion_operation_id: operation.operation_id,
@@ -704,6 +717,166 @@ export function appendPrivateEvidenceCorrection(
       ...record.correction_digests,
       operation.action.correction_digest,
     ],
+  };
+}
+
+const privacyDeletionResultBase = {
+  schema: z.literal(PRIVACY_DELETION_RESULT_SCHEMA),
+  protocol: z.literal(PROTOCOL_REVISION),
+  policy_revision: z.literal(SYNTHETIC_PRIVACY_POLICY_REVISION),
+  owner: actorSchema,
+  operation_id: operationIdV2Schema,
+};
+
+const privacyDeletionResultSchema = z
+  .discriminatedUnion("outcome", [
+    z
+      .object({
+        ...privacyDeletionResultBase,
+        outcome: z.enum(["deleted", "already_deleted"]),
+        tombstone: tombstoneSchema,
+      })
+      .strict(),
+    z
+      .object({
+        ...privacyDeletionResultBase,
+        outcome: z.literal("held"),
+      })
+      .strict(),
+  ])
+  .superRefine((value, context) => {
+    if (value.outcome === "held") {
+      return;
+    }
+
+    if (
+      !sameActor(value.owner, value.tombstone.owner) ||
+      value.policy_revision !== value.tombstone.policy_revision ||
+      value.operation_id !== value.tombstone.deletion_operation_id
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Deletion tombstone does not match its result binding",
+      });
+    }
+  });
+
+const privacyCorrectionResultSchema = z
+  .object({
+    schema: z.literal(PRIVACY_CORRECTION_RESULT_SCHEMA),
+    protocol: z.literal(PROTOCOL_REVISION),
+    policy_revision: z.literal(SYNTHETIC_PRIVACY_POLICY_REVISION),
+    owner: actorSchema,
+    operation_id: operationIdV2Schema,
+    outcome: z.enum(PRIVACY_CORRECTION_OUTCOMES),
+    correction_digests: z
+      .array(z.string().regex(DIGEST))
+      .min(1)
+      .max(64)
+      .refine((values) => new Set(values).size === values.length),
+  })
+  .strict();
+
+export type PrivacyDeletionResult = z.infer<typeof privacyDeletionResultSchema>;
+export type PrivacyCorrectionResult = z.infer<
+  typeof privacyCorrectionResultSchema
+>;
+
+export function parsePrivacyDeletionResult(
+  input: unknown,
+): PrivacyDeletionResult {
+  const result = privacyDeletionResultSchema.safeParse(input);
+  if (!result.success) {
+    invalidPrivacyContract();
+  }
+  return result.data;
+}
+
+export function parsePrivacyCorrectionResult(
+  input: unknown,
+): PrivacyCorrectionResult {
+  const result = privacyCorrectionResultSchema.safeParse(input);
+  if (!result.success) {
+    invalidPrivacyContract();
+  }
+  return result.data;
+}
+
+export function buildPrivateEvidenceDeletionResult(
+  authenticatedPrincipal: unknown,
+  operationInput: unknown,
+  recordInput: unknown,
+  now: number,
+): PrivacyDeletionResult {
+  const planned = planPrivateEvidenceDeletion(
+    authenticatedPrincipal,
+    operationInput,
+    recordInput,
+    now,
+  );
+  const operation = authorizePrivacyOperation(
+    authenticatedPrincipal,
+    operationInput,
+    SYNTHETIC_PRIVACY_POLICY_REVISION,
+  );
+
+  if (planned.outcome === "held") {
+    return {
+      schema: PRIVACY_DELETION_RESULT_SCHEMA,
+      protocol: PROTOCOL_REVISION,
+      policy_revision: SYNTHETIC_PRIVACY_POLICY_REVISION,
+      owner: operation.owner,
+      operation_id: operation.operation_id,
+      outcome: "held",
+    };
+  }
+
+  return {
+    schema: PRIVACY_DELETION_RESULT_SCHEMA,
+    protocol: PROTOCOL_REVISION,
+    policy_revision: SYNTHETIC_PRIVACY_POLICY_REVISION,
+    owner: operation.owner,
+    operation_id: operation.operation_id,
+    outcome: planned.outcome,
+    tombstone: planned.tombstone,
+  };
+}
+
+export function buildPrivateEvidenceCorrectionResult(
+  authenticatedPrincipal: unknown,
+  operationInput: unknown,
+  recordInput: unknown,
+): PrivacyCorrectionResult {
+  const operation = authorizePrivacyOperation(
+    authenticatedPrincipal,
+    operationInput,
+    SYNTHETIC_PRIVACY_POLICY_REVISION,
+  );
+  if (operation.action.kind !== "correct") {
+    throw new ProtocolError("privacy_unavailable");
+  }
+
+  const before = lifecycleRecordSchema.safeParse(recordInput);
+  const corrected = appendPrivateEvidenceCorrection(
+    authenticatedPrincipal,
+    operationInput,
+    recordInput,
+  );
+  if (!before.success) {
+    throw new ProtocolError("privacy_unavailable");
+  }
+
+  const alreadyCorrected = before.data.correction_digests.includes(
+    operation.action.correction_digest,
+  );
+  return {
+    schema: PRIVACY_CORRECTION_RESULT_SCHEMA,
+    protocol: PROTOCOL_REVISION,
+    policy_revision: SYNTHETIC_PRIVACY_POLICY_REVISION,
+    owner: operation.owner,
+    operation_id: operation.operation_id,
+    outcome: alreadyCorrected ? "already_corrected" : "corrected",
+    correction_digests: corrected.correction_digests,
   };
 }
 

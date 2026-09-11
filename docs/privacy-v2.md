@@ -4,8 +4,9 @@ Revision: `private-evidence-synthetic-2026-09-10`
 
 Status: synthetic conformance policy; production activation blocked
 
-The normative machine-readable vector is `test/fixtures/v2-privacy.json`. The
-TypeScript implementation is `src/privacy-v2.ts`, and
+The normative machine-readable vector is `test/fixtures/v2-privacy.json`; its
+`result_vectors` freeze the canonical deletion and correction wire responses.
+The TypeScript implementation is `src/privacy-v2.ts`, and
 `scripts/verify-v2-privacy.py` verifies the policy and root-signed consent
 independently.
 

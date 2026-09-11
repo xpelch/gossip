@@ -42,6 +42,22 @@ Corrections append a new digest to the lifecycle record. They never mutate the
 prior evidence or its signed history. Export records are sorted by data class and
 record ID and reject server-only key material.
 
+The public deletion result is frozen as `gossip.privacy-deletion-result.v1`.
+It includes the protocol, policy revision, owner, operation ID, and explicit
+`deleted`, `already_deleted`, or `held` outcome. A tombstone is required for
+the first two outcomes and forbidden for `held`; the lifecycle record is never
+returned on the wire. The public correction result is frozen as
+`gossip.privacy-correction-result.v1` and includes the same operation binding,
+an explicit `corrected` or `already_corrected` outcome, and the bounded
+append-only `correction_digests` list. Both results use closed schemas and have
+canonical fixture vectors. These helpers wrap the lifecycle planning functions
+only; they do not register transport tools or activate `private_submission`.
+
+An exact retry of a completed owner operation returns the original outcome and,
+for export or access audit, the original response snapshot. It does not read the
+owner partition again or append a second successful access-audit event. Engines
+must retain that snapshot without creating a plaintext copy of private data.
+
 A public commitment or linkable identity association requires a fresh
 `gossip.publication-consent.v1` record signed by the root Gossip Identity Wallet.
 The signature uses the existing `identity` canonical digest domain and this
