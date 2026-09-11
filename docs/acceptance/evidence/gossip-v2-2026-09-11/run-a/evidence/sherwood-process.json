@@ -1,9 +1,9 @@
 {
   "result": "passed",
   "repository": "https://github.com/xpelch/sherwood",
-  "commit": "b0a083b23998f978ef837d655ce59f753436807a",
+  "commit": "0752939896b2f7b97d51767d4b6206329d76e14e",
   "assembly": {
-    "sha256": "sha256:a33d63631da06fb939e7b958fde8620eca6a0344dbc28640a34eac15db131333",
+    "sha256": "sha256:2fdb591a994d92824bc51f63bce5d3433740938d86b04dea0d32a2c2ff7446fe",
     "bytes": 7804416
   },
   "runtime": {
@@ -22,11 +22,13 @@
     "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_persists_public_submission_receipts_evidence_and_session_scope_after_restart",
     "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_enforces_identity_session_replay_revocation_rate_and_malformed_downgrade_fail_closed",
     "Sherwood.Tests.GossipV2ProcessConformanceTests.A_paused_process_kill_restarts_into_reconciliation_without_reexecution",
-    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_throwing_persistence_cut_point_rolls_back_and_requires_reconciliation",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rolls_back_each_terminal_persistence_cut_point",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_reconciles_when_the_retained_source_dependency_is_unavailable",
     "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_keeps_private_export_owner_scoped_and_matches_http_with_mcp",
     "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_keeps_private_lifecycle_owner_scoped_and_matches_http_with_mcp",
     "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rolls_back_private_faults_and_retries_after_restart",
-    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rejects_stale_wrong_chain_wrong_boundary_and_reorged_source_over_http_and_mcp"
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rejects_stale_wrong_chain_wrong_boundary_and_reorged_source_over_http_and_mcp",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_quarantines_published_evidence_without_rewriting_history_and_repeats_idempotently"
   ],
   "test_results": [
     {
@@ -54,7 +56,11 @@
       "outcome": "passed"
     },
     {
-      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_throwing_persistence_cut_point_rolls_back_and_requires_reconciliation",
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rolls_back_each_terminal_persistence_cut_point",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_reconciles_when_the_retained_source_dependency_is_unavailable",
       "outcome": "passed"
     },
     {
@@ -72,16 +78,26 @@
     {
       "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rejects_stale_wrong_chain_wrong_boundary_and_reorged_source_over_http_and_mcp",
       "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_quarantines_published_evidence_without_rewriting_history_and_repeats_idempotently",
+      "outcome": "passed"
     }
   ],
   "counters": {
-    "total": 11,
-    "executed": 11,
-    "passed": 11,
+    "total": 13,
+    "executed": 13,
+    "passed": 13,
     "failed": 0,
     "error": 0,
     "notExecuted": 0,
     "skipped": 0
+  },
+  "process_capture": {
+    "schema": "sherwood.gossip-v2-process-capture.v1",
+    "redaction_profile": "digests-and-counts-only",
+    "sha256": "sha256:fa25afdd088f6035499578e6c6f99eb49e3d7e7f2b4691c30d26ed8024b54ec4",
+    "bytes": 1658
   },
   "scenario_assertions": {
     "mcp_http_parity": 8,
@@ -93,6 +109,8 @@
     "public_submission_transport": 18,
     "zero_cost_reconciliation": 10,
     "persistence_fault_recovery": 8,
+    "evidence_finality_reorg": 15,
+    "correction_supersession": 8,
     "owner_isolation": 20
   },
   "transport": "loopback-http",
@@ -106,6 +124,7 @@
   "public_session_zero_cost": true,
   "public_lookup_root_only": true,
   "public_correction_lineage": true,
+  "public_conflict_lineage": true,
   "public_missing_target_rollback": true,
   "private_export_transport_parity": true,
   "private_export_replay_exact": true,
@@ -119,6 +138,11 @@
   "wrong_chain_refused": true,
   "wrong_boundary_refused": true,
   "reorged_source_refused": true,
+  "missing_source_refused": true,
+  "retained_source_outage_reconciled": true,
+  "post_publication_reorg_quarantined": true,
+  "quarantine_idempotent": true,
+  "quarantine_history_preserved": true,
   "rejected_evidence_transport_parity": true,
   "rejected_without_partial_evidence": true,
   "durable_operation_singleton": true,
@@ -141,14 +165,14 @@
   "receipt_chain_verified": true,
   "restart_replay_exact": true,
   "diagnostics_clean": true,
-  "test_source_sha256": "sha256:dd1c14e8864e8bbb13bb822c0d26df1fe26f9fb0502af9564c7ba2f0c7eb05db",
-  "test_source_bytes": 159277,
+  "test_source_sha256": "sha256:901b3e2007b4b2217405a9ff1033b6ab6118174079412f8aaf4edd162f5b66e3",
+  "test_source_bytes": 179347,
   "runbook_source_sha256": "sha256:3ee8113dcc8b73756dce880c8d5677d25a8ff0f6ecf0dd3154c93e1ca5bfa2b4",
   "runbook_source_bytes": 24711,
-  "stdout_sha256": "sha256:d454c97e443c909dfce8c2d9b7eac9779aad200d79291587516f48a9300c108b",
+  "stdout_sha256": "sha256:dafe3cc9c5dad7bfee0ec729fd26045eaa76ea26adf45a9eae5b8049e735ca33",
   "stdout_bytes": 575,
   "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "stderr_bytes": 0,
-  "trx_sha256": "sha256:d7da7209eb148bda78172fec984f46ed8c145abf7ef83cc4e3ea81675e398398",
-  "trx_bytes": 21176
+  "trx_sha256": "sha256:65d9cd32615a82baa3ba65bde2bca2e15a3cb08870611a3412187542d8bef590",
+  "trx_bytes": 24280
 }

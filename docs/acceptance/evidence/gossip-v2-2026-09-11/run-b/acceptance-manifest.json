@@ -2,26 +2,26 @@
   "schema": "gossip.acceptance-envelope.v1",
   "statement": {
     "schema": "gossip.acceptance-statement.v1",
-    "suite_revision": "gossip-v2-conformance-2026-09-11.11",
+    "suite_revision": "gossip-v2-conformance-2026-09-11.12",
     "protocol": "gossip/2-draft.1",
-    "generated_at": 1789151539,
+    "generated_at": 1789155517,
     "source": {
       "repository": "https://github.com/xpelch/gossip",
-      "commit": "40c87fe7b2434ee3a2e24740ec33a58a92984e29",
+      "commit": "e715ce044bd72484b3218da36e2f749a51e9a704",
       "dirty": false
     },
     "artifacts": {
       "gossip": {
         "package": "@gossip/agent-kit",
         "version": "0.1.0-dev.1",
-        "sha256": "sha256:0ed0a5dbf725168092803fddc2bc31154155822d7719d394154b0d227bbc7352",
-        "bytes": 15054713
+        "sha256": "sha256:5324302459019e14678e0e1d87c5b23995127a4a2516f9ed432afd75f29ff1ca",
+        "bytes": 15085437
       },
       "sherwood": {
         "repository": "https://github.com/xpelch/sherwood",
-        "commit": "b0a083b23998f978ef837d655ce59f753436807a",
+        "commit": "0752939896b2f7b97d51767d4b6206329d76e14e",
         "assembly": {
-          "sha256": "sha256:a33d63631da06fb939e7b958fde8620eca6a0344dbc28640a34eac15db131333",
+          "sha256": "sha256:2fdb591a994d92824bc51f63bce5d3433740938d86b04dea0d32a2c2ff7446fe",
           "bytes": 7804416
         },
         "image_digest": null
@@ -103,7 +103,7 @@
       {
         "name": "v2-conformance",
         "path": "fixtures/v2-conformance.json",
-        "sha256": "sha256:86068f09e4ff269637aa5dee445c75cb43e405938f91ba79c6353f3e79da9a36",
+        "sha256": "sha256:9a26b0dc8329a6636d4809b0c7c1fe11588103495da80071289a3618a1a98c18",
         "bytes": 8884
       }
     ],
@@ -115,7 +115,7 @@
         "evidence": [
           {
             "path": "evidence/artifact-install.json",
-            "sha256": "sha256:9e55aaf02ac8f939694c88832d1c9a98cdbeeca8b08e7447d144ea698e7ff55e",
+            "sha256": "sha256:fff040a628ff2c39e31f8ae16d04f657e3db3f3ba2d3a46c12380f290ca1dc7b",
             "bytes": 264
           }
         ]
@@ -139,8 +139,13 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:68774a203382ac5a02d7fab1839b687e13e3aef84d755f09cc54756c3df5ba86",
-            "bytes": 6973
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
           }
         ]
       },
@@ -151,8 +156,13 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:68774a203382ac5a02d7fab1839b687e13e3aef84d755f09cc54756c3df5ba86",
-            "bytes": 6973
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
           }
         ]
       },
@@ -163,8 +173,13 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:68774a203382ac5a02d7fab1839b687e13e3aef84d755f09cc54756c3df5ba86",
-            "bytes": 6973
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
           }
         ]
       },
@@ -175,8 +190,13 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:68774a203382ac5a02d7fab1839b687e13e3aef84d755f09cc54756c3df5ba86",
-            "bytes": 6973
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
           }
         ]
       },
@@ -187,8 +207,13 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:68774a203382ac5a02d7fab1839b687e13e3aef84d755f09cc54756c3df5ba86",
-            "bytes": 6973
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
           }
         ]
       },
@@ -199,8 +224,13 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:68774a203382ac5a02d7fab1839b687e13e3aef84d755f09cc54756c3df5ba86",
-            "bytes": 6973
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
           }
         ]
       },
@@ -211,8 +241,13 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:68774a203382ac5a02d7fab1839b687e13e3aef84d755f09cc54756c3df5ba86",
-            "bytes": 6973
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
           }
         ]
       },
@@ -223,22 +258,49 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:68774a203382ac5a02d7fab1839b687e13e3aef84d755f09cc54756c3df5ba86",
-            "bytes": 6973
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
           }
         ]
       },
       {
         "id": "evidence_finality_reorg",
-        "status": "blocked",
-        "reason": "The process proved stale, wrong-chain, wrong block/hash and source-reorged refusals; missing-source and post-publication quarantine remain unproven.",
-        "next_action": "Prove missing-source refusal and post-publication reorg quarantine through the packaged process."
+        "status": "verified",
+        "assertions": 15,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
+          }
+        ]
       },
       {
         "id": "correction_supersession",
-        "status": "blocked",
-        "reason": "Correction lineage was not run through the packaged process.",
-        "next_action": "Run conflict, correction and supersession fixtures."
+        "status": "verified",
+        "assertions": 8,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
+          }
+        ]
       },
       {
         "id": "owner_isolation",
@@ -247,8 +309,13 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:68774a203382ac5a02d7fab1839b687e13e3aef84d755f09cc54756c3df5ba86",
-            "bytes": 6973
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
           }
         ]
       },
@@ -259,8 +326,13 @@
         "evidence": [
           {
             "path": "evidence/sherwood-process.json",
-            "sha256": "sha256:68774a203382ac5a02d7fab1839b687e13e3aef84d755f09cc54756c3df5ba86",
-            "bytes": 6973
+            "sha256": "sha256:ca243e57d771b842d382e94673919233b59cbd06241bf84ed66ba26b3e5776b1",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:8934c668d2b97bf6dbe44dd70cf69aa4c6b39c36cb5dc83bffb0d58ea670f18a",
+            "bytes": 1658
           }
         ]
       },
@@ -287,8 +359,8 @@
       {
         "name": "atomic_consult",
         "state": "installed",
-        "reason": "Complete zero-cost consultation and bounded crash recovery passed; the remaining economic and evidence matrix is unverified.",
-        "next_action": "Pass the remaining economics, evidence and production gates."
+        "reason": "Complete zero-cost consultation, bounded crash recovery, terminal persistence faults, and controlled evidence failures passed without production acceptance.",
+        "next_action": "Pass the production endpoint, trust, SLO, and real-host gates."
       },
       {
         "name": "durable_operations",
@@ -305,8 +377,8 @@
       {
         "name": "evidence",
         "state": "installed",
-        "reason": "Retained evidence, controlled refusal and transactional rollback passed without missing-source, post-publication reorg or correction reproduction.",
-        "next_action": "Pass controlled evidence and independent reproduction scenarios."
+        "reason": "Retained evidence, deterministic refusal, conflict and correction lineage, transactional rollback, and post-publication reorg quarantine passed without production trust acceptance.",
+        "next_action": "Pass production receipt trust, endpoint, SLO, and real-host acceptance."
       },
       {
         "name": "session_keys",
@@ -317,7 +389,7 @@
       {
         "name": "public_submission",
         "state": "installed",
-        "reason": "Signed public-only submission, exact retrieval, retries, restart, corrections, and scoped sessions passed through the packaged process.",
+        "reason": "Signed public-only submission, exact retrieval, retries, restart, conflicts, corrections, and scoped sessions passed through the packaged process.",
         "next_action": "Pass the pinned production endpoint and host acceptance before advertising verified support."
       },
       {
@@ -343,6 +415,6 @@
   },
   "content_address": {
     "algorithm": "sha256",
-    "digest": "sha256:6b7dc925c0653fa693a8eadab448bdbdb95adb43b08f1f946e5e62cc9d04d74f"
+    "digest": "sha256:9bc5f5573b29d8021b4239ba495bb9ba0ce7538a635a91dca1f8bffbb90f6dfc"
   }
 }
