@@ -303,6 +303,86 @@ test("TypeScript and Python enforce the same manifest bounds", () => {
     );
     assert.equal(validPython.status, 0, validPython.stderr);
 
+    const replay = structuredClone(validBase);
+    replay.statement.generated_at += 1;
+    replay.content_address.digest = canonicalDigest(
+      "conformance",
+      replay.statement,
+    );
+    const replayManifestPath = path.join(temporary, "replay-manifest.json");
+    fs.writeFileSync(replayManifestPath, JSON.stringify(replay));
+
+    const replayPython = spawnSync(
+      "python",
+      [
+        "scripts/verify-v2-conformance-manifest.py",
+        "--manifest",
+        validManifestPath,
+        "--replay-manifest",
+        replayManifestPath,
+      ],
+      { encoding: "utf8" },
+    );
+    assert.equal(replayPython.status, 0, replayPython.stderr);
+
+    const differentRuntime = structuredClone(replay);
+    differentRuntime.statement.runtime.node = "25.0.0";
+    differentRuntime.content_address.digest = canonicalDigest(
+      "conformance",
+      differentRuntime.statement,
+    );
+    const differentRuntimePath = path.join(
+      temporary,
+      "different-runtime-manifest.json",
+    );
+    fs.writeFileSync(differentRuntimePath, JSON.stringify(differentRuntime));
+
+    const differentRuntimePython = spawnSync(
+      "python",
+      [
+        "scripts/verify-v2-conformance-manifest.py",
+        "--manifest",
+        validManifestPath,
+        "--replay-manifest",
+        differentRuntimePath,
+      ],
+      { encoding: "utf8" },
+    );
+    assert.notEqual(differentRuntimePython.status, 0);
+
+    const divergentReplay = structuredClone(replay);
+    const divergentScenario = divergentReplay.statement.scenarios.find(
+      (scenario: Record<string, unknown>) => scenario.id === "artifact_install",
+    );
+    assert.ok(divergentScenario);
+    divergentScenario.status = "blocked";
+    divergentScenario.reason = "replay diverged";
+    divergentScenario.next_action = "inspect replay";
+    delete divergentScenario.assertions;
+    delete divergentScenario.evidence;
+    divergentReplay.content_address.digest = canonicalDigest(
+      "conformance",
+      divergentReplay.statement,
+    );
+    const divergentReplayPath = path.join(
+      temporary,
+      "divergent-replay-manifest.json",
+    );
+    fs.writeFileSync(divergentReplayPath, JSON.stringify(divergentReplay));
+
+    const divergentPython = spawnSync(
+      "python",
+      [
+        "scripts/verify-v2-conformance-manifest.py",
+        "--manifest",
+        validManifestPath,
+        "--replay-manifest",
+        divergentReplayPath,
+      ],
+      { encoding: "utf8" },
+    );
+    assert.notEqual(divergentPython.status, 0);
+
     const invalidManifests = [
       (() => {
         const invalid = structuredClone(validBase);

@@ -86,6 +86,24 @@ An artifact digest is evidence of bytes, not behavior. A content address proves
 that the statement was not modified after generation; it does not authenticate
 who ran it or authorize a capability.
 
+## Compare a clean replay
+
+Run the conformance command again from a clean checkout and compare the two
+published manifests:
+
+```powershell
+python scripts/verify-v2-conformance-manifest.py `
+  --manifest C:\temp\gossip-v2-acceptance\acceptance-manifest.json `
+  --replay-manifest C:\temp\gossip-v2-acceptance-replay\acceptance-manifest.json
+```
+
+The verifier independently checks both manifests, their referenced file
+digests, and their content addresses. It then compares the pinned source,
+artifact, runtime, revision and fixture inputs together with every scenario
+status, verified assertion count, capability state, and the overall decision.
+Generated timestamps and dynamic process-evidence bytes are allowed to differ
+between runs.
+
 ## Remaining process harness
 
 The next slice extends the pinned Sherwood process with controlled chain

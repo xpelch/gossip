@@ -5,6 +5,8 @@ import hashlib
 import json
 import re
 import runpy
+import subprocess
+import sys
 from pathlib import Path
 
 
@@ -76,6 +78,7 @@ VERSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.+_-]{0,63}$")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--manifest", type=Path)
+parser.add_argument("--replay-manifest", type=Path)
 arguments = parser.parse_args()
 manifest_path = (
     arguments.manifest.resolve()
@@ -84,6 +87,14 @@ manifest_path = (
 )
 verify_referenced_files = arguments.manifest is not None
 manifest_root = manifest_path.parent
+replay_manifest_path = (
+    arguments.replay_manifest.resolve()
+    if arguments.replay_manifest is not None
+    else None
+)
+
+if replay_manifest_path is not None and arguments.manifest is None:
+    raise AssertionError("--replay-manifest requires --manifest")
 
 
 def exact_keys(value, expected):
@@ -350,4 +361,57 @@ assert content_address["algorithm"] == "sha256"
 verify_sha256(content_address["digest"])
 assert content_address["digest"] == digest(statement)
 
-print(f"v2 content-addressed acceptance manifest verified: {statement['decision']}")
+
+def replay_projection(value):
+    """Return fields that must remain stable across clean-checkout replays."""
+    return {
+        "schema": value["schema"],
+        "suite_revision": value["suite_revision"],
+        "protocol": value["protocol"],
+        "source": value["source"],
+        "artifacts": value["artifacts"],
+        "runtime": value["runtime"],
+        "revisions": value["revisions"],
+        "fixtures": value["fixtures"],
+        "scenarios": [
+            {
+                "id": scenario["id"],
+                "status": scenario["status"],
+                **(
+                    {"assertions": scenario["assertions"]}
+                    if scenario["status"] == "verified"
+                    else {}
+                ),
+            }
+            for scenario in value["scenarios"]
+        ],
+        "capabilities": [
+            {"name": capability["name"], "state": capability["state"]}
+            for capability in value["capabilities"]
+        ],
+        "decision": value["decision"],
+    }
+
+
+if replay_manifest_path is None:
+    print(f"v2 content-addressed acceptance manifest verified: {statement['decision']}")
+else:
+    replay = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).resolve()),
+            "--manifest",
+            str(replay_manifest_path),
+        ],
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        timeout=30,
+    )
+    assert replay.returncode == 0, "the replay manifest failed independent verification"
+    replay_fixture = json.loads(replay_manifest_path.read_text(encoding="utf-8"))
+    assert replay_projection(statement) == replay_projection(
+        replay_fixture["statement"]
+    ), "clean-checkout replay changed the acceptance decision or deterministic inputs"
+    print("v2 acceptance manifests independently verified and replay matched")
