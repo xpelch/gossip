@@ -49,6 +49,7 @@ PROCESS_EVIDENCE_SCENARIOS = {
     "operation_exactly_once",
     "operation_conflict",
     "authentication_fail_closed",
+    "session_scope_escape",
 }
 SHA256_PREFIX = "sha256:"
 MAX_UNIX_SECONDS = 253_402_300_799

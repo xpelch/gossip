@@ -403,7 +403,11 @@ test("TypeScript and Python enforce Sherwood assembly and process evidence prere
     valid.statement.revisions.engine = "synthetic-v1";
     valid.statement.revisions.database_migrations =
       "git-tree-" + "2".repeat(40);
-    for (const scenarioId of ["mcp_http_parity", "privacy_canary_scan"]) {
+    for (const scenarioId of [
+      "mcp_http_parity",
+      "privacy_canary_scan",
+      "session_scope_escape",
+    ]) {
       const scenario = valid.statement.scenarios.find(
         (candidate: Record<string, unknown>) => candidate.id === scenarioId,
       );

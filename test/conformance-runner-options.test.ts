@@ -6,6 +6,7 @@ import {
   parseConformanceArguments,
   parseTrxResults,
   parseTrxResult,
+  SHERWOOD_PROCESS_TEST_FQNS,
 } from "../scripts/conformance-runner-options.mjs";
 
 const commit = "6f5739c5".repeat(5);
@@ -154,27 +155,28 @@ test("accepts the xUnit TRX counter shape without an optional skipped attribute"
   );
 });
 
-test("requires both exact Sherwood process test outcomes in one TRX", () => {
-  const first =
-    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_signed_http_and_mcp_and_replays_after_restart";
-  const second =
-    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_enforces_concurrency_conflicts_authentication_and_owner_isolation";
+test("requires all exact Sherwood process test outcomes in one TRX", () => {
+  const [first, second, third, fourth] = SHERWOOD_PROCESS_TEST_FQNS;
   const trx = `
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_serves_signed_http_and_mcp_and_replays_after_restart" />
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_enforces_concurrency_conflicts_authentication_and_owner_isolation" />
+    <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_serves_registered_identity_session_over_http_and_mcp_and_preserves_root_ownership_after_restart" />
+    <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_enforces_identity_session_replay_revocation_rate_and_malformed_downgrade_fail_closed" />
     <UnitTestResult testName="${first}" outcome="Passed" />
     <UnitTestResult testName="${second}" outcome="Passed" />
-    <Counters total="2" executed="2" passed="2" failed="0" error="0" notExecuted="0" skipped="0" />`;
+    <UnitTestResult testName="${third}" outcome="Passed" />
+    <UnitTestResult testName="${fourth}" outcome="Passed" />
+    <Counters total="4" executed="4" passed="4" failed="0" error="0" notExecuted="0" skipped="0" />`;
 
-  assert.deepEqual(parseTrxResults(trx, [first, second]), {
-    total: 2,
-    executed: 2,
-    passed: 2,
+  assert.deepEqual(parseTrxResults(trx, SHERWOOD_PROCESS_TEST_FQNS), {
+    total: 4,
+    executed: 4,
+    passed: 4,
     failed: 0,
     error: 0,
     notExecuted: 0,
     skipped: 0,
-    tests: [first, second],
+    tests: SHERWOOD_PROCESS_TEST_FQNS,
   });
   assert.throws(() => parseTrxResults(trx, [first]), /exact pass contract/i);
 
@@ -183,7 +185,7 @@ test("requires both exact Sherwood process test outcomes in one TRX", () => {
     `testName="${second}" outcome="Failed"`,
   );
   assert.throws(
-    () => parseTrxResults(failed, [first, second]),
+    () => parseTrxResults(failed, SHERWOOD_PROCESS_TEST_FQNS),
     /exact pass contract/i,
   );
 
@@ -192,7 +194,7 @@ test("requires both exact Sherwood process test outcomes in one TRX", () => {
     `<UnitTestResult testName="${first}" outcome="Passed" />`,
   );
   assert.throws(
-    () => parseTrxResults(duplicate, [first, second]),
+    () => parseTrxResults(duplicate, SHERWOOD_PROCESS_TEST_FQNS),
     /exact pass contract/i,
   );
 });

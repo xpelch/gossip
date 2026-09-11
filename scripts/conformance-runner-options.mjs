@@ -5,6 +5,13 @@ const HTTPS_ORIGIN = /^https:\/\/github\.com\/xpelch\/sherwood(?:\.git)?$/u;
 const SSH_ORIGIN =
   /^(?:git@github\.com:xpelch\/sherwood|ssh:\/\/git@github\.com\/xpelch\/sherwood)(?:\.git)?$/u;
 
+export const SHERWOOD_PROCESS_TEST_FQNS = Object.freeze([
+  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_signed_http_and_mcp_and_replays_after_restart",
+  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_enforces_concurrency_conflicts_authentication_and_owner_isolation",
+  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_registered_identity_session_over_http_and_mcp_and_preserves_root_ownership_after_restart",
+  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_enforces_identity_session_replay_revocation_rate_and_malformed_downgrade_fail_closed",
+]);
+
 export function parseConformanceArguments(args) {
   let output;
   let sherwoodRepository;

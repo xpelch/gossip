@@ -90,8 +90,8 @@
       {
         "id": "session_scope_escape",
         "status": "blocked",
-        "reason": "Sherwood has no session registry.",
-        "next_action": "Implement and test durable session authorization."
+        "reason": "No packaged Sherwood session process was exercised.",
+        "next_action": "Run the pinned Sherwood session process gate."
       },
       {
         "id": "operation_exactly_once",
@@ -188,8 +188,8 @@
       {
         "name": "session_keys",
         "state": "blocked",
-        "reason": "Sherwood has no durable session registry.",
-        "next_action": "Implement server session enrollment, nonce and revocation state."
+        "reason": "The portable contract is installed without packaged server session evidence.",
+        "next_action": "Run the pinned Sherwood session process gate."
       },
       {
         "name": "private_submission",
@@ -214,6 +214,6 @@
   },
   "content_address": {
     "algorithm": "sha256",
-    "digest": "sha256:b380ed2034025618cff5ea92be22bfb9cd647cbe3568605d3d19ee96126f57cc"
+    "digest": "sha256:69bbd77f96255aeee701716cd9d02152c300d29c90f38b87cb63a9c9c2b8895b"
   }
 }

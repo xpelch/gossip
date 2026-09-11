@@ -6,7 +6,7 @@
 
 ## Accepted portable behavior
 
-The public kit now has an inactive, portable contract for root-signed session
+The public kit has a portable contract for root-signed session
 grants, canonical signed request envelopes, explicit rotation, revocation, and
 scope authorization. The root Gossip Identity Wallet remains the owner. A
 session grant can express only Gossip information tools, evidence submission
@@ -61,14 +61,35 @@ the separately supplied tool and cost. The separate fields were removed. The
 tool, cost, submission kind, root, key ID, and payload now come only from the
 canonical body authenticated by `gossip-eip191-v2`.
 
+## Sherwood server activation
+
+Sherwood commit `f701681f2c4088835407839481bdb7a904cf1cbc`
+implements the server side on draft PR
+[#458](https://github.com/xpelch/sherwood/pull/458). It provides an append-only
+grant and revocation registry, durable replay nonces, root-only management,
+direct HTTP and MCP session adapters, shared admission limits, and root-owned
+operation and receipt reads. Session identities never become Sherwood
+subscribers and cannot downgrade into root authentication through Gossip v2 or
+legacy `X-Sherwood-*` headers.
+
+The process gate starts real Kestrel instances against disposable PostgreSQL
+17 and runs these exact tests:
+
+- `A_real_process_serves_registered_identity_session_over_http_and_mcp_and_preserves_root_ownership_after_restart`
+- `A_real_process_enforces_identity_session_replay_revocation_rate_and_malformed_downgrade_fail_closed`
+
+Those tests cover grant idempotency, direct and MCP mappings, restart, replay,
+effective revocation, shared rate limits, malformed no-downgrade behavior,
+root ownership, and the absence of session subscriber creation. This proves
+the server gate for a pinned assembly; it does not create or store a session
+private key.
+
 ## Remaining activation gates
 
-This work does not create or store a session private key, register a grant with
-Sherwood, persist a nonce, expose a session MCP/HTTP route, or mark
-`session_keys` verified. Production activation requires an atomic server
-registry for grants, revocations, owner mappings, and replay nonces; protected
-session-key storage; transport wiring; privacy policy; and real version-pinned
-host acceptance.
+`session_keys` must remain `installed`, never `verified`, after the Sherwood
+process run. Verification still requires protected client-side session-key
+storage, privacy policy acceptance, a public HTTPS deployment, and real
+version-pinned Grok Bot, Hermes, and OpenClaw host acceptance.
 
 The frozen activation wire contract is `POST /v2/gossip/session` with the
 canonical identity-session request as the raw body. Its EIP-191 proof signs
@@ -89,13 +110,13 @@ outer and inner root identities to match. A grant covers exactly one endpoint,
 so `/mcp` and `/v2/gossip/session` require separate grants and may use separate
 audiences.
 
-The server must use root owner chain `4663`, enforce the grant interval and
-existing 24-hour lifetime, cap a root at sixteen grants, reject globally reused
-session public keys/addresses, and linearize replay at durable
+The server implementation uses root owner chain `4663`, enforces the grant
+interval and existing 24-hour lifetime, caps a root at sixteen grants, rejects
+globally reused session public keys/addresses, and linearizes replay at durable
 `(root, key_id, nonce)` insertion. Retired or revoked keys cannot authorize new
 reads or work, while accepted root-owned operations and receipts remain
-historical. These requirements describe future Sherwood activation and do not
-promote `session_keys` or any live endpoint to verified support.
+historical. These server requirements are covered by the pinned process gate.
+They do not promote `session_keys` or any live endpoint to verified support.
 
 ERC-1271 contract-wallet continuity and draft execution-delegation standards
 remain separate specifications. This contract grants no payment, trading,

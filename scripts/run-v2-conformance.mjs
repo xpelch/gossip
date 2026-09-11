@@ -21,18 +21,16 @@ import {
   isCanonicalSherwoodOrigin,
   parseConformanceArguments,
   parseTrxResults,
+  SHERWOOD_PROCESS_TEST_FQNS,
 } from "./conformance-runner-options.mjs";
 
 const execute = promisify(execFile);
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const repository = resolve(scriptDirectory, "..");
 const MAX_OUTPUT_BYTES = 1_048_576;
-const SHERWOOD_TEST_FQNS = [
-  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_signed_http_and_mcp_and_replays_after_restart",
-  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_enforces_concurrency_conflicts_authentication_and_owner_isolation",
-];
 const SHERWOOD_TEST_FILTER =
-  "FullyQualifiedName=" + SHERWOOD_TEST_FQNS.join("|FullyQualifiedName=");
+  "FullyQualifiedName=" +
+  SHERWOOD_PROCESS_TEST_FQNS.join("|FullyQualifiedName=");
 const SHERWOOD_TEST_CLASS = "Sherwood.Tests.GossipV2ProcessConformanceTests";
 const SHERWOOD_CANARY_PREFIX = "PROCESS-CONFORMANCE-CANARY";
 const SHERWOOD_HANG_TIMEOUT = "5m";
@@ -159,7 +157,7 @@ async function runSherwoodConformance(
   );
   if (
     !testSource.includes("class GossipV2ProcessConformanceTests") ||
-    !SHERWOOD_TEST_FQNS.every((fqn) =>
+    !SHERWOOD_PROCESS_TEST_FQNS.every((fqn) =>
       testSource.includes(fqn.slice(SHERWOOD_TEST_CLASS.length + 1)),
     ) ||
     !/ServerRevision\s*=\s*"synthetic-v1"/su.test(testSource) ||
@@ -249,7 +247,7 @@ async function runSherwoodConformance(
   }
   const trx = await readFile(trxPath, "utf8");
   scanConformanceText(trx, [SHERWOOD_CANARY_PREFIX]);
-  const parsedResults = parseTrxResults(trx, SHERWOOD_TEST_FQNS);
+  const parsedResults = parseTrxResults(trx, SHERWOOD_PROCESS_TEST_FQNS);
   const { tests, ...counters } = parsedResults;
   const runtime = await measureRuntime();
 
@@ -282,7 +280,8 @@ async function runSherwoodConformance(
         privacy_canary_scan: 4,
         operation_exactly_once: 7,
         operation_conflict: 4,
-        authentication_fail_closed: 11,
+        authentication_fail_closed: 15,
+        session_scope_escape: 16,
       },
       transport: "loopback-http",
       logical_endpoint_scheme: "https",
@@ -294,6 +293,14 @@ async function runSherwoodConformance(
       operation_conflict: true,
       authentication_fail_closed: true,
       owner_isolation_non_enumeration: true,
+      identity_session_registry: true,
+      session_scope_enforced: true,
+      session_replay_rejected: true,
+      session_revocation_enforced: true,
+      session_root_ownership_preserved: true,
+      session_subscriber_absent: true,
+      session_shared_rate_cap: true,
+      legacy_session_downgrade_rejected: true,
       receipt_chain_verified: true,
       restart_replay_exact: true,
       diagnostics_clean: true,
@@ -678,8 +685,10 @@ async function main() {
         ),
         blocked(
           "session_scope_escape",
-          "Sherwood has no session registry.",
-          "Implement and test durable session authorization.",
+          sherwoodEvidence
+            ? "The packaged process evidence did not establish this scenario."
+            : "No packaged Sherwood session process was exercised.",
+          "Run the durable session scope, replay, revocation and downgrade matrix.",
         ),
         blocked(
           "operation_exactly_once",
@@ -770,9 +779,13 @@ async function main() {
         ),
         unavailableCapability(
           "session_keys",
-          "blocked",
-          "Sherwood has no durable session registry.",
-          "Implement server session enrollment, nonce and revocation state.",
+          sherwoodEvidence ? "installed" : "blocked",
+          sherwoodEvidence
+            ? "The server registry and bounded session transports passed, but protected client storage and real host integration remain unverified."
+            : "The portable contract is installed without packaged server session evidence.",
+          sherwoodEvidence
+            ? "Pass protected storage and version-pinned Grok Bot, Hermes and OpenClaw acceptance."
+            : "Run the pinned Sherwood session process gate.",
         ),
         unavailableCapability(
           "private_submission",
@@ -813,6 +826,7 @@ async function main() {
         "operation_exactly_once",
         "operation_conflict",
         "authentication_fail_closed",
+        "session_scope_escape",
       ];
       statement.scenarios = statement.scenarios.map((scenario) => {
         if (processScenarioIds.includes(scenario.id)) {
