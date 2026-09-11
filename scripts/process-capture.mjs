@@ -68,7 +68,7 @@ export function parseSherwoodProcessCapture(text) {
   if (
     !isRecord(capture.privacy) ||
     capture.privacy.canary_present !== false ||
-    capture.privacy.private_key_present !== false ||
+    capture.privacy.key_material_present !== false ||
     capture.privacy.raw_payloads_present !== false
   ) {
     throw new Error("The Sherwood process capture privacy result is invalid.");

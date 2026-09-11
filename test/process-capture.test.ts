@@ -22,7 +22,7 @@ function validCapture() {
     operation_id: "process-conformance",
     privacy: {
       canary_present: false,
-      private_key_present: false,
+      key_material_present: false,
       raw_payloads_present: false,
     },
     redaction_profile: "digests-and-counts-only",

@@ -45,7 +45,7 @@ The runner can execute the process-faithful Sherwood slice when the caller
 supplies an absolute, clean local checkout and an exact commit:
 
 ```powershell
-node scripts/run-v2-conformance.mjs --output C:\temp\gossip-v2-acceptance --sherwood-repository C:\src\sherwood --sherwood-commit 23219aec6587248042371ebafd736ffd1abeab10
+node scripts/run-v2-conformance.mjs --output C:\temp\gossip-v2-acceptance --sherwood-repository C:\src\sherwood --sherwood-commit 0752939896b2f7b97d51767d4b6206329d76e14e
 ```
 
 The commit value must be 40 lowercase hexadecimal characters. The local
