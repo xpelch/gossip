@@ -96,6 +96,18 @@ These gates must remain visible rather than being inferred from installed code.
 They do not weaken the locally proven public protocol and do not authorize
 private data handling or transaction execution.
 
+## External deployment audit
+
+The GitHub deployment record for Sherwood production reports deployment
+`6400689362` as successful at commit
+`33ed9bf96106087e46fcad25dc62a1191f278ee0`. That commit does not contain the
+tested Gossip v2 branch commit
+`017e592401b5a79edfbf9b2b7c8df01bd2cd555b`. Its published environment URL is
+the Railway project dashboard, not a public Gossip HTTPS endpoint or audience.
+GitHub records no Gossip repository deployment and neither repository has a
+GitHub release. This proves that an existing Sherwood deployment cannot be
+promoted to Gossip v2 acceptance from repository metadata alone.
+
 ## Resume sequence
 
 1. Review and merge the two stacks from their `main` bases upward so their
