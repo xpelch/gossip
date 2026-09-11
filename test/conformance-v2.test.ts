@@ -530,6 +530,7 @@ test("TypeScript and Python enforce Sherwood assembly and process evidence prere
       "mcp_http_parity",
       "privacy_canary_scan",
       "session_scope_escape",
+      "public_submission_transport",
       "zero_cost_reconciliation",
       "persistence_fault_recovery",
       "owner_isolation",
@@ -550,6 +551,16 @@ test("TypeScript and Python enforce Sherwood assembly and process evidence prere
         },
       ];
     }
+    const publicSubmission = valid.statement.capabilities.find(
+      (candidate: Record<string, unknown>) =>
+        candidate.name === "public_submission",
+    );
+    assert.ok(publicSubmission);
+    publicSubmission.state = "installed";
+    publicSubmission.reason =
+      "The packaged public-submission process gate passed without production deployment acceptance.";
+    publicSubmission.next_action =
+      "Pass the pinned production endpoint and host acceptance.";
     valid.content_address.digest = canonicalDigest(
       "conformance",
       valid.statement,
@@ -610,6 +621,7 @@ test("TypeScript and Python enforce Sherwood assembly and process evidence prere
         return invalid;
       })(),
       ...[
+        "public_submission_transport",
         "zero_cost_reconciliation",
         "persistence_fault_recovery",
         "owner_isolation",

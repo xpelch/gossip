@@ -889,9 +889,10 @@ export function mapIdentitySessionToolPayload(
         invalid();
       }
       if (
-        (input.endpoint !== undefined &&
-          submission.endpoint !== input.endpoint) ||
-        (input.audience !== undefined && submission.audience !== input.audience)
+        input.endpoint === undefined ||
+        input.audience === undefined ||
+        submission.endpoint !== input.endpoint ||
+        submission.audience !== input.audience
       ) {
         unauthorized();
       }

@@ -7,7 +7,7 @@ export const ACCEPTANCE_ENVELOPE_SCHEMA =
 export const ACCEPTANCE_STATEMENT_SCHEMA =
   "gossip.acceptance-statement.v1" as const;
 export const CONFORMANCE_SUITE_REVISION =
-  "gossip-v2-conformance-2026-09-11.10" as const;
+  "gossip-v2-conformance-2026-09-11.11" as const;
 
 export const CONFORMANCE_SCENARIOS = [
   "artifact_install",
@@ -15,6 +15,7 @@ export const CONFORMANCE_SCENARIOS = [
   "mcp_http_parity",
   "authentication_fail_closed",
   "session_scope_escape",
+  "public_submission_transport",
   "operation_exactly_once",
   "operation_conflict",
   "zero_cost_reconciliation",
@@ -33,6 +34,7 @@ export const CONFORMANCE_CAPABILITIES = [
   "signed_receipts",
   "evidence",
   "session_keys",
+  "public_submission",
   "private_submission",
   "http",
   "tasks",
@@ -52,6 +54,7 @@ const PROCESS_EVIDENCE_SCENARIOS = [
   "operation_conflict",
   "authentication_fail_closed",
   "session_scope_escape",
+  "public_submission_transport",
   "zero_cost_reconciliation",
   "persistence_fault_recovery",
   "owner_isolation",

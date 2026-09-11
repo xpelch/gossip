@@ -2,7 +2,7 @@
   "schema": "gossip.acceptance-envelope.v1",
   "statement": {
     "schema": "gossip.acceptance-statement.v1",
-    "suite_revision": "gossip-v2-conformance-2026-09-11.10",
+    "suite_revision": "gossip-v2-conformance-2026-09-11.11",
     "protocol": "gossip/2-draft.1",
     "generated_at": 1800000000,
     "source": {
@@ -106,6 +106,12 @@
         "next_action": "Run the pinned Sherwood session process gate."
       },
       {
+        "id": "public_submission_transport",
+        "status": "blocked",
+        "reason": "No packaged public-submission process was exercised.",
+        "next_action": "Run signed public submission, exact evidence retrieval, restart, correction, and scoped-session checks through both transports."
+      },
+      {
         "id": "operation_exactly_once",
         "status": "blocked",
         "reason": "The 100-request process scenario was not run.",
@@ -204,6 +210,12 @@
         "next_action": "Run the pinned Sherwood session process gate."
       },
       {
+        "name": "public_submission",
+        "state": "blocked",
+        "reason": "The portable contract is installed without packaged public-submission process evidence.",
+        "next_action": "Run the pinned Sherwood public-submission process gate."
+      },
+      {
         "name": "private_submission",
         "state": "blocked",
         "reason": "Encrypted owner-scoped storage is not proven.",
@@ -226,6 +238,6 @@
   },
   "content_address": {
     "algorithm": "sha256",
-    "digest": "sha256:de203f31d090f005c58807e3fa1900544822ca8276361bf9b48e3bf93df019ac"
+    "digest": "sha256:9a9716313378ee364db8704d4301c38a14921b5c89b94a42a870497b9ed2e983"
   }
 }

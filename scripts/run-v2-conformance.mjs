@@ -284,6 +284,7 @@ async function runSherwoodConformance(
         operation_conflict: 4,
         authentication_fail_closed: 15,
         session_scope_escape: 16,
+        public_submission_transport: 18,
         zero_cost_reconciliation: 10,
         persistence_fault_recovery: 8,
         owner_isolation: 20,
@@ -293,6 +294,13 @@ async function runSherwoodConformance(
       signed_http_complete_zero_cost: true,
       signed_mcp_complete_zero_cost: true,
       canonical_transport_parity: true,
+      public_submission_http_mcp_parity: true,
+      public_receipt_replay_exact: true,
+      public_evidence_retrieval_exact: true,
+      public_session_zero_cost: true,
+      public_lookup_root_only: true,
+      public_correction_lineage: true,
+      public_missing_target_rollback: true,
       private_export_transport_parity: true,
       private_export_replay_exact: true,
       private_export_owner_isolation: true,
@@ -646,7 +654,7 @@ async function main() {
     ).stdout.trim();
     const statement = {
       schema: "gossip.acceptance-statement.v1",
-      suite_revision: "gossip-v2-conformance-2026-09-11.10",
+      suite_revision: "gossip-v2-conformance-2026-09-11.11",
       protocol: "gossip/2-draft.1",
       generated_at: Math.floor(Date.now() / 1000),
       source: {
@@ -718,6 +726,13 @@ async function main() {
             ? "The packaged process evidence did not establish this scenario."
             : "No packaged Sherwood session process was exercised.",
           "Run the durable session scope, replay, revocation and downgrade matrix.",
+        ),
+        blocked(
+          "public_submission_transport",
+          sherwoodEvidence
+            ? "The packaged process evidence did not establish this scenario."
+            : "No packaged public-submission process was exercised.",
+          "Run signed public submission, exact evidence retrieval, restart, correction, and scoped-session checks through both transports.",
         ),
         blocked(
           "operation_exactly_once",
@@ -819,6 +834,16 @@ async function main() {
             : "Run the pinned Sherwood session process gate.",
         ),
         unavailableCapability(
+          "public_submission",
+          sherwoodEvidence ? "installed" : "blocked",
+          sherwoodEvidence
+            ? "Signed public-only submission, exact retrieval, retries, restart, corrections, and scoped sessions passed through the packaged process."
+            : "The portable contract is installed without packaged public-submission process evidence.",
+          sherwoodEvidence
+            ? "Pass the pinned production endpoint and host acceptance before advertising verified support."
+            : "Run the pinned Sherwood public-submission process gate.",
+        ),
+        unavailableCapability(
           "private_submission",
           "blocked",
           sherwoodEvidence
@@ -860,6 +885,7 @@ async function main() {
         "operation_conflict",
         "authentication_fail_closed",
         "session_scope_escape",
+        "public_submission_transport",
         "zero_cost_reconciliation",
         "persistence_fault_recovery",
         "owner_isolation",

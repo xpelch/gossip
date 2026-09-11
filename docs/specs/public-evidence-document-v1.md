@@ -1,8 +1,9 @@
 # Public evidence document v1
 
-`gossip.public-evidence-document.v1` is a contract-only response for retrieving
-one public evidence payload by its exact content digest. It does not register a
-MCP tool, add an HTTP route, or activate persistence.
+`gossip.public-evidence-document.v1` is the portable response for retrieving one
+public evidence payload by its exact content digest. This kit parses and
+verifies the document without hosting a route. Sherwood separately exposes
+root-authenticated HTTP and MCP lookup backed by durable public storage.
 
 The top-level object is exact and contains only:
 
@@ -48,8 +49,7 @@ The TypeScript parser is `parsePublicEvidenceDocument` in
 `test/fixtures/v2-public-evidence-document.json`, and the independent Python
 check runs with `npm run verify:public-evidence-document-v2`.
 
-This contract intentionally leaves retrieval inactive. A future server must
-resolve external public targets and their same-subject relationship before
-returning them. It must also keep the response byte-identical for retries of
-the same digest. MCP, HTTP, private submission, feedback, trading, and
-transaction execution remain outside this slice.
+The `.11` Sherwood process gate requires the server to resolve external public
+targets and their same-subject relationship before returning them and to keep
+the HTTP and MCP response byte-identical for one digest. This does not activate
+private submission, feedback, trading, or transaction execution.

@@ -49,7 +49,7 @@ function expectCode(action: () => unknown, code: ProtocolError["code"]): void {
 
 function feature(
   capability: string,
-  status: "verified" | "blocked" = "verified",
+  status: "verified" | "installed" | "blocked" = "verified",
 ) {
   return status === "verified"
     ? { capability, status, evidence_revision: "engine-1" }
@@ -286,6 +286,19 @@ test("negotiates verified core capabilities and retains reported lower limits", 
         max_collection_items: 128,
       },
     },
+  );
+});
+
+test("accepts installed public submission as a non-core advertised capability", () => {
+  const report = capabilities({
+    features: [
+      ...capabilities().features,
+      feature("public_submission", "installed"),
+    ],
+  });
+
+  assert.doesNotThrow(() =>
+    negotiateCapabilities(report, expectedConnection, 1_000),
   );
 });
 

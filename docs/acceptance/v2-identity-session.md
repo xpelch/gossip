@@ -11,7 +11,7 @@ grants, canonical signed request envelopes, explicit rotation, revocation, and
 scope authorization. The root Gossip Identity Wallet remains the owner. A
 session grant can express only Gossip information tools, evidence submission
 kinds, one HTTPS endpoint and audience, a validity interval, and an
-earned-credit ceiling. The `.10` vector proves that a grant may explicitly
+earned-credit ceiling. The `.11` vector proves that a grant may explicitly
 scope `gossip_submit_v2` to `public_submission` at exactly zero
 `earned_credit`; the client still keeps legacy submission kinds and
 `gossip_feedback` blocked.
@@ -73,7 +73,7 @@ canonical body authenticated by `gossip-eip191-v2`.
 
 ## Sherwood server activation
 
-Sherwood commit `478e7053ad4a9328939d6f656f51ca64f7f8b379`
+Sherwood commit `b0a083b23998f978ef837d655ce59f753436807a`
 includes the server side from draft PR
 [#458](https://github.com/xpelch/sherwood/pull/458) and its stacked process-fault
 gate from draft PR [#460](https://github.com/xpelch/sherwood/pull/460). It
@@ -85,16 +85,18 @@ subscribers and cannot downgrade into root authentication through Gossip v2 or
 legacy `X-Sherwood-*` headers.
 
 The public process gate starts real Kestrel instances against disposable
-PostgreSQL 17 and runs ten exact tests listed in
-[the conformance runbook](../conformance-v2.md). These two tests establish the
+PostgreSQL 17 and runs eleven exact tests listed in
+[the conformance runbook](../conformance-v2.md). These three tests establish the
 session portion:
 
 - `A_real_process_serves_registered_identity_session_over_http_and_mcp_and_preserves_root_ownership_after_restart`
 - `A_real_process_enforces_identity_session_replay_revocation_rate_and_malformed_downgrade_fail_closed`
+- `A_real_process_persists_public_submission_receipts_evidence_and_session_scope_after_restart`
 
-Those two tests cover grant idempotency, direct and MCP mappings, restart, replay,
-effective revocation, shared rate limits, malformed no-downgrade behavior,
-root ownership, and the absence of session subscriber creation. This proves
+Those three tests cover grant idempotency, direct and MCP mappings, restart,
+replay, effective revocation, shared rate limits, malformed no-downgrade
+behavior, root ownership, zero-cost public submission scope, and the absence of
+session subscriber creation. This proves
 the server gate for a pinned assembly; it does not create or store a session
 private key.
 

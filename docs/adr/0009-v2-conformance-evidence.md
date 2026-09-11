@@ -35,7 +35,7 @@ The `conformance` digest domain is distinct from requests, evidence, receipts,
 and identity continuity. The content address covers the statement only, so it
 does not hash itself.
 
-Every manifest enumerates all fifteen scenarios and all eight negotiated
+Every manifest enumerates all sixteen scenarios and all nine negotiated
 capabilities exactly once. A verified capability cites verified scenarios.
 `installed`, `blocked`, and `not_applicable` entries contain a fixed reason and
 one actionable next step. Installation cannot satisfy a verified capability.
@@ -57,7 +57,8 @@ boolean results. Restricted raw captures are scanned and deleted with the
 disposable checkout. A passing slice may mark `mcp_http_parity`,
 `privacy_canary_scan`, `operation_exactly_once`, `operation_conflict`,
 `authentication_fail_closed`, `session_scope_escape`,
-`zero_cost_reconciliation`, `persistence_fault_recovery`, and
+`public_submission_transport`, `zero_cost_reconciliation`,
+`persistence_fault_recovery`, and
 `owner_isolation` verified, and only when the manifest also
 contains the pinned Sherwood commit and assembly, measured
 .NET/Docker/PostgreSQL versions, and engine/migration revisions. It does not

@@ -30,10 +30,10 @@ The runner:
 The first manifest is expected to decide `blocked`. It proves packaging and
 portable contracts; it does not exercise Sherwood, MCP/HTTP parity, durable
 database behavior, process faults, private storage, or a second clean replay.
-The current offline fixture suite is conformance revision `.10` and includes
+The current offline fixture suite is conformance revision `.11` and includes
 the exact-digest public evidence document vector plus the signed
-`public_submission` identity-session grant and request vector. This adds
-contract proof only; it does not promote a capability to `verified`.
+`public_submission` identity-session grant and request vector. Offline execution
+adds contract proof only; it does not promote a capability to `verified`.
 
 ## Optional Sherwood process evidence
 
@@ -41,7 +41,7 @@ The runner can execute the process-faithful Sherwood slice when the caller
 supplies an absolute, clean local checkout and an exact commit:
 
 ```powershell
-node scripts/run-v2-conformance.mjs --output C:\temp\gossip-v2-acceptance --sherwood-repository C:\src\sherwood --sherwood-commit 478e7053ad4a9328939d6f656f51ca64f7f8b379
+node scripts/run-v2-conformance.mjs --output C:\temp\gossip-v2-acceptance --sherwood-repository C:\src\sherwood --sherwood-commit b0a083b23998f978ef837d655ce59f753436807a
 ```
 
 The commit value must be 40 lowercase hexadecimal characters. The local
@@ -49,7 +49,7 @@ checkout must have the canonical `xpelch/sherwood` HTTPS or SSH origin, no
 working-tree changes, and no reparse-point root. The runner clones it without
 hardlinks, detaches the requested commit, restores and builds the Sherwood
 test project in Release mode with continuous-integration determinism enabled
-and the temporary source root mapped to `/_/`. It then runs all ten exact
+and the temporary source root mapped to `/_/`. It then runs all eleven exact
 process test FQNs in one bounded TRX result. The stable source mapping keeps the
 assembly digest independent of the temporary clone path. The supplied checkout
 is executable source code and therefore an explicit caller trust boundary; the
@@ -59,10 +59,11 @@ The public evidence summary records only hashes, sizes, counters, revisions,
 runtime versions and boolean assertions. Raw child output and TRX data remain
 in disposable restricted storage and are scanned before summary derivation;
 paths, remotes, requests, receipts, signatures, keys, connection strings and
-canaries are never published. Passing all ten tests promotes
+canaries are never published. Passing all eleven tests promotes
 `mcp_http_parity`, `privacy_canary_scan`, `operation_exactly_once`,
 `operation_conflict`, `authentication_fail_closed`,
-`session_scope_escape`, `zero_cost_reconciliation`, and
+`session_scope_escape`, `public_submission_transport`,
+`zero_cost_reconciliation`, and
 `persistence_fault_recovery`, and `owner_isolation` to `verified`.
 The owner-isolation gate covers operations, receipts, encrypted private
 payloads, export, correction, deletion, access audit, cross-owner failures, and
@@ -74,6 +75,12 @@ a frozen persistence cut point. No capability is promoted to `verified`, and
 the overall decision remains `blocked` because the run produces an assembly
 but no production image, controlled reorg/correction evidence, or independent
 clean replay.
+The public-submission process gate proves signed HTTP and MCP submission,
+byte-identical retry receipts, exact evidence retrieval, restart durability,
+correction lineage, missing-target rollback, root-only lookup, and a zero-cost
+scoped session. It promotes `public_submission` to `installed`; production TLS,
+host, and endpoint acceptance is still required before verified support.
+
 The process uses loopback HTTP while authenticating against logical HTTPS
 endpoint and audience values. The server session registry and bounded
 transports are exercised, so `session_keys` becomes `installed`; protected

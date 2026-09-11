@@ -92,8 +92,9 @@ validation and hashing do not establish signer ownership or reserve credit.
 An untrusted capability report names protocol/schema/auth revisions, MCP
 revision, server ID/revision, endpoint, audience, issue/expiry times, limits,
 and per-feature readiness. Features are `atomic_consult`, `durable_operations`,
-`signed_receipts`, `evidence`, `session_keys`, `private_submission`, `http`, and
-`tasks`. States are `installed`, `verified`, `not_applicable`, and `blocked`.
+`signed_receipts`, `evidence`, `session_keys`, `public_submission`,
+`private_submission`, `http`, and `tasks`. States are `installed`, `verified`,
+`not_applicable`, and `blocked`.
 Every non-verified entry has a reason and an actionable next step. A verified
 entry names its conformance evidence revision. Duplicate features are invalid.
 

@@ -18,6 +18,7 @@ SCENARIOS = {
     "mcp_http_parity",
     "authentication_fail_closed",
     "session_scope_escape",
+    "public_submission_transport",
     "operation_exactly_once",
     "operation_conflict",
     "zero_cost_reconciliation",
@@ -35,6 +36,7 @@ CAPABILITIES = {
     "signed_receipts",
     "evidence",
     "session_keys",
+    "public_submission",
     "private_submission",
     "http",
     "tasks",
@@ -52,6 +54,7 @@ PROCESS_EVIDENCE_SCENARIOS = {
     "operation_conflict",
     "authentication_fail_closed",
     "session_scope_escape",
+    "public_submission_transport",
     "zero_cost_reconciliation",
     "persistence_fault_recovery",
     "owner_isolation",
@@ -185,7 +188,7 @@ exact_keys(
     },
 )
 assert statement["schema"] == "gossip.acceptance-statement.v1"
-assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-11.10"
+assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-11.11"
 assert statement["protocol"] == PROTOCOL
 assert statement["decision"] in {"verified", "blocked"}
 verify_integer(statement["generated_at"], 0, MAX_UNIX_SECONDS)

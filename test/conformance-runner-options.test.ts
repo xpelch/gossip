@@ -175,11 +175,13 @@ test("requires all exact Sherwood process test outcomes in one TRX", () => {
     eighth,
     ninth,
     tenth,
+    eleventh,
   ] = SHERWOOD_PROCESS_TEST_FQNS;
   const trx = `
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_serves_signed_http_and_mcp_and_replays_after_restart" />
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_enforces_concurrency_conflicts_authentication_and_owner_isolation" />
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_serves_registered_identity_session_over_http_and_mcp_and_preserves_root_ownership_after_restart" />
+    <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_persists_public_submission_receipts_evidence_and_session_scope_after_restart" />
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_enforces_identity_session_replay_revocation_rate_and_malformed_downgrade_fail_closed" />
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_paused_process_kill_restarts_into_reconciliation_without_reexecution" />
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_throwing_persistence_cut_point_rolls_back_and_requires_reconciliation" />
@@ -197,12 +199,13 @@ test("requires all exact Sherwood process test outcomes in one TRX", () => {
     <UnitTestResult testName="${eighth}" outcome="Passed" />
     <UnitTestResult testName="${ninth}" outcome="Passed" />
     <UnitTestResult testName="${tenth}" outcome="Passed" />
-    <Counters total="10" executed="10" passed="10" failed="0" error="0" notExecuted="0" skipped="0" />`;
+    <UnitTestResult testName="${eleventh}" outcome="Passed" />
+    <Counters total="11" executed="11" passed="11" failed="0" error="0" notExecuted="0" skipped="0" />`;
 
   assert.deepEqual(parseTrxResults(trx, SHERWOOD_PROCESS_TEST_FQNS), {
-    total: 10,
-    executed: 10,
-    passed: 10,
+    total: 11,
+    executed: 11,
+    passed: 11,
     failed: 0,
     error: 0,
     notExecuted: 0,

@@ -24,6 +24,7 @@ const FEATURES = [
   "signed_receipts",
   "evidence",
   "session_keys",
+  "public_submission",
   "private_submission",
   "http",
   "tasks",

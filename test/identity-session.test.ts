@@ -724,10 +724,71 @@ test("maps each implementable session tool to its exact payload and cost", async
         submission_kind: "public_submission",
         payload: publicSubmission,
         cost: { unit: "earned_credit", amount: "0" },
+        endpoint: "https://gossip.example/mcp/",
+      }),
+    "unauthorized",
+  );
+  expectCode(
+    () =>
+      mapIdentitySessionToolPayload({
+        root: { chain_id: "4663", address: root.address.toLowerCase() },
+        tool: "gossip_submit_v2",
+        submission_kind: "public_submission",
+        payload: publicSubmission,
+        cost: { unit: "earned_credit", amount: "0" },
+        endpoint: "https://gossip.example/mcp/",
+        audience: "https://other.example/",
+      }),
+    "unauthorized",
+  );
+  expectCode(
+    () =>
+      mapIdentitySessionToolPayload({
+        root: { chain_id: "4663", address: root.address.toLowerCase() },
+        tool: "gossip_submit_v2",
+        submission_kind: "public_submission",
+        payload: publicSubmission,
+        cost: { unit: "earned_credit", amount: "0" },
         endpoint: "https://other.example/mcp/",
         audience: "https://gossip.example/",
       }),
     "unauthorized",
+  );
+  expectCode(
+    () =>
+      mapIdentitySessionToolPayload({
+        root: { chain_id: "4663", address: root.address.toLowerCase() },
+        tool: "gossip_submit_v2",
+        submission_kind: "public_submission",
+        payload: publicSubmission,
+        cost: { unit: "earned_credit", amount: "0" },
+        audience: "https://gossip.example/",
+      }),
+    "unauthorized",
+  );
+  expectCode(
+    () =>
+      mapIdentitySessionToolPayload({
+        root: { chain_id: "4663", address: root.address.toLowerCase() },
+        tool: "gossip_submit_v2",
+        submission_kind: "chain_observation",
+        payload: publicSubmission,
+        cost: { unit: "earned_credit", amount: "0" },
+        endpoint: "https://gossip.example/mcp/",
+        audience: "https://gossip.example/",
+      }),
+    "unsupported_capability",
+  );
+  expectCode(
+    () =>
+      mapIdentitySessionToolPayload({
+        root: { chain_id: "4663", address: root.address.toLowerCase() },
+        tool: "gossip_feedback",
+        submission_kind: "public_submission",
+        payload: {},
+        cost: { unit: "earned_credit", amount: "0" },
+      }),
+    "unsupported_capability",
   );
 
   const signed = await signedGrant(grant(sessionOne));

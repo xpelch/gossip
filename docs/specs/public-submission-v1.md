@@ -1,9 +1,11 @@
 # Public submission contract v1
 
-`gossip.public-submission.v1` freezes the information-only boundary for a
-future public evidence submission tool. It is contract-only in this revision:
-it is not registered in the MCP bridge, exposed over HTTP, advertised as a
-capability, or persisted by the runtime.
+`gossip.public-submission.v1` freezes the information-only boundary for public
+evidence submission. This public kit supplies the portable contract and signed
+session request; it does not host an endpoint or persist submissions. Sherwood,
+the first engine, separately implements authenticated HTTP and MCP adapters,
+durable persistence, exact retrieval, and truthful `installed` capability
+reporting behind its process acceptance gate.
 
 The request contains the authenticated v2 actor, endpoint and audience, a
 stable operation ID, and an explicit `public_submission` operation kind. Its
@@ -60,13 +62,14 @@ Public submissions may point `supersedes` or `conflicts_with` at an external
 public evidence digest. Those targets must not be bundled in the same request;
 `derived_from` remains closed in the submitted graph. The public parser cannot
 prove the visibility or same-subject relationship of an external target, so an
-eventual server must resolve it transactionally before accepting the operation.
+server must resolve it transactionally before accepting the operation.
 The general `parseEvidenceGraph` parser remains closed and unchanged by this
 mode.
 
 This contract does not activate `private_submission` or `gossip_feedback`.
 Trading, payment, generic signing, transaction construction, and blockchain
 execution remain outside Gossip's information exchange boundary and remain
-blocked here. Activating a public transport requires a later implementation
-slice with authenticated persistence, atomic insertion, retries, correction,
-conflict, retrieval, and process conformance evidence.
+blocked here. The `.11` conformance runner requires authenticated persistence,
+atomic insertion, retries, correction, conflict, retrieval, and real-process
+evidence before it reports the Sherwood adapter as installed. Production TLS,
+endpoint, and host acceptance remain separate release gates.
