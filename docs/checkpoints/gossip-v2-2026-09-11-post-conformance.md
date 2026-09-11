@@ -19,9 +19,10 @@ Public evidence submission costs zero earned credit. `private_submission`,
 
 The coordinated pull requests use branch `codex/gossip-v2-conformance-final`:
 
-- [Gossip #28](https://github.com/xpelch/gossip/pull/28), public commit
-  `30c30676fcc2f601db63181fbcd1326bf17e5926`;
-- [Sherwood #464](https://github.com/xpelch/sherwood/pull/464), engine commit
+- [Gossip #28](https://github.com/xpelch/gossip/pull/28), published-evidence commit
+  `25124f6d684d57afaee1c5d84a9c83e07c1c72d0`;
+- [Sherwood #464](https://github.com/xpelch/sherwood/pull/464), branch head
+  `3432ed1421854954dd6f1db74335bc24cf42a720` and tested engine commit
   `017e592401b5a79edfbf9b2b7c8df01bd2cd555b`.
 
 The public package freezes canonical v2 consultation, evidence, receipt,
@@ -48,7 +49,7 @@ The public package passed:
 - `npm run typecheck`;
 - all nine independent Python verifiers.
 
-The latest Sherwood Gossip v2 suite passed 338 of 338 tests. The application
+The latest Sherwood Gossip v2 and wallet-authentication suite passed 361 of 361 tests. The application
 facade and exact public-submission process slice passed 17 of 17 tests after the
 final capability and diagnostics review. The Sherwood build completed with no
 warnings or errors.

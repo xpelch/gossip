@@ -20,7 +20,7 @@ coordinated review branches:
   commit `017e592401b5a79edfbf9b2b7c8df01bd2cd555b`.
 
 The public suite passes 193 tests with two expected Windows skips. The Sherwood
-Gossip v2 suite passes 338 tests. Two clean-source conformance runs each pass
+Gossip v2 and wallet-authentication suite passes 361 tests. Two clean-source conformance runs each pass
 the exact thirteen-test process contract and independently match on their
 stable replay projection. The published suite `.12` verifies 15 local scenarios,
 including HTTP/MCP parity, exactly-once and zero-cost behavior, authentication,
