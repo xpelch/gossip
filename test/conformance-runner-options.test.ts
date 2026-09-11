@@ -156,7 +156,7 @@ test("accepts the xUnit TRX counter shape without an optional skipped attribute"
 });
 
 test("requires all exact Sherwood process test outcomes in one TRX", () => {
-  const [first, second, third, fourth, fifth, sixth] =
+  const [first, second, third, fourth, fifth, sixth, seventh] =
     SHERWOOD_PROCESS_TEST_FQNS;
   const trx = `
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_serves_signed_http_and_mcp_and_replays_after_restart" />
@@ -165,18 +165,20 @@ test("requires all exact Sherwood process test outcomes in one TRX", () => {
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_enforces_identity_session_replay_revocation_rate_and_malformed_downgrade_fail_closed" />
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_paused_process_kill_restarts_into_reconciliation_without_reexecution" />
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_throwing_persistence_cut_point_rolls_back_and_requires_reconciliation" />
+    <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_keeps_private_export_owner_scoped_and_matches_http_with_mcp" />
     <UnitTestResult testName="${first}" outcome="Passed" />
     <UnitTestResult testName="${second}" outcome="Passed" />
     <UnitTestResult testName="${third}" outcome="Passed" />
     <UnitTestResult testName="${fourth}" outcome="Passed" />
     <UnitTestResult testName="${fifth}" outcome="Passed" />
     <UnitTestResult testName="${sixth}" outcome="Passed" />
-    <Counters total="6" executed="6" passed="6" failed="0" error="0" notExecuted="0" skipped="0" />`;
+    <UnitTestResult testName="${seventh}" outcome="Passed" />
+    <Counters total="7" executed="7" passed="7" failed="0" error="0" notExecuted="0" skipped="0" />`;
 
   assert.deepEqual(parseTrxResults(trx, SHERWOOD_PROCESS_TEST_FQNS), {
-    total: 6,
-    executed: 6,
-    passed: 6,
+    total: 7,
+    executed: 7,
+    passed: 7,
     failed: 0,
     error: 0,
     notExecuted: 0,

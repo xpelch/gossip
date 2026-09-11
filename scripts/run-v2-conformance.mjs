@@ -276,8 +276,8 @@ async function runSherwoodConformance(
       })),
       counters,
       scenario_assertions: {
-        mcp_http_parity: 6,
-        privacy_canary_scan: 4,
+        mcp_http_parity: 8,
+        privacy_canary_scan: 6,
         operation_exactly_once: 7,
         operation_conflict: 4,
         authentication_fail_closed: 15,
@@ -290,6 +290,9 @@ async function runSherwoodConformance(
       signed_http_complete_zero_cost: true,
       signed_mcp_complete_zero_cost: true,
       canonical_transport_parity: true,
+      private_export_transport_parity: true,
+      private_export_replay_exact: true,
+      private_export_owner_isolation: true,
       durable_operation_singleton: true,
       operation_exactly_once: true,
       operation_conflict: true,
@@ -623,7 +626,7 @@ async function main() {
     ).stdout.trim();
     const statement = {
       schema: "gossip.acceptance-statement.v1",
-      suite_revision: "gossip-v2-conformance-2026-09-10.3",
+      suite_revision: "gossip-v2-conformance-2026-09-11.4",
       protocol: "gossip/2-draft.1",
       generated_at: Math.floor(Date.now() / 1000),
       source: {
@@ -850,8 +853,8 @@ async function main() {
         if (scenario.id === "owner_isolation") {
           return blocked(
             scenario.id,
-            "The process proved scalar-2 operation and receipt non-enumeration only; private lifecycle, export, deletion and audit remain unproven.",
-            "Exercise operation, receipt, evidence, export, deletion and audit isolation.",
+            "The process proved operation, receipt and private-export isolation; deletion, correction and complete access-audit isolation remain unproven.",
+            "Exercise private deletion, correction and access-audit isolation through both transports.",
           );
         }
 

@@ -50,7 +50,7 @@ from an optional production image digest. A source run may have an assembly
 without an image; an overall `verified` decision still requires the production
 image gate.
 
-The process slice runs both pinned external-process tests in one bounded TRX,
+The process slice runs the pinned external-process tests in one bounded TRX,
 with bounded stdout and stderr captures. Public evidence contains only hashes,
 sizes, exact test FQNs and counters, measured runtimes, pinned revisions and
 boolean results. Restricted raw captures are scanned and deleted with the
