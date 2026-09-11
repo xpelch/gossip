@@ -29,6 +29,7 @@
     "scripts/verify-v2-conformance-manifest.py",
     "scripts/run-v2-conformance.mjs",
     "scripts/conformance-runner-options.mjs",
+    "scripts/process-capture.mjs",
     "test/fixtures/v2-canonical.json",
     "test/fixtures/v2-evidence-receipts.json",
     "test/fixtures/v2-receipt-auth.json",

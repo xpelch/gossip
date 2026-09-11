@@ -49,7 +49,7 @@ The TypeScript parser is `parsePublicEvidenceDocument` in
 `test/fixtures/v2-public-evidence-document.json`, and the independent Python
 check runs with `npm run verify:public-evidence-document-v2`.
 
-The `.11` Sherwood process gate requires the server to resolve external public
+The `.12` Sherwood process gate requires the server to resolve external public
 targets and their same-subject relationship before returning them and to keep
 the HTTP and MCP response byte-identical for one digest. This does not activate
 private submission, feedback, trading, or transaction execution.

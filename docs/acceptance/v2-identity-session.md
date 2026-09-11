@@ -11,7 +11,7 @@ grants, canonical signed request envelopes, explicit rotation, revocation, and
 scope authorization. The root Gossip Identity Wallet remains the owner. A
 session grant can express only Gossip information tools, evidence submission
 kinds, one HTTPS endpoint and audience, a validity interval, and an
-earned-credit ceiling. The `.11` vector proves that a grant may explicitly
+earned-credit ceiling. The `.12` vector proves that a grant may explicitly
 scope `gossip_submit_v2` to `public_submission` at exactly zero
 `earned_credit`; the client still keeps legacy submission kinds and
 `gossip_feedback` blocked.
@@ -73,7 +73,7 @@ canonical body authenticated by `gossip-eip191-v2`.
 
 ## Sherwood server activation
 
-Sherwood commit `b0a083b23998f978ef837d655ce59f753436807a`
+Sherwood commit `23219aec6587248042371ebafd736ffd1abeab10`
 includes the server side from draft PR
 [#458](https://github.com/xpelch/sherwood/pull/458) and its stacked process-fault
 gate from draft PR [#460](https://github.com/xpelch/sherwood/pull/460). It
@@ -85,7 +85,7 @@ subscribers and cannot downgrade into root authentication through Gossip v2 or
 legacy `X-Sherwood-*` headers.
 
 The public process gate starts real Kestrel instances against disposable
-PostgreSQL 17 and runs eleven exact tests listed in
+PostgreSQL 17 and runs thirteen exact tests listed in
 [the conformance runbook](../conformance-v2.md). These three tests establish the
 session portion:
 

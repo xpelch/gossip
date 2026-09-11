@@ -34,7 +34,7 @@ The runner:
 The first manifest is expected to decide `blocked`. It proves packaging and
 portable contracts; it does not exercise Sherwood, MCP/HTTP parity, durable
 database behavior, process faults, private storage, or a second clean replay.
-The current offline fixture suite is conformance revision `.11` and includes
+The current offline fixture suite is conformance revision `.12` and includes
 the exact-digest public evidence document vector plus the signed
 `public_submission` identity-session grant and request vector. Offline execution
 adds contract proof only; it does not promote a capability to `verified`.
@@ -45,7 +45,7 @@ The runner can execute the process-faithful Sherwood slice when the caller
 supplies an absolute, clean local checkout and an exact commit:
 
 ```powershell
-node scripts/run-v2-conformance.mjs --output C:\temp\gossip-v2-acceptance --sherwood-repository C:\src\sherwood --sherwood-commit b0a083b23998f978ef837d655ce59f753436807a
+node scripts/run-v2-conformance.mjs --output C:\temp\gossip-v2-acceptance --sherwood-repository C:\src\sherwood --sherwood-commit 23219aec6587248042371ebafd736ffd1abeab10
 ```
 
 The commit value must be 40 lowercase hexadecimal characters. The local
@@ -53,22 +53,25 @@ checkout must have the canonical `xpelch/sherwood` HTTPS or SSH origin, no
 working-tree changes, and no reparse-point root. The runner clones it without
 hardlinks, detaches the requested commit, restores and builds the Sherwood
 test project in Release mode with continuous-integration determinism enabled
-and the temporary source root mapped to `/_/`. It then runs all eleven exact
+and the temporary source root mapped to `/_/`. It then runs all thirteen exact
 process test FQNs in one bounded TRX result. The stable source mapping keeps the
 assembly digest independent of the temporary clone path. The supplied checkout
 is executable source code and therefore an explicit caller trust boundary; the
 commit must be the full 40-character value resolved from that clean checkout.
 
-The public evidence summary records only hashes, sizes, counters, revisions,
-runtime versions and boolean assertions. Raw child output and TRX data remain
-in disposable restricted storage and are scanned before summary derivation;
-paths, remotes, requests, receipts, signatures, keys, connection strings and
-canaries are never published. Passing all eleven tests promotes
+The process test also emits one canonical capture index. The runner validates
+its exact schema and transport parity, scans it, and publishes it unchanged.
+The index records hashes and byte counts for the canonical request, HTTP and MCP
+responses, evidence graph, receipt chain, operation result, database state,
+diagnostics, and disabled telemetry. It contains no raw payload, key, connection
+string, or canary. Raw child output and TRX data remain in disposable restricted
+storage and are scanned before summary derivation. Passing all thirteen tests promotes
 `mcp_http_parity`, `privacy_canary_scan`, `operation_exactly_once`,
 `operation_conflict`, `authentication_fail_closed`,
 `session_scope_escape`, `public_submission_transport`,
 `zero_cost_reconciliation`, and
-`persistence_fault_recovery`, and `owner_isolation` to `verified`.
+`persistence_fault_recovery`, `evidence_finality_reorg`,
+`correction_supersession`, and `owner_isolation` to `verified`.
 The owner-isolation gate covers operations, receipts, encrypted private
 payloads, export, correction, deletion, access audit, cross-owner failures, and
 privacy fault recovery under the synthetic policy. `private_submission` remains
@@ -136,10 +139,11 @@ independent replay; the separate attestation is the aggregate proof.
 
 ## Remaining process harness
 
-The controlled-source slice now proves stale, wrong-chain, wrong block/hash and
-source-reorged refusals through both transports. The next slice must cover
-missing-source injection, post-publication reorg quarantine, correction, and
-supersession without weakening the ten existing process gates.
+The controlled-source slice proves stale, wrong-chain, wrong block/hash,
+source-reorged, and missing-source refusals through both transports. It also
+proves retained-source outage reconciliation, post-publication reorg
+quarantine, public conflict lineage, correction, and supersession without
+weakening the existing process gates.
 
 Protected session-key storage, production privacy operations, production receipt
 trust, and high-trust independent reproduction remain blocked until their

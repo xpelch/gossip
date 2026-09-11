@@ -69,7 +69,7 @@ mode.
 This contract does not activate `private_submission` or `gossip_feedback`.
 Trading, payment, generic signing, transaction construction, and blockchain
 execution remain outside Gossip's information exchange boundary and remain
-blocked here. The `.11` conformance runner requires authenticated persistence,
+blocked here. The `.12` conformance runner requires authenticated persistence,
 atomic insertion, retries, correction, conflict, retrieval, and real-process
 evidence before it reports the Sherwood adapter as installed. Production TLS,
 endpoint, and host acceptance remain separate release gates.

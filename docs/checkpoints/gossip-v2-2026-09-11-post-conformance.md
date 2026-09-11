@@ -22,20 +22,22 @@ The coordinated pull requests use branch `codex/gossip-v2-conformance-final`:
 - [Gossip #28](https://github.com/xpelch/gossip/pull/28), public commit
   `15a09683a2b0d90ca2bbd9adf148e222213b73b3`;
 - [Sherwood #464](https://github.com/xpelch/sherwood/pull/464), engine commit
-  `f724066489e84dacda282ff741ee639f9e77e94b`.
+  `23219aec6587248042371ebafd736ffd1abeab10`.
 
 The public package freezes canonical v2 consultation, evidence, receipt,
-identity-session, and public-submission contracts. Its current conformance
-runner still pins Sherwood `b0a083b23998f978ef837d655ce59f753436807a` and
-eleven real-process tests. Sherwood implements the
+identity-session, and public-submission contracts. Its conformance runner now
+pins Sherwood `23219aec6587248042371ebafd736ffd1abeab10` and thirteen
+real-process tests. Sherwood implements the
 durable operations, signed receipts, public evidence graph, root and scoped
 session authorization, and equivalent HTTP and MCP surfaces.
 
 The latest Sherwood commit extends the real-process matrix with public conflict
 lineage, missing retained-source refusal, retained-source dependency outage,
 idempotent post-publication reorg quarantine, and rollback at every terminal
-persistence cut point. The public runner and evidence bundle have not yet been
-repinned to that commit; this is the first task in the resume sequence below.
+persistence cut point. It emits a canonical, digest-only process capture for
+requests, responses, evidence, receipts, database state, diagnostics, and
+disabled telemetry. The refreshed runner validates that capture under suite
+revision `.12`; a new evidence bundle still needs to be published.
 
 ## Verification
 
@@ -95,16 +97,12 @@ private data handling or transaction execution.
 
 ## Resume sequence
 
-1. Repin the public conformance runner to Sherwood `f7240664`, expand it to the
-   new exact-process matrix, and advance the suite revision.
-2. Add a redacted process-capture artifact for canonical requests, responses,
-   evidence, receipts, durable state, diagnostics, and telemetry.
-3. Run the complete public checks and two clean-source conformance executions,
+1. Run the complete public checks and two clean-source conformance executions,
    compare their stable projections, and publish the refreshed evidence.
-4. Review and merge Gossip #28 and Sherwood #464 together so their pinned
+2. Review and merge Gossip #28 and Sherwood #464 together so their pinned
    contracts remain aligned.
-5. Provision the public endpoint and release artifact, then record their exact
+3. Provision the public endpoint and release artifact, then record their exact
    identities and provenance.
-6. Run the published conformance command on each advertised host.
-7. Approve the numeric SLOs and production trust policies.
-8. Publish a new final WS7 manifest and release decision, then close epic #3.
+4. Run the published conformance command on each advertised host.
+5. Approve the numeric SLOs and production trust policies.
+6. Publish a new final WS7 manifest and release decision, then close epic #3.

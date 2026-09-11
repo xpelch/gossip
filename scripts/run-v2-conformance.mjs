@@ -24,11 +24,13 @@ import {
   sherwoodDeterministicBuildProperties,
   SHERWOOD_PROCESS_TEST_FQNS,
 } from "./conformance-runner-options.mjs";
+import { parseSherwoodProcessCapture } from "./process-capture.mjs";
 
 const execute = promisify(execFile);
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const repository = resolve(scriptDirectory, "..");
 const MAX_OUTPUT_BYTES = 1_048_576;
+const MAX_PROCESS_CAPTURE_BYTES = 65_536;
 const SHERWOOD_TEST_FILTER =
   "FullyQualifiedName=" +
   SHERWOOD_PROCESS_TEST_FQNS.join("|FullyQualifiedName=");
@@ -102,6 +104,22 @@ async function writeEvidence(root, filename, value, scanConformanceText) {
   return fileEvidence(root, path);
 }
 
+async function writeCapturedEvidence(
+  root,
+  filename,
+  content,
+  scanConformanceText,
+) {
+  const path = `evidence/${filename}`;
+  scanConformanceText(content, [SHERWOOD_CANARY_PREFIX]);
+  await writeFile(join(root, ...path.split("/")), content, {
+    encoding: "utf8",
+    flag: "wx",
+    mode: 0o600,
+  });
+  return fileEvidence(root, path);
+}
+
 function blocked(id, reason, nextAction) {
   return { id, status: "blocked", reason, next_action: nextAction };
 }
@@ -161,6 +179,8 @@ async function runSherwoodConformance(
     !SHERWOOD_PROCESS_TEST_FQNS.every((fqn) =>
       testSource.includes(fqn.slice(SHERWOOD_TEST_CLASS.length + 1)),
     ) ||
+    !testSource.includes("GOSSIP_V2_CONFORMANCE_CAPTURE_PATH") ||
+    !testSource.includes("sherwood.gossip-v2-process-capture.v1") ||
     !/ServerRevision\s*=\s*"synthetic-v1"/su.test(testSource) ||
     !postgresFixtureSource.includes('new PostgreSqlBuilder("postgres:17")')
   ) {
@@ -209,6 +229,10 @@ async function runSherwoodConformance(
   const assembly = await hashFile(assemblyPath);
   const resultsDirectory = join(temporary, "sherwood-test-results");
   await mkdir(resultsDirectory, { recursive: true, mode: 0o700 });
+  const processCapturePath = join(
+    resultsDirectory,
+    "process-conformance-capture.json",
+  );
   const testResult = await command(
     "dotnet",
     [
@@ -227,7 +251,13 @@ async function runSherwoodConformance(
       "--results-directory",
       resultsDirectory,
     ],
-    { cwd: checkout },
+    {
+      cwd: checkout,
+      env: {
+        ...process.env,
+        GOSSIP_V2_CONFORMANCE_CAPTURE_PATH: processCapturePath,
+      },
+    },
   );
   scanConformanceText(testResult.stdout, [SHERWOOD_CANARY_PREFIX]);
   scanConformanceText(testResult.stderr, [SHERWOOD_CANARY_PREFIX]);
@@ -251,11 +281,32 @@ async function runSherwoodConformance(
   scanConformanceText(trx, [SHERWOOD_CANARY_PREFIX]);
   const parsedResults = parseTrxResults(trx, SHERWOOD_PROCESS_TEST_FQNS);
   const { tests, ...counters } = parsedResults;
+  let processCaptureStats;
+  try {
+    processCaptureStats = await stat(processCapturePath);
+  } catch {
+    throw new Error(
+      "The Sherwood process test did not produce its redacted capture.",
+    );
+  }
+  if (
+    !processCaptureStats.isFile() ||
+    processCaptureStats.size > MAX_PROCESS_CAPTURE_BYTES
+  ) {
+    throw new Error("The Sherwood process capture exceeded its output limit.");
+  }
+  const processCaptureText = await readFile(processCapturePath, "utf8");
+  scanConformanceText(processCaptureText, [SHERWOOD_CANARY_PREFIX]);
+  const processCapture = parseSherwoodProcessCapture(processCaptureText);
+  const processCaptureDigest = `sha256:${createHash("sha256")
+    .update(processCaptureText)
+    .digest("hex")}`;
   const runtime = await measureRuntime();
 
   return {
     commit,
     assembly,
+    processCaptureText,
     runtime,
     revisions: {
       engine: "synthetic-v1",
@@ -277,6 +328,12 @@ async function runSherwoodConformance(
         outcome: "passed",
       })),
       counters,
+      process_capture: {
+        schema: processCapture.schema,
+        redaction_profile: processCapture.redaction_profile,
+        sha256: processCaptureDigest,
+        bytes: Buffer.byteLength(processCaptureText, "utf8"),
+      },
       scenario_assertions: {
         mcp_http_parity: 8,
         privacy_canary_scan: 12,
@@ -287,6 +344,8 @@ async function runSherwoodConformance(
         public_submission_transport: 18,
         zero_cost_reconciliation: 10,
         persistence_fault_recovery: 8,
+        evidence_finality_reorg: 15,
+        correction_supersession: 8,
         owner_isolation: 20,
       },
       transport: "loopback-http",
@@ -300,6 +359,7 @@ async function runSherwoodConformance(
       public_session_zero_cost: true,
       public_lookup_root_only: true,
       public_correction_lineage: true,
+      public_conflict_lineage: true,
       public_missing_target_rollback: true,
       private_export_transport_parity: true,
       private_export_replay_exact: true,
@@ -313,6 +373,11 @@ async function runSherwoodConformance(
       wrong_chain_refused: true,
       wrong_boundary_refused: true,
       reorged_source_refused: true,
+      missing_source_refused: true,
+      retained_source_outage_reconciled: true,
+      post_publication_reorg_quarantined: true,
+      quarantine_idempotent: true,
+      quarantine_history_preserved: true,
       rejected_evidence_transport_parity: true,
       rejected_without_partial_evidence: true,
       durable_operation_singleton: true,
@@ -623,6 +688,14 @@ async function main() {
           scanConformanceText,
         )
       : null;
+    const processCaptureEvidence = sherwoodEvidence
+      ? await writeCapturedEvidence(
+          output,
+          "sherwood-process-capture.json",
+          sherwoodEvidence.processCaptureText,
+          scanConformanceText,
+        )
+      : null;
 
     const fixtureNames = [
       "v2-canonical.json",
@@ -654,7 +727,7 @@ async function main() {
     ).stdout.trim();
     const statement = {
       schema: "gossip.acceptance-statement.v1",
-      suite_revision: "gossip-v2-conformance-2026-09-11.11",
+      suite_revision: "gossip-v2-conformance-2026-09-11.12",
       protocol: "gossip/2-draft.1",
       generated_at: Math.floor(Date.now() / 1000),
       source: {
@@ -795,9 +868,9 @@ async function main() {
           "atomic_consult",
           "installed",
           sherwoodEvidence
-            ? "Complete zero-cost consultation and bounded crash recovery passed; the remaining economic and evidence matrix is unverified."
+            ? "Complete zero-cost consultation, bounded crash recovery, terminal persistence faults, and controlled evidence failures passed without production acceptance."
             : "Contract code is installed without packaged engine evidence.",
-          "Pass the remaining economics, evidence and production gates.",
+          "Pass the production endpoint, trust, SLO, and real-host gates.",
         ),
         unavailableCapability(
           "durable_operations",
@@ -819,9 +892,9 @@ async function main() {
           "evidence",
           "installed",
           sherwoodEvidence
-            ? "Retained evidence, controlled refusal and transactional rollback passed without missing-source, post-publication reorg or correction reproduction."
+            ? "Retained evidence, deterministic refusal, conflict and correction lineage, transactional rollback, and post-publication reorg quarantine passed without production trust acceptance."
             : "Evidence contracts are installed without end-to-end reproduction.",
-          "Pass controlled evidence and independent reproduction scenarios.",
+          "Pass production receipt trust, endpoint, SLO, and real-host acceptance.",
         ),
         unavailableCapability(
           "session_keys",
@@ -837,7 +910,7 @@ async function main() {
           "public_submission",
           sherwoodEvidence ? "installed" : "blocked",
           sherwoodEvidence
-            ? "Signed public-only submission, exact retrieval, retries, restart, corrections, and scoped sessions passed through the packaged process."
+            ? "Signed public-only submission, exact retrieval, retries, restart, conflicts, corrections, and scoped sessions passed through the packaged process."
             : "The portable contract is installed without packaged public-submission process evidence.",
           sherwoodEvidence
             ? "Pass the pinned production endpoint and host acceptance before advertising verified support."
@@ -888,6 +961,8 @@ async function main() {
         "public_submission_transport",
         "zero_cost_reconciliation",
         "persistence_fault_recovery",
+        "evidence_finality_reorg",
+        "correction_supersession",
         "owner_isolation",
       ];
       statement.scenarios = statement.scenarios.map((scenario) => {
@@ -897,7 +972,7 @@ async function main() {
             status: "verified",
             assertions:
               sherwoodEvidence.summary.scenario_assertions[scenario.id],
-            evidence: [processEvidence],
+            evidence: [processEvidence, processCaptureEvidence],
           };
         }
 
