@@ -13,6 +13,8 @@ export const SHERWOOD_PROCESS_TEST_FQNS = Object.freeze([
   "Sherwood.Tests.GossipV2ProcessConformanceTests.A_paused_process_kill_restarts_into_reconciliation_without_reexecution",
   "Sherwood.Tests.GossipV2ProcessConformanceTests.A_throwing_persistence_cut_point_rolls_back_and_requires_reconciliation",
   "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_keeps_private_export_owner_scoped_and_matches_http_with_mcp",
+  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_keeps_private_lifecycle_owner_scoped_and_matches_http_with_mcp",
+  "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rolls_back_private_faults_and_retries_after_restart",
 ]);
 
 export function sherwoodDeterministicBuildProperties(checkout) {

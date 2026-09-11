@@ -489,6 +489,7 @@ test("TypeScript and Python enforce Sherwood assembly and process evidence prere
       "session_scope_escape",
       "zero_cost_reconciliation",
       "persistence_fault_recovery",
+      "owner_isolation",
     ]) {
       const scenario = valid.statement.scenarios.find(
         (candidate: Record<string, unknown>) => candidate.id === scenarioId,
@@ -565,21 +566,23 @@ test("TypeScript and Python enforce Sherwood assembly and process evidence prere
         scenario.evidence = [fixture.statement.scenarios[0].evidence[0]];
         return invalid;
       })(),
-      ...["zero_cost_reconciliation", "persistence_fault_recovery"].map(
-        (scenarioId) => {
-          const invalid = structuredClone(fixture);
-          const scenario = invalid.statement.scenarios.find(
-            (candidate: Record<string, unknown>) => candidate.id === scenarioId,
-          );
-          assert.ok(scenario);
-          delete scenario.reason;
-          delete scenario.next_action;
-          scenario.status = "verified";
-          scenario.assertions = 1;
-          scenario.evidence = [fixture.statement.scenarios[0].evidence[0]];
-          return invalid;
-        },
-      ),
+      ...[
+        "zero_cost_reconciliation",
+        "persistence_fault_recovery",
+        "owner_isolation",
+      ].map((scenarioId) => {
+        const invalid = structuredClone(fixture);
+        const scenario = invalid.statement.scenarios.find(
+          (candidate: Record<string, unknown>) => candidate.id === scenarioId,
+        );
+        assert.ok(scenario);
+        delete scenario.reason;
+        delete scenario.next_action;
+        scenario.status = "verified";
+        scenario.assertions = 1;
+        scenario.evidence = [fixture.statement.scenarios[0].evidence[0]];
+        return invalid;
+      }),
     ];
 
     for (const [index, invalid] of invalidManifests.entries()) {

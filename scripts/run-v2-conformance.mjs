@@ -279,13 +279,14 @@ async function runSherwoodConformance(
       counters,
       scenario_assertions: {
         mcp_http_parity: 8,
-        privacy_canary_scan: 6,
+        privacy_canary_scan: 12,
         operation_exactly_once: 7,
         operation_conflict: 4,
         authentication_fail_closed: 15,
         session_scope_escape: 16,
         zero_cost_reconciliation: 10,
         persistence_fault_recovery: 8,
+        owner_isolation: 20,
       },
       transport: "loopback-http",
       logical_endpoint_scheme: "https",
@@ -295,6 +296,11 @@ async function runSherwoodConformance(
       private_export_transport_parity: true,
       private_export_replay_exact: true,
       private_export_owner_isolation: true,
+      private_lifecycle_transport_parity: true,
+      private_lifecycle_fault_recovery: true,
+      mcp_structured_content_parity: true,
+      private_payload_canary_scanned: true,
+      foreign_private_partition_excluded: true,
       durable_operation_singleton: true,
       operation_exactly_once: true,
       operation_conflict: true,
@@ -628,7 +634,7 @@ async function main() {
     ).stdout.trim();
     const statement = {
       schema: "gossip.acceptance-statement.v1",
-      suite_revision: "gossip-v2-conformance-2026-09-11.4",
+      suite_revision: "gossip-v2-conformance-2026-09-11.5",
       protocol: "gossip/2-draft.1",
       generated_at: Math.floor(Date.now() / 1000),
       source: {
@@ -733,8 +739,8 @@ async function main() {
         ),
         blocked(
           "owner_isolation",
-          "The complete private owner lifecycle is not implemented by Sherwood.",
-          "Exercise operation, receipt, evidence, export, deletion and audit isolation.",
+          "No packaged owner-lifecycle process evidence was supplied.",
+          "Run operation, receipt, evidence, export, deletion and audit isolation against one packaged process.",
         ),
         blocked(
           "privacy_canary_scan",
@@ -801,8 +807,10 @@ async function main() {
         unavailableCapability(
           "private_submission",
           "blocked",
-          "Encrypted owner-scoped storage is not proven.",
-          "Pass the approved private lifecycle and privacy scan.",
+          sherwoodEvidence
+            ? "The synthetic encrypted lifecycle passed, but production retention, holds, key rotation and backup erasure are not approved."
+            : "No packaged encrypted owner-lifecycle evidence was supplied.",
+          "Approve the production privacy policy and operational deletion and key-management gates.",
         ),
         unavailableCapability(
           "http",
@@ -840,6 +848,7 @@ async function main() {
         "session_scope_escape",
         "zero_cost_reconciliation",
         "persistence_fault_recovery",
+        "owner_isolation",
       ];
       statement.scenarios = statement.scenarios.map((scenario) => {
         if (processScenarioIds.includes(scenario.id)) {
@@ -850,14 +859,6 @@ async function main() {
               sherwoodEvidence.summary.scenario_assertions[scenario.id],
             evidence: [processEvidence],
           };
-        }
-
-        if (scenario.id === "owner_isolation") {
-          return blocked(
-            scenario.id,
-            "The process proved operation, receipt and private-export isolation; deletion, correction and complete access-audit isolation remain unproven.",
-            "Exercise private deletion, correction and access-audit isolation through both transports.",
-          );
         }
 
         return scenario;

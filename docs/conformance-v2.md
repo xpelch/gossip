@@ -44,7 +44,7 @@ checkout must have the canonical `xpelch/sherwood` HTTPS or SSH origin, no
 working-tree changes, and no reparse-point root. The runner clones it without
 hardlinks, detaches the requested commit, restores and builds the Sherwood
 test project in Release mode with continuous-integration determinism enabled
-and the temporary source root mapped to `/_/`. It then runs all seven exact
+and the temporary source root mapped to `/_/`. It then runs all nine exact
 process test FQNs in one bounded TRX result. The stable source mapping keeps the
 assembly digest independent of the temporary clone path. The supplied checkout
 is executable source code and therefore an explicit caller trust boundary; the
@@ -54,14 +54,16 @@ The public evidence summary records only hashes, sizes, counters, revisions,
 runtime versions and boolean assertions. Raw child output and TRX data remain
 in disposable restricted storage and are scanned before summary derivation;
 paths, remotes, requests, receipts, signatures, keys, connection strings and
-canaries are never published. Passing all seven tests promotes
+canaries are never published. Passing all nine tests promotes
 `mcp_http_parity`, `privacy_canary_scan`, `operation_exactly_once`,
 `operation_conflict`, `authentication_fail_closed`,
 `session_scope_escape`, `zero_cost_reconciliation`, and
-`persistence_fault_recovery` to `verified`.
-`owner_isolation` remains blocked with partial evidence: operation, receipt and
-private-export isolation pass, while deletion, correction and complete
-access-audit isolation remain unproven. The new fault tests prove
+`persistence_fault_recovery`, and `owner_isolation` to `verified`.
+The owner-isolation gate covers operations, receipts, encrypted private
+payloads, export, correction, deletion, access audit, cross-owner failures, and
+privacy fault recovery under the synthetic policy. `private_submission` remains
+blocked until the production retention, hold, key-rotation, backup-erasure, and
+approval gates pass. The fault tests prove
 zero-cost reconciliation after a killed process and transactional rollback at
 a frozen persistence cut point. No capability is promoted to `verified`, and
 the overall decision remains `blocked` because the run produces an assembly
@@ -112,7 +114,7 @@ between runs.
 The next slice extends the pinned Sherwood process with controlled chain
 fixtures. It must cover stale, wrong-chain, missing-source, reorg, correction,
 supersession, private owner lifecycle, and independent clean replay without
-weakening the seven existing process gates.
+weakening the nine existing process gates.
 
 Protected session-key storage, encrypted private-evidence operations,
 production receipt trust, and high-trust independent reproduction remain

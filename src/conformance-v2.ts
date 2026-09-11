@@ -7,7 +7,7 @@ export const ACCEPTANCE_ENVELOPE_SCHEMA =
 export const ACCEPTANCE_STATEMENT_SCHEMA =
   "gossip.acceptance-statement.v1" as const;
 export const CONFORMANCE_SUITE_REVISION =
-  "gossip-v2-conformance-2026-09-11.4" as const;
+  "gossip-v2-conformance-2026-09-11.5" as const;
 
 export const CONFORMANCE_SCENARIOS = [
   "artifact_install",
@@ -54,6 +54,7 @@ const PROCESS_EVIDENCE_SCENARIOS = [
   "session_scope_escape",
   "zero_cost_reconciliation",
   "persistence_fault_recovery",
+  "owner_isolation",
 ] as const;
 
 const DIGEST = /^sha256:[0-9a-f]{64}$/;

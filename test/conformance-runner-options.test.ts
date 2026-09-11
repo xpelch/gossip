@@ -164,7 +164,7 @@ test("accepts the xUnit TRX counter shape without an optional skipped attribute"
 });
 
 test("requires all exact Sherwood process test outcomes in one TRX", () => {
-  const [first, second, third, fourth, fifth, sixth, seventh] =
+  const [first, second, third, fourth, fifth, sixth, seventh, eighth, ninth] =
     SHERWOOD_PROCESS_TEST_FQNS;
   const trx = `
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_serves_signed_http_and_mcp_and_replays_after_restart" />
@@ -174,6 +174,8 @@ test("requires all exact Sherwood process test outcomes in one TRX", () => {
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_paused_process_kill_restarts_into_reconciliation_without_reexecution" />
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_throwing_persistence_cut_point_rolls_back_and_requires_reconciliation" />
     <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_keeps_private_export_owner_scoped_and_matches_http_with_mcp" />
+    <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_keeps_private_lifecycle_owner_scoped_and_matches_http_with_mcp" />
+    <TestMethod className="Sherwood.Tests.GossipV2ProcessConformanceTests" name="A_real_process_rolls_back_private_faults_and_retries_after_restart" />
     <UnitTestResult testName="${first}" outcome="Passed" />
     <UnitTestResult testName="${second}" outcome="Passed" />
     <UnitTestResult testName="${third}" outcome="Passed" />
@@ -181,12 +183,14 @@ test("requires all exact Sherwood process test outcomes in one TRX", () => {
     <UnitTestResult testName="${fifth}" outcome="Passed" />
     <UnitTestResult testName="${sixth}" outcome="Passed" />
     <UnitTestResult testName="${seventh}" outcome="Passed" />
-    <Counters total="7" executed="7" passed="7" failed="0" error="0" notExecuted="0" skipped="0" />`;
+    <UnitTestResult testName="${eighth}" outcome="Passed" />
+    <UnitTestResult testName="${ninth}" outcome="Passed" />
+    <Counters total="9" executed="9" passed="9" failed="0" error="0" notExecuted="0" skipped="0" />`;
 
   assert.deepEqual(parseTrxResults(trx, SHERWOOD_PROCESS_TEST_FQNS), {
-    total: 7,
-    executed: 7,
-    passed: 7,
+    total: 9,
+    executed: 9,
+    passed: 9,
     failed: 0,
     error: 0,
     notExecuted: 0,
