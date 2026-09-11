@@ -1,0 +1,16 @@
+{
+  "schema": "gossip.replay-attestation-envelope.v1",
+  "attestation": {
+    "schema": "gossip.replay-attestation.v1",
+    "protocol": "gossip/2-draft.1",
+    "suite_revision": "gossip-v2-conformance-2026-09-11.11",
+    "primary_manifest": "sha256:9e1eb22ee851b0d8a6bd791bf49afdc896ccc0613381a6aed342f074bf3312f9",
+    "replay_manifest": "sha256:6b7dc925c0653fa693a8eadab448bdbdb95adb43b08f1f946e5e62cc9d04d74f",
+    "projection_digest": "sha256:11b1f5efe02b1b8c313ab43e6c05357bb9e7a9678746f3c354ef6fde56fb616d",
+    "result": "matched"
+  },
+  "content_address": {
+    "algorithm": "sha256",
+    "digest": "sha256:3b5e4d9531ca797d87954e5ea923f6d4ef14e95def8db8bf089bc00ea83d48a3"
+  }
+}

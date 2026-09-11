@@ -1,0 +1,348 @@
+{
+  "schema": "gossip.acceptance-envelope.v1",
+  "statement": {
+    "schema": "gossip.acceptance-statement.v1",
+    "suite_revision": "gossip-v2-conformance-2026-09-11.11",
+    "protocol": "gossip/2-draft.1",
+    "generated_at": 1789151208,
+    "source": {
+      "repository": "https://github.com/xpelch/gossip",
+      "commit": "40c87fe7b2434ee3a2e24740ec33a58a92984e29",
+      "dirty": false
+    },
+    "artifacts": {
+      "gossip": {
+        "package": "@gossip/agent-kit",
+        "version": "0.1.0-dev.1",
+        "sha256": "sha256:0ed0a5dbf725168092803fddc2bc31154155822d7719d394154b0d227bbc7352",
+        "bytes": 15054713
+      },
+      "sherwood": {
+        "repository": "https://github.com/xpelch/sherwood",
+        "commit": "b0a083b23998f978ef837d655ce59f753436807a",
+        "assembly": {
+          "sha256": "sha256:a33d63631da06fb939e7b958fde8620eca6a0344dbc28640a34eac15db131333",
+          "bytes": 7804416
+        },
+        "image_digest": null
+      }
+    },
+    "runtime": {
+      "os": "win32",
+      "architecture": "x64",
+      "node": "24.13.1",
+      "npm": "11.8.0",
+      "python": "3.13.5",
+      "dotnet": "10.0.301",
+      "docker": "29.7.2",
+      "postgresql": "17"
+    },
+    "revisions": {
+      "schema": "2026-09-09",
+      "auth": "gossip-eip191-v2",
+      "mcp": "2025-11-25",
+      "engine": "synthetic-v1",
+      "database_migrations": "git-tree-f19988a33b66954bee7c4b8887ab42d84fc78984",
+      "fixture_suite": "gossip-v2-fixtures-1"
+    },
+    "fixtures": [
+      {
+        "name": "v2-canonical",
+        "path": "fixtures/v2-canonical.json",
+        "sha256": "sha256:b4b0c6af3ac730c10a70d071c812d53bf2ea8acbcb9fa02413cb7a6249e2955c",
+        "bytes": 80541
+      },
+      {
+        "name": "v2-evidence-receipts",
+        "path": "fixtures/v2-evidence-receipts.json",
+        "sha256": "sha256:62bae77f4385e179d24cbd4c48849df7045e4156b276f7bbae384f590ee7e1c3",
+        "bytes": 122546
+      },
+      {
+        "name": "v2-receipt-auth",
+        "path": "fixtures/v2-receipt-auth.json",
+        "sha256": "sha256:ca2a8ac09a0ca97c8de3b862e6a9eea30347e1da7e44d30ea6182ebad74bed9c",
+        "bytes": 2541
+      },
+      {
+        "name": "v2-http-auth",
+        "path": "fixtures/v2-http-auth.json",
+        "sha256": "sha256:0c8781af7a2ab843c673d0353a64e3c881ad8c2e367bbce8f22b949ba0c2600b",
+        "bytes": 962
+      },
+      {
+        "name": "v2-identity-session",
+        "path": "fixtures/v2-identity-session.json",
+        "sha256": "sha256:22b6f837f8b81a370ffc41508c9153497ec360551ab1f156ea4aeeb97bcaa4e2",
+        "bytes": 17762
+      },
+      {
+        "name": "v2-privacy",
+        "path": "fixtures/v2-privacy.json",
+        "sha256": "sha256:62452ac3ab5b1880c37ac61f53992e3e9192fdd4b8df1a94124454d1fcb1e59e",
+        "bytes": 9590
+      },
+      {
+        "name": "v2-public-submission",
+        "path": "fixtures/v2-public-submission.json",
+        "sha256": "sha256:f9aebf379d99ec502ccb166834317070371615c82e912b5aace1c921e237e4fd",
+        "bytes": 6445
+      },
+      {
+        "name": "v2-public-submission-receipt",
+        "path": "fixtures/v2-public-submission-receipt.json",
+        "sha256": "sha256:764288d73d8b2dfbdd075d2ce0c4fc1c3a36310ef97889695c9756231f92cfa5",
+        "bytes": 2246
+      },
+      {
+        "name": "v2-public-evidence-document",
+        "path": "fixtures/v2-public-evidence-document.json",
+        "sha256": "sha256:fc354947186f67448eec394899e8a74a8cc1057d28c34425f1aaed2336b55d2a",
+        "bytes": 2395
+      },
+      {
+        "name": "v2-conformance",
+        "path": "fixtures/v2-conformance.json",
+        "sha256": "sha256:86068f09e4ff269637aa5dee445c75cb43e405938f91ba79c6353f3e79da9a36",
+        "bytes": 8884
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "artifact_install",
+        "status": "verified",
+        "assertions": 6,
+        "evidence": [
+          {
+            "path": "evidence/artifact-install.json",
+            "sha256": "sha256:9e55aaf02ac8f939694c88832d1c9a98cdbeeca8b08e7447d144ea698e7ff55e",
+            "bytes": 264
+          }
+        ]
+      },
+      {
+        "id": "installed_cli_process",
+        "status": "verified",
+        "assertions": 4,
+        "evidence": [
+          {
+            "path": "evidence/installed-cli.json",
+            "sha256": "sha256:75c981f78232be5d893152a758819419225b670012ea5dbca0ac3e6db4755c43",
+            "bytes": 109
+          }
+        ]
+      },
+      {
+        "id": "mcp_http_parity",
+        "status": "verified",
+        "assertions": 8,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:49f4bc8e2d1c2946e1722b4f60a4521bd63e946276697e58b5a0a75b141d0b89",
+            "bytes": 6973
+          }
+        ]
+      },
+      {
+        "id": "authentication_fail_closed",
+        "status": "verified",
+        "assertions": 15,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:49f4bc8e2d1c2946e1722b4f60a4521bd63e946276697e58b5a0a75b141d0b89",
+            "bytes": 6973
+          }
+        ]
+      },
+      {
+        "id": "session_scope_escape",
+        "status": "verified",
+        "assertions": 16,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:49f4bc8e2d1c2946e1722b4f60a4521bd63e946276697e58b5a0a75b141d0b89",
+            "bytes": 6973
+          }
+        ]
+      },
+      {
+        "id": "public_submission_transport",
+        "status": "verified",
+        "assertions": 18,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:49f4bc8e2d1c2946e1722b4f60a4521bd63e946276697e58b5a0a75b141d0b89",
+            "bytes": 6973
+          }
+        ]
+      },
+      {
+        "id": "operation_exactly_once",
+        "status": "verified",
+        "assertions": 7,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:49f4bc8e2d1c2946e1722b4f60a4521bd63e946276697e58b5a0a75b141d0b89",
+            "bytes": 6973
+          }
+        ]
+      },
+      {
+        "id": "operation_conflict",
+        "status": "verified",
+        "assertions": 4,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:49f4bc8e2d1c2946e1722b4f60a4521bd63e946276697e58b5a0a75b141d0b89",
+            "bytes": 6973
+          }
+        ]
+      },
+      {
+        "id": "zero_cost_reconciliation",
+        "status": "verified",
+        "assertions": 10,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:49f4bc8e2d1c2946e1722b4f60a4521bd63e946276697e58b5a0a75b141d0b89",
+            "bytes": 6973
+          }
+        ]
+      },
+      {
+        "id": "persistence_fault_recovery",
+        "status": "verified",
+        "assertions": 8,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:49f4bc8e2d1c2946e1722b4f60a4521bd63e946276697e58b5a0a75b141d0b89",
+            "bytes": 6973
+          }
+        ]
+      },
+      {
+        "id": "evidence_finality_reorg",
+        "status": "blocked",
+        "reason": "The process proved stale, wrong-chain, wrong block/hash and source-reorged refusals; missing-source and post-publication quarantine remain unproven.",
+        "next_action": "Prove missing-source refusal and post-publication reorg quarantine through the packaged process."
+      },
+      {
+        "id": "correction_supersession",
+        "status": "blocked",
+        "reason": "Correction lineage was not run through the packaged process.",
+        "next_action": "Run conflict, correction and supersession fixtures."
+      },
+      {
+        "id": "owner_isolation",
+        "status": "verified",
+        "assertions": 20,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:49f4bc8e2d1c2946e1722b4f60a4521bd63e946276697e58b5a0a75b141d0b89",
+            "bytes": 6973
+          }
+        ]
+      },
+      {
+        "id": "privacy_canary_scan",
+        "status": "verified",
+        "assertions": 12,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:49f4bc8e2d1c2946e1722b4f60a4521bd63e946276697e58b5a0a75b141d0b89",
+            "bytes": 6973
+          }
+        ]
+      },
+      {
+        "id": "independent_vectors",
+        "status": "verified",
+        "assertions": 9,
+        "evidence": [
+          {
+            "path": "evidence/independent-vectors.json",
+            "sha256": "sha256:d9ec0bd2d176f143adb84b82c5770adc380050505aaee8651f2bf5b2e4e1e634",
+            "bytes": 377
+          }
+        ]
+      },
+      {
+        "id": "clean_checkout_reproduction",
+        "status": "blocked",
+        "reason": "A second clean-checkout replay has not been compared.",
+        "next_action": "Replay pinned sources and compare scenario and capability decisions."
+      }
+    ],
+    "capabilities": [
+      {
+        "name": "atomic_consult",
+        "state": "installed",
+        "reason": "Complete zero-cost consultation and bounded crash recovery passed; the remaining economic and evidence matrix is unverified.",
+        "next_action": "Pass the remaining economics, evidence and production gates."
+      },
+      {
+        "name": "durable_operations",
+        "state": "installed",
+        "reason": "Restart, exactly-once, conflict and fault recovery passed; independent replay and production acceptance remain unverified.",
+        "next_action": "Pass independent clean replay and production acceptance."
+      },
+      {
+        "name": "signed_receipts",
+        "state": "installed",
+        "reason": "The tested assembly issued a valid receipt chain without a production key trust path.",
+        "next_action": "Verify packaged receipt issuance and the pinned trust anchor."
+      },
+      {
+        "name": "evidence",
+        "state": "installed",
+        "reason": "Retained evidence, controlled refusal and transactional rollback passed without missing-source, post-publication reorg or correction reproduction.",
+        "next_action": "Pass controlled evidence and independent reproduction scenarios."
+      },
+      {
+        "name": "session_keys",
+        "state": "installed",
+        "reason": "The server registry and bounded session transports passed, but protected client storage and real host integration remain unverified.",
+        "next_action": "Pass protected storage and version-pinned Grok Bot, Hermes and OpenClaw acceptance."
+      },
+      {
+        "name": "public_submission",
+        "state": "installed",
+        "reason": "Signed public-only submission, exact retrieval, retries, restart, corrections, and scoped sessions passed through the packaged process.",
+        "next_action": "Pass the pinned production endpoint and host acceptance before advertising verified support."
+      },
+      {
+        "name": "private_submission",
+        "state": "blocked",
+        "reason": "The synthetic encrypted lifecycle passed, but production retention, holds, key rotation and backup erasure are not approved.",
+        "next_action": "Approve the production privacy policy and operational deletion and key-management gates."
+      },
+      {
+        "name": "http",
+        "state": "installed",
+        "reason": "Process parity passed for the tested assembly without deployment acceptance.",
+        "next_action": "Pass the pinned production image, TLS and host acceptance gates."
+      },
+      {
+        "name": "tasks",
+        "state": "not_applicable",
+        "reason": "MCP Tasks are outside the current core profile.",
+        "next_action": "Negotiate a separately pinned Tasks profile before use."
+      }
+    ],
+    "decision": "blocked"
+  },
+  "content_address": {
+    "algorithm": "sha256",
+    "digest": "sha256:9e1eb22ee851b0d8a6bd791bf49afdc896ccc0613381a6aed342f074bf3312f9"
+  }
+}

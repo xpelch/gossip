@@ -4,6 +4,10 @@ Issue [#17](https://github.com/xpelch/gossip/issues/17) requires one disposable,
 version-pinned run across the installed Gossip process and Sherwood. The current
 harness implements the public manifest and the offline installed-artifact slice.
 
+The latest integrated two-run evidence and matched replay attestation are
+published in
+[`docs/acceptance/evidence/gossip-v2-2026-09-11`](acceptance/evidence/gossip-v2-2026-09-11/README.md).
+
 ## Run the offline slice
 
 Use a clean checkout with Node 24, npm, and Python. Choose a new absolute output
