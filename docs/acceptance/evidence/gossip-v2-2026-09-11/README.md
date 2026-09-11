@@ -5,15 +5,15 @@ suite `gossip-v2-conformance-2026-09-11.12` and their replay attestation.
 
 Both executions pinned:
 
-- Gossip commit `e715ce044bd72484b3218da36e2f749a51e9a704`;
-- Sherwood commit `0752939896b2f7b97d51767d4b6206329d76e14e`;
+- Gossip commit `30c30676fcc2f601db63181fbcd1326bf17e5926`;
+- Sherwood commit `017e592401b5a79edfbf9b2b7c8df01bd2cd555b`;
 - protocol `gossip/2-draft.1`;
 - the exact thirteen-test Sherwood process contract.
 
 Each run cloned the public source without hardlinks, built and packed the kit,
 installed the artifact without lifecycle scripts, cloned the exact clean
 Sherwood commit, built the same deterministic Release assembly
-`sha256:2fdb591a994d92824bc51f63bce5d3433740938d86b04dea0d32a2c2ff7446fe`,
+`sha256:16ee8ebd41c1ecdaee46a322eba74d5db13b2015f895dd7d1549212b78378974`,
 and ran the thirteen
 real-process tests against disposable PostgreSQL and Kestrel instances.
 
@@ -31,12 +31,12 @@ because this evidence does not claim those production gates.
 
 Content addresses:
 
-- run A: `sha256:b6b5f15c1371112034b202c5effad4ad8b75057440298910633045d5119ef44c`;
-- run B: `sha256:9bc5f5573b29d8021b4239ba495bb9ba0ce7538a635a91dca1f8bffbb90f6dfc`;
+- run A: `sha256:263bdb8b21f6525994e178254c7a11e3da327ace02ea05b2f9c256958a4515f0`;
+- run B: `sha256:0f57921e75237ca498a070eff4ff5256f11d31b300cad7a10d299ce706aaf5b1`;
 - stable comparison projection:
-  `sha256:6552324c39654dd68c551495076366e4c4f0a07b75f0d45e47a98ae23d6a7989`;
+  `sha256:a8e22baa45c4e921376fdee2a50378faf624ba8f8a57c5bcead6afc4bcc2b8ef`;
 - replay attestation:
-  `sha256:a5517f4d26f9af8043cc9f5391c1402dbdab3b0ff83bf123a4868d5aa29dff45`.
+  `sha256:045bb4b0bd46c61d270e189cdb20a5300b6ed793bb030c31600c3f459e3ead47`.
 
 Verify the published copies from the repository root:
 

@@ -1,10 +1,10 @@
 {
   "result": "passed",
   "repository": "https://github.com/xpelch/sherwood",
-  "commit": "0752939896b2f7b97d51767d4b6206329d76e14e",
+  "commit": "017e592401b5a79edfbf9b2b7c8df01bd2cd555b",
   "assembly": {
-    "sha256": "sha256:2fdb591a994d92824bc51f63bce5d3433740938d86b04dea0d32a2c2ff7446fe",
-    "bytes": 7804416
+    "sha256": "sha256:16ee8ebd41c1ecdaee46a322eba74d5db13b2015f895dd7d1549212b78378974",
+    "bytes": 7807488
   },
   "runtime": {
     "dotnet": "10.0.301",
@@ -96,7 +96,7 @@
   "process_capture": {
     "schema": "sherwood.gossip-v2-process-capture.v1",
     "redaction_profile": "digests-and-counts-only",
-    "sha256": "sha256:fa25afdd088f6035499578e6c6f99eb49e3d7e7f2b4691c30d26ed8024b54ec4",
+    "sha256": "sha256:34691ed230527efb6a453984483aa890b7eec3e939db49a89f648d1aaa53764c",
     "bytes": 1658
   },
   "scenario_assertions": {
@@ -165,14 +165,14 @@
   "receipt_chain_verified": true,
   "restart_replay_exact": true,
   "diagnostics_clean": true,
-  "test_source_sha256": "sha256:901b3e2007b4b2217405a9ff1033b6ab6118174079412f8aaf4edd162f5b66e3",
-  "test_source_bytes": 179347,
-  "runbook_source_sha256": "sha256:3ee8113dcc8b73756dce880c8d5677d25a8ff0f6ecf0dd3154c93e1ca5bfa2b4",
-  "runbook_source_bytes": 24711,
-  "stdout_sha256": "sha256:dafe3cc9c5dad7bfee0ec729fd26045eaa76ea26adf45a9eae5b8049e735ca33",
+  "test_source_sha256": "sha256:aae2fed16f2d46f4c4f1481dcff3ef037e9091459d57236e66d218e3297c2006",
+  "test_source_bytes": 179605,
+  "runbook_source_sha256": "sha256:7b3ae481d406fe58f561d0594be9792a60ac156b3b65c9c0f28b46c66421fbe6",
+  "runbook_source_bytes": 25422,
+  "stdout_sha256": "sha256:9e8f6a5470674716aab91181156f1ca9ed550bd9e1f5c692a2a35843f2fde405",
   "stdout_bytes": 575,
   "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "stderr_bytes": 0,
-  "trx_sha256": "sha256:65d9cd32615a82baa3ba65bde2bca2e15a3cb08870611a3412187542d8bef590",
+  "trx_sha256": "sha256:77a1a31524d22f4697ebef24ff0eb074ee412066c88641672be718bc49202924",
   "trx_bytes": 24280
 }
