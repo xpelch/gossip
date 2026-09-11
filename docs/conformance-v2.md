@@ -36,14 +36,14 @@ The runner can execute the process-faithful Sherwood slice when the caller
 supplies an absolute, clean local checkout and an exact commit:
 
 ```powershell
-node scripts/run-v2-conformance.mjs --output C:\temp\gossip-v2-acceptance --sherwood-repository C:\src\sherwood --sherwood-commit f701681f2c4088835407839481bdb7a904cf1cbc
+node scripts/run-v2-conformance.mjs --output C:\temp\gossip-v2-acceptance --sherwood-repository C:\src\sherwood --sherwood-commit 478e7053ad4a9328939d6f656f51ca64f7f8b379
 ```
 
 The commit value must be 40 lowercase hexadecimal characters. The local
 checkout must have the canonical `xpelch/sherwood` HTTPS or SSH origin, no
 working-tree changes, and no reparse-point root. The runner clones it without
 hardlinks, detaches the requested commit, restores and builds the Sherwood
-test project in Release mode, then runs all four exact process test FQNs in one
+test project in Release mode, then runs all six exact process test FQNs in one
 bounded TRX result. The supplied checkout is executable source code and
 therefore an explicit caller trust boundary; the commit must be the full
 40-character value resolved from that clean checkout.
@@ -52,20 +52,23 @@ The public evidence summary records only hashes, sizes, counters, revisions,
 runtime versions and boolean assertions. Raw child output and TRX data remain
 in disposable restricted storage and are scanned before summary derivation;
 paths, remotes, requests, receipts, signatures, keys, connection strings and
-canaries are never published. Passing all four tests promotes
+canaries are never published. Passing all six tests promotes
 `mcp_http_parity`, `privacy_canary_scan`, `operation_exactly_once`,
 `operation_conflict`, `authentication_fail_closed`, and
-`session_scope_escape` to `verified`.
+`session_scope_escape`, `zero_cost_reconciliation`, and
+`persistence_fault_recovery` to `verified`.
 `owner_isolation` remains blocked with partial non-enumeration evidence because
-private lifecycle/export/delete/audit is absent. Zero-cost reconciliation
-remains blocked because crash/timeout recovery was not run; all capabilities
-and the overall decision remain blocked because the run produces an assembly
-but no production image.
+private lifecycle/export/delete/audit is absent. The new fault tests prove
+zero-cost reconciliation after a killed process and transactional rollback at
+a frozen persistence cut point. No capability is promoted to `verified`, and
+the overall decision remains `blocked` because the run produces an assembly
+but no production image, controlled reorg/correction evidence, or independent
+clean replay.
 The process uses loopback HTTP while authenticating against logical HTTPS
 endpoint and audience values. The server session registry and bounded
 transports are exercised, so `session_keys` becomes `installed`; protected
-client storage, real host integration, TLS, images, faults, and clean replay
-remain unverified. A timed `execFile` kill can leave
+client storage, real host integration, TLS, images, the remaining fault matrix,
+and clean replay remain unverified. A timed `execFile` kill can leave
 descendant processes on some platforms; the Sherwood test has deterministic
 cleanup, and this residual is reported rather than hidden.
 
@@ -85,11 +88,10 @@ who ran it or authorize a capability.
 
 ## Remaining process harness
 
-The next slice launches one pinned Sherwood artifact with disposable PostgreSQL
-and controlled chain fixtures. Installed MCP and signed HTTP requests must hit
-that same application. It will run the 100-request exactly-once case, conflict,
-zero-cost reconciliation, restart, frozen persistence faults, evidence/reorg,
-owner isolation, and privacy canary scenarios.
+The next slice extends the pinned Sherwood process with controlled chain
+fixtures. It must cover stale, wrong-chain, missing-source, reorg, correction,
+supersession, private owner lifecycle, and independent clean replay without
+weakening the six existing process gates.
 
 Protected session-key storage, encrypted private-evidence operations,
 production receipt trust, and high-trust independent reproduction remain

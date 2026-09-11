@@ -282,6 +282,8 @@ async function runSherwoodConformance(
         operation_conflict: 4,
         authentication_fail_closed: 15,
         session_scope_escape: 16,
+        zero_cost_reconciliation: 10,
+        persistence_fault_recovery: 8,
       },
       transport: "loopback-http",
       logical_endpoint_scheme: "https",
@@ -301,6 +303,10 @@ async function runSherwoodConformance(
       session_subscriber_absent: true,
       session_shared_rate_cap: true,
       legacy_session_downgrade_rejected: true,
+      crash_recovery_reconciled: true,
+      persistence_transaction_rolled_back: true,
+      zero_cost_preserved_after_fault: true,
+      retained_source_not_reexecuted: true,
       receipt_chain_verified: true,
       restart_replay_exact: true,
       diagnostics_clean: true,
@@ -617,7 +623,7 @@ async function main() {
     ).stdout.trim();
     const statement = {
       schema: "gossip.acceptance-statement.v1",
-      suite_revision: "gossip-v2-conformance-2026-09-10.2",
+      suite_revision: "gossip-v2-conformance-2026-09-10.3",
       protocol: "gossip/2-draft.1",
       generated_at: Math.floor(Date.now() / 1000),
       source: {
@@ -749,17 +755,17 @@ async function main() {
           "atomic_consult",
           "installed",
           sherwoodEvidence
-            ? "One complete zero-cost process path passed; the economic and fault matrix remains unverified."
+            ? "Complete zero-cost consultation and bounded crash recovery passed; the remaining economic and evidence matrix is unverified."
             : "Contract code is installed without packaged engine evidence.",
-          "Pass operation, economics and fault scenarios.",
+          "Pass the remaining economics, evidence and production gates.",
         ),
         unavailableCapability(
           "durable_operations",
           "installed",
           sherwoodEvidence
-            ? "One restart replay passed; concurrency, conflict and fault recovery remain unverified."
+            ? "Restart, exactly-once, conflict and fault recovery passed; independent replay and production acceptance remain unverified."
             : "Contract code is installed without packaged database evidence.",
-          "Pass restart, conflict and exactly-once scenarios.",
+          "Pass independent clean replay and production acceptance.",
         ),
         unavailableCapability(
           "signed_receipts",
@@ -773,7 +779,7 @@ async function main() {
           "evidence",
           "installed",
           sherwoodEvidence
-            ? "One retained evidence result passed without controlled reorg or correction reproduction."
+            ? "Retained evidence and transactional fault rollback passed without controlled reorg or correction reproduction."
             : "Evidence contracts are installed without end-to-end reproduction.",
           "Pass controlled evidence and independent reproduction scenarios.",
         ),
@@ -827,6 +833,8 @@ async function main() {
         "operation_conflict",
         "authentication_fail_closed",
         "session_scope_escape",
+        "zero_cost_reconciliation",
+        "persistence_fault_recovery",
       ];
       statement.scenarios = statement.scenarios.map((scenario) => {
         if (processScenarioIds.includes(scenario.id)) {

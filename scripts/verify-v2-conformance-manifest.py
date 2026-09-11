@@ -50,6 +50,8 @@ PROCESS_EVIDENCE_SCENARIOS = {
     "operation_conflict",
     "authentication_fail_closed",
     "session_scope_escape",
+    "zero_cost_reconciliation",
+    "persistence_fault_recovery",
 }
 SHA256_PREFIX = "sha256:"
 MAX_UNIX_SECONDS = 253_402_300_799
@@ -168,7 +170,7 @@ exact_keys(
     },
 )
 assert statement["schema"] == "gossip.acceptance-statement.v1"
-assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-10.2"
+assert statement["suite_revision"] == "gossip-v2-conformance-2026-09-10.3"
 assert statement["protocol"] == PROTOCOL
 assert statement["decision"] in {"verified", "blocked"}
 verify_integer(statement["generated_at"], 0, MAX_UNIX_SECONDS)

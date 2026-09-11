@@ -63,22 +63,26 @@ canonical body authenticated by `gossip-eip191-v2`.
 
 ## Sherwood server activation
 
-Sherwood commit `f701681f2c4088835407839481bdb7a904cf1cbc`
-implements the server side on draft PR
-[#458](https://github.com/xpelch/sherwood/pull/458). It provides an append-only
+Sherwood commit `478e7053ad4a9328939d6f656f51ca64f7f8b379`
+includes the server side from draft PR
+[#458](https://github.com/xpelch/sherwood/pull/458) and its stacked process-fault
+gate from draft PR [#460](https://github.com/xpelch/sherwood/pull/460). It
+provides an append-only
 grant and revocation registry, durable replay nonces, root-only management,
 direct HTTP and MCP session adapters, shared admission limits, and root-owned
 operation and receipt reads. Session identities never become Sherwood
 subscribers and cannot downgrade into root authentication through Gossip v2 or
 legacy `X-Sherwood-*` headers.
 
-The process gate starts real Kestrel instances against disposable PostgreSQL
-17 and runs these exact tests:
+The public process gate starts real Kestrel instances against disposable
+PostgreSQL 17 and runs six exact tests listed in
+[the conformance runbook](../conformance-v2.md). These two tests establish the
+session portion:
 
 - `A_real_process_serves_registered_identity_session_over_http_and_mcp_and_preserves_root_ownership_after_restart`
 - `A_real_process_enforces_identity_session_replay_revocation_rate_and_malformed_downgrade_fail_closed`
 
-Those tests cover grant idempotency, direct and MCP mappings, restart, replay,
+Those two tests cover grant idempotency, direct and MCP mappings, restart, replay,
 effective revocation, shared rate limits, malformed no-downgrade behavior,
 root ownership, and the absence of session subscriber creation. This proves
 the server gate for a pinned assembly; it does not create or store a session
