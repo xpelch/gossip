@@ -25,6 +25,7 @@
     "scripts/verify-v2-privacy.py",
     "scripts/verify-v2-public-submission.py",
     "scripts/verify-v2-public-submission-receipt.py",
+    "scripts/verify-v2-public-evidence-document.py",
     "scripts/verify-v2-conformance-manifest.py",
     "scripts/run-v2-conformance.mjs",
     "scripts/conformance-runner-options.mjs",
@@ -36,6 +37,7 @@
     "test/fixtures/v2-privacy.json",
     "test/fixtures/v2-public-submission.json",
     "test/fixtures/v2-public-submission-receipt.json",
+    "test/fixtures/v2-public-evidence-document.json",
     "test/fixtures/v2-conformance.json"
   ],
   "scripts": {
@@ -51,6 +53,7 @@
     "verify:privacy-v2": "python scripts/verify-v2-privacy.py",
     "verify:public-submission-v2": "python scripts/verify-v2-public-submission.py",
     "verify:public-submission-receipt-v2": "python scripts/verify-v2-public-submission-receipt.py",
+    "verify:public-evidence-document-v2": "python scripts/verify-v2-public-evidence-document.py",
     "verify:conformance-v2": "python scripts/verify-v2-conformance-manifest.py",
     "conformance:v2:offline": "node scripts/run-v2-conformance.mjs"
   },

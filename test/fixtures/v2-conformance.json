@@ -2,7 +2,7 @@
   "schema": "gossip.acceptance-envelope.v1",
   "statement": {
     "schema": "gossip.acceptance-statement.v1",
-    "suite_revision": "gossip-v2-conformance-2026-09-11.8",
+    "suite_revision": "gossip-v2-conformance-2026-09-11.9",
     "protocol": "gossip/2-draft.1",
     "generated_at": 1800000000,
     "source": {
@@ -48,6 +48,12 @@
         "path": "test/fixtures/v2-canonical.json",
         "sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "bytes": 4096
+      },
+      {
+        "name": "public-evidence-document",
+        "path": "test/fixtures/v2-public-evidence-document.json",
+        "sha256": "sha256:75fb6d5dc8aa29c4b285a70109e0f61029f24a73fea0a2c2c1d17e1f80a1465c",
+        "bytes": 2314
       }
     ],
     "scenarios": [
@@ -214,6 +220,6 @@
   },
   "content_address": {
     "algorithm": "sha256",
-    "digest": "sha256:3d260e06154624e79d6253d30b3fd8ec49b929f8cd98d50cf4a0f811c674970f"
+    "digest": "sha256:ff5204041dd3727dc40c0d1995917793f7cbac56b04e30458de6a1e1b6bf3d61"
   }
 }

@@ -22,14 +22,16 @@ The runner:
    lifecycle scripts disabled;
 4. invokes the installed CLI in a disposable empty state directory;
 5. runs the independent canonical, evidence, receipt-authentication,
-   identity-session, privacy, public-submission, public-submission-receipt, and
-   manifest verifiers from the installed package;
+   identity-session, privacy, public-submission, public-submission-receipt,
+   public-evidence-document, and manifest verifiers from the installed package;
 6. scans public evidence summaries;
 7. writes `acceptance-manifest.json` and its referenced evidence files.
 
 The first manifest is expected to decide `blocked`. It proves packaging and
 portable contracts; it does not exercise Sherwood, MCP/HTTP parity, durable
 database behavior, process faults, private storage, or a second clean replay.
+The current offline fixture suite is conformance revision `.9` and includes the
+exact-digest public evidence document vector.
 
 ## Optional Sherwood process evidence
 

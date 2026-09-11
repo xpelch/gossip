@@ -31,6 +31,27 @@ function expectCode(action: () => unknown, code: ProtocolError["code"]): void {
   });
 }
 
+function copyReferencedFixtures(
+  statement: Record<string, any>,
+  temporary: string,
+): void {
+  for (const fixtureReference of statement.fixtures) {
+    const filename = fixtureReference.path.split("/").at(-1);
+    assert.ok(filename);
+    const fixtureBytes = fs.readFileSync(
+      new URL(`./fixtures/${filename}`, import.meta.url),
+    );
+    const copiedFixture = path.join(
+      temporary,
+      ...fixtureReference.path.split("/"),
+    );
+    fs.mkdirSync(path.dirname(copiedFixture), { recursive: true });
+    fs.writeFileSync(copiedFixture, fixtureBytes);
+    fixtureReference.sha256 = `sha256:${createHash("sha256").update(fixtureBytes).digest("hex")}`;
+    fixtureReference.bytes = fixtureBytes.byteLength;
+  }
+}
+
 test("verifies the literal blocked acceptance envelope and its content address", () => {
   const envelope = parseConformanceEnvelope(fixture);
 
@@ -257,21 +278,8 @@ test("TypeScript and Python enforce the same manifest bounds", () => {
   );
 
   try {
-    const fixtureBytes = fs.readFileSync(
-      new URL("./fixtures/v2-canonical.json", import.meta.url),
-    );
-    const copiedFixture = path.join(
-      temporary,
-      "test",
-      "fixtures",
-      "v2-canonical.json",
-    );
-    fs.mkdirSync(path.dirname(copiedFixture), { recursive: true });
-    fs.writeFileSync(copiedFixture, fixtureBytes);
-
     const validBase = structuredClone(fixture);
-    validBase.statement.fixtures[0].sha256 = `sha256:${createHash("sha256").update(fixtureBytes).digest("hex")}`;
-    validBase.statement.fixtures[0].bytes = fixtureBytes.byteLength;
+    copyReferencedFixtures(validBase.statement, temporary);
     for (const scenario of validBase.statement.scenarios) {
       if (scenario.status !== "verified") {
         continue;
@@ -487,25 +495,12 @@ test("TypeScript and Python enforce Sherwood assembly and process evidence prere
   );
 
   try {
-    const fixtureBytes = fs.readFileSync(
-      new URL("./fixtures/v2-canonical.json", import.meta.url),
-    );
-    const copiedFixture = path.join(
-      temporary,
-      "test",
-      "fixtures",
-      "v2-canonical.json",
-    );
-    fs.mkdirSync(path.dirname(copiedFixture), { recursive: true });
-    fs.writeFileSync(copiedFixture, fixtureBytes);
-
     const processEvidence = path.join(temporary, "evidence", "process.json");
     fs.mkdirSync(path.dirname(processEvidence), { recursive: true });
     fs.writeFileSync(processEvidence, "process evidence\n");
 
     const valid = structuredClone(fixture);
-    valid.statement.fixtures[0].sha256 = `sha256:${createHash("sha256").update(fixtureBytes).digest("hex")}`;
-    valid.statement.fixtures[0].bytes = fixtureBytes.byteLength;
+    copyReferencedFixtures(valid.statement, temporary);
     for (const scenario of valid.statement.scenarios) {
       if (scenario.status !== "verified") {
         continue;
