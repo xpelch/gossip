@@ -100,13 +100,19 @@ private data handling or transaction execution.
 
 The GitHub deployment record for Sherwood production reports deployment
 `6400689362` as successful at commit
-`33ed9bf96106087e46fcad25dc62a1191f278ee0`. That commit does not contain the
-tested Gossip v2 branch commit
-`017e592401b5a79edfbf9b2b7c8df01bd2cd555b`. Its published environment URL is
-the Railway project dashboard, not a public Gossip HTTPS endpoint or audience.
-GitHub records no Gossip repository deployment and neither repository has a
-GitHub release. This proves that an existing Sherwood deployment cannot be
-promoted to Gossip v2 acceptance from repository metadata alone.
+`33ed9bf96106087e46fcad25dc62a1191f278ee0`. A direct, read-only Railway query
+confirms the `engine` service is running from that commit and image digest
+`sha256:9e1c8f58fd2374ad7c1f01aea10c273c1fe1f00c365880b25384e48dc554bc4e`
+at `https://engine-production-c4d8.up.railway.app`. Its `/health` route returns
+HTTP 200 and unauthenticated `POST /mcp` returns HTTP 401, while
+`GET /v2/gossip/capabilities` returns HTTP 404.
+
+The deployed commit does not contain the tested Gossip v2 branch commit
+`017e592401b5a79edfbf9b2b7c8df01bd2cd555b`. No Gossip v2 endpoint or audience
+is therefore active on the public service. GitHub records no Gossip repository
+deployment and neither repository has a GitHub release. This proves that the
+existing Sherwood deployment is healthy but cannot be promoted to Gossip v2
+acceptance.
 
 ## Resume sequence
 
