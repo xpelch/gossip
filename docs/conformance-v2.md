@@ -30,8 +30,10 @@ The runner:
 The first manifest is expected to decide `blocked`. It proves packaging and
 portable contracts; it does not exercise Sherwood, MCP/HTTP parity, durable
 database behavior, process faults, private storage, or a second clean replay.
-The current offline fixture suite is conformance revision `.9` and includes the
-exact-digest public evidence document vector.
+The current offline fixture suite is conformance revision `.10` and includes
+the exact-digest public evidence document vector plus the signed
+`public_submission` identity-session grant and request vector. This adds
+contract proof only; it does not promote a capability to `verified`.
 
 ## Optional Sherwood process evidence
 

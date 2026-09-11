@@ -646,7 +646,7 @@ async function main() {
     ).stdout.trim();
     const statement = {
       schema: "gossip.acceptance-statement.v1",
-      suite_revision: "gossip-v2-conformance-2026-09-11.9",
+      suite_revision: "gossip-v2-conformance-2026-09-11.10",
       protocol: "gossip/2-draft.1",
       generated_at: Math.floor(Date.now() / 1000),
       source: {

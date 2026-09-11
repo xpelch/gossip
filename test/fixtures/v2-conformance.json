@@ -2,7 +2,7 @@
   "schema": "gossip.acceptance-envelope.v1",
   "statement": {
     "schema": "gossip.acceptance-statement.v1",
-    "suite_revision": "gossip-v2-conformance-2026-09-11.9",
+    "suite_revision": "gossip-v2-conformance-2026-09-11.10",
     "protocol": "gossip/2-draft.1",
     "generated_at": 1800000000,
     "source": {
@@ -54,6 +54,12 @@
         "path": "test/fixtures/v2-public-evidence-document.json",
         "sha256": "sha256:75fb6d5dc8aa29c4b285a70109e0f61029f24a73fea0a2c2c1d17e1f80a1465c",
         "bytes": 2314
+      },
+      {
+        "name": "identity-session",
+        "path": "test/fixtures/v2-identity-session.json",
+        "sha256": "sha256:22b6f837f8b81a370ffc41508c9153497ec360551ab1f156ea4aeeb97bcaa4e2",
+        "bytes": 17762
       }
     ],
     "scenarios": [
@@ -150,7 +156,7 @@
       {
         "id": "independent_vectors",
         "status": "verified",
-        "assertions": 5,
+        "assertions": 6,
         "evidence": [
           {
             "path": "evidence/independent-vectors.json",
@@ -220,6 +226,6 @@
   },
   "content_address": {
     "algorithm": "sha256",
-    "digest": "sha256:ff5204041dd3727dc40c0d1995917793f7cbac56b04e30458de6a1e1b6bf3d61"
+    "digest": "sha256:de203f31d090f005c58807e3fa1900544822ca8276361bf9b48e3bf93df019ac"
   }
 }

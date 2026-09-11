@@ -18,6 +18,7 @@ import {
 } from "./http-auth-v2.js";
 import { ProtocolError } from "./protocol-errors.js";
 import { consultationSchema, operationIdV2Schema } from "./protocol-v2.js";
+import { parsePublicSubmission } from "./public-submission-v1.js";
 
 export const IDENTITY_SESSION_SCHEMA = "gossip.identity-session.v1" as const;
 export const IDENTITY_SESSION_REVOCATION_SCHEMA =
@@ -43,6 +44,7 @@ export const IDENTITY_SESSION_SUBMISSION_KINDS = [
   "research_heuristic",
   "correction",
   "feedback",
+  "public_submission",
 ] as const;
 
 export type IdentitySessionTool = (typeof IDENTITY_SESSION_TOOLS)[number];
@@ -138,6 +140,7 @@ type IdentitySessionToolMappingInput = Pick<
 > & {
   endpoint?: string;
   audience?: string;
+  submission_kind?: IdentitySessionSubmissionKind | null;
 };
 
 const ADDRESS = /^0x[0-9a-f]{40}$/;
@@ -876,7 +879,24 @@ export function mapIdentitySessionToolPayload(
       }
       return { operation_id: payload.operation_id };
     }
-    case "gossip_submit_v2":
+    case "gossip_submit_v2": {
+      if (input.submission_kind !== "public_submission") {
+        throw new ProtocolError("unsupported_capability");
+      }
+      requireZeroCost(input.cost.amount);
+      const submission = parsePublicSubmission(input.payload);
+      if (!sameRoot(submission.actor, input.root)) {
+        invalid();
+      }
+      if (
+        (input.endpoint !== undefined &&
+          submission.endpoint !== input.endpoint) ||
+        (input.audience !== undefined && submission.audience !== input.audience)
+      ) {
+        unauthorized();
+      }
+      return submission;
+    }
     case "gossip_feedback":
       throw new ProtocolError("unsupported_capability");
   }
@@ -933,6 +953,13 @@ function authorizeExtractedIdentitySessionCore(
     !grant.submission_kinds.includes(signedRequest.submission_kind)
   ) {
     unauthorized();
+  }
+
+  if (
+    signedRequest.tool === "gossip_submit_v2" &&
+    signedRequest.submission_kind !== "public_submission"
+  ) {
+    throw new ProtocolError("unsupported_capability");
   }
 
   mapIdentitySessionToolPayload({

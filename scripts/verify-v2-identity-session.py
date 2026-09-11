@@ -143,6 +143,56 @@ expect_failure(
     )
 )
 
+public_vector = fixture["public_submission_session"]
+public_grant = public_vector["grant"]
+public_request = public_vector["request"]
+public_payload = public_request["payload"]
+assert public_grant["grant"]["tools"] == ["gossip_submit_v2"]
+assert public_grant["grant"]["submission_kinds"] == ["public_submission"]
+assert public_grant["grant"]["max_cost"] == {
+    "unit": "earned_credit",
+    "amount": "0",
+}
+assert public_request["tool"] == "gossip_submit_v2"
+assert public_request["submission_kind"] == "public_submission"
+assert public_request["cost"] == public_grant["grant"]["max_cost"]
+assert public_payload["operation_kind"] == "public_submission"
+assert public_payload["actor"] == public_request["root"]
+assert public_payload["endpoint"] == public_vector["endpoint"]
+assert public_payload["audience"] == public_vector["audience"]
+assert public_payload["max_cost"] == public_request["cost"]
+assert canonical_json(public_request) == public_vector["body"]
+public_body_digest = (
+    "sha256:" + hashlib.sha256(public_vector["body"].encode("utf-8")).hexdigest()
+)
+assert public_body_digest == public_vector["body_digest"]
+public_request_message = "\n".join(
+    [
+        "Gossip request v2",
+        PROTOCOL,
+        "gossip-eip191-v2",
+        public_vector["audience"],
+        public_vector["endpoint"],
+        public_vector["method"],
+        public_vector["target"],
+        public_body_digest,
+        public_vector["nonce"],
+        public_vector["expires"],
+    ]
+)
+verify_signature(
+    public_vector["public_key"],
+    public_vector["address"],
+    public_request_message.encode("utf-8"),
+    public_vector["signature"],
+)
+verify_signature(
+    public_grant["root_public_key"],
+    public_grant["grant"]["root"]["address"],
+    grant_message(public_grant["grant_digest"]).encode("utf-8"),
+    public_grant["signature"],
+)
+
 print(
-    "v2 identity-session grants, signed requests, rotation, revocation, and signatures verified"
+    "v2 identity-session grants, public submissions, signed requests, rotation, revocation, and signatures verified"
 )

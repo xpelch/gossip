@@ -8,6 +8,7 @@ import {
   type GossipV2HttpRequest,
 } from "../src/http-auth-v2.js";
 import { canonicalJson } from "../src/canonical.js";
+import { parsePublicSubmission } from "../src/public-submission-v1.js";
 import {
   authorizeIdentitySession,
   authorizeIdentitySessionMcp,
@@ -200,6 +201,26 @@ function consultationPayload(
   };
 }
 
+function publicSubmissionPayload(
+  actorAddress = root.address.toLowerCase(),
+  operationId = "public-submission-1",
+  endpoint = "https://gossip.example/mcp/",
+  audience = "https://gossip.example/",
+): Record<string, unknown> {
+  const value = JSON.parse(
+    fs.readFileSync(
+      new URL("./fixtures/v2-public-submission.json", import.meta.url),
+      "utf8",
+    ),
+  ) as { canonical: string };
+  const payload = JSON.parse(value.canonical) as Record<string, any>;
+  payload.operation_id = operationId;
+  payload.actor.address = actorAddress;
+  payload.endpoint = endpoint;
+  payload.audience = audience;
+  return payload;
+}
+
 function expectCode(action: () => unknown, code: ProtocolError["code"]): void {
   assert.throws(action, (error: unknown) => {
     assert.ok(error instanceof ProtocolError);
@@ -270,6 +291,56 @@ test("verifies literal grant, rotation, and revocation vectors", () => {
     },
   });
   assert.equal(authorized.request.tool, "gossip_consult_v2");
+});
+
+test("verifies the literal public_submission grant and request vector", () => {
+  const vector = fixture.public_submission_session as any;
+  const signedGrant = verifyIdentitySessionGrant(vector.grant);
+  const request = parseIdentitySessionRequest(vector.body);
+  const authenticatedRequest: GossipV2HttpRequest = {
+    audience: vector.audience,
+    endpoint: vector.endpoint,
+    method: vector.method,
+    target: vector.target,
+    body: new TextEncoder().encode(vector.body),
+    nonce: vector.nonce,
+    expires: vector.expires,
+    headers: vector.headers,
+  };
+
+  assert.equal(signedGrant.grant.submission_kinds[0], "public_submission");
+  assert.equal(request.tool, "gossip_submit_v2");
+  assert.equal(request.submission_kind, "public_submission");
+  assert.equal(request.cost.amount, "0");
+  assert.doesNotThrow(() =>
+    mapIdentitySessionToolPayload({
+      root: request.root,
+      tool: request.tool,
+      submission_kind: request.submission_kind,
+      payload: request.payload,
+      cost: request.cost,
+      endpoint: vector.endpoint,
+      audience: vector.audience,
+    }),
+  );
+  assert.doesNotThrow(() =>
+    authorizeIdentitySession({
+      grants: [vector.grant],
+      revocations: [],
+      now: 1_800_000_200,
+      request: authenticatedRequest,
+      verifier: {
+        endpoint: vector.endpoint,
+        audience: vector.audience,
+      },
+    }),
+  );
+  assert.doesNotThrow(() =>
+    verifyIdentitySessionTransport(authenticatedRequest, 1_800_000_200, {
+      endpoint: vector.endpoint,
+      audience: vector.audience,
+    }),
+  );
 });
 
 test("rejects the incomplete consultation payload", async () => {
@@ -542,6 +613,20 @@ test("maps each implementable session tool to its exact payload and cost", async
     }),
     { operation_id: "operation-1" },
   );
+
+  const publicSubmission = publicSubmissionPayload();
+  assert.deepEqual(
+    mapIdentitySessionToolPayload({
+      root: { chain_id: "4663", address: root.address.toLowerCase() },
+      tool: "gossip_submit_v2",
+      submission_kind: "public_submission",
+      payload: publicSubmission,
+      cost: { unit: "earned_credit", amount: "0" },
+      endpoint: "https://gossip.example/mcp/",
+      audience: "https://gossip.example/",
+    }),
+    parsePublicSubmission(publicSubmission),
+  );
   assert.deepEqual(
     mapIdentitySessionToolPayload({
       root: { chain_id: "4663", address: root.address.toLowerCase() },
@@ -608,12 +693,41 @@ test("maps each implementable session tool to its exact payload and cost", async
   expectCode(
     () =>
       mapIdentitySessionToolPayload({
+        root: { chain_id: "4663", address: sessionOne.address.toLowerCase() },
+        tool: "gossip_submit_v2",
+        submission_kind: "public_submission",
+        payload: publicSubmission,
+        cost: { unit: "earned_credit", amount: "0" },
+        endpoint: "https://gossip.example/mcp/",
+        audience: "https://gossip.example/",
+      }),
+    "invalid_request",
+  );
+  expectCode(
+    () =>
+      mapIdentitySessionToolPayload({
         root: { chain_id: "4663", address: root.address.toLowerCase() },
         tool: "gossip_submit_v2",
-        payload: {},
-        cost: { unit: "earned_credit", amount: "0" },
+        submission_kind: "public_submission",
+        payload: publicSubmission,
+        cost: { unit: "earned_credit", amount: "1" },
+        endpoint: "https://gossip.example/mcp/",
+        audience: "https://gossip.example/",
       }),
-    "unsupported_capability",
+    "unauthorized",
+  );
+  expectCode(
+    () =>
+      mapIdentitySessionToolPayload({
+        root: { chain_id: "4663", address: root.address.toLowerCase() },
+        tool: "gossip_submit_v2",
+        submission_kind: "public_submission",
+        payload: publicSubmission,
+        cost: { unit: "earned_credit", amount: "0" },
+        endpoint: "https://other.example/mcp/",
+        audience: "https://gossip.example/",
+      }),
+    "unauthorized",
   );
 
   const signed = await signedGrant(grant(sessionOne));
@@ -641,6 +755,42 @@ test("maps each implementable session tool to its exact payload and cost", async
       actualTool: "gossip_consult_v2",
     }),
   );
+});
+
+test("authorizes a public_submission grant and exact public payload", async () => {
+  const value = grant(sessionOne, {
+    tools: ["gossip_submit_v2"],
+    submission_kinds: ["public_submission"],
+  });
+  const signed = await signedGrant(value);
+  const payload = publicSubmissionPayload(
+    root.address.toLowerCase(),
+    "public-submission-1",
+    "https://engine.test/mcp",
+    "https://engine.test/",
+  );
+  const request = await authenticatedRequest(
+    sessionOne,
+    requestContext({
+      tool: "gossip_submit_v2",
+      submission_kind: "public_submission",
+      payload,
+    }),
+  );
+
+  const authorized = authorizeIdentitySession({
+    grants: [signed],
+    revocations: [],
+    now: 1_800_000_200,
+    request,
+    verifier: {
+      endpoint: "https://engine.test/mcp",
+      audience: "https://engine.test/",
+    },
+  });
+
+  assert.equal(authorized.request.submission_kind, "public_submission");
+  assert.deepEqual(authorized.request.payload, payload);
 });
 
 test("requires an exclusive session_request MCP argument", () => {

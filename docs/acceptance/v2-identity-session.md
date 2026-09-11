@@ -11,7 +11,10 @@ grants, canonical signed request envelopes, explicit rotation, revocation, and
 scope authorization. The root Gossip Identity Wallet remains the owner. A
 session grant can express only Gossip information tools, evidence submission
 kinds, one HTTPS endpoint and audience, a validity interval, and an
-earned-credit ceiling.
+earned-credit ceiling. The `.10` vector proves that a grant may explicitly
+scope `gossip_submit_v2` to `public_submission` at exactly zero
+`earned_credit`; the client still keeps legacy submission kinds and
+`gossip_feedback` blocked.
 
 The signed `gossip.identity-session-request.v1` body contains the root identity,
 key ID, tool, submission kind, cost, and complete payload. The frozen
@@ -48,6 +51,13 @@ Focused tests cover malformed runtime input, wrong root chain, destination,
 session key, time interval, tool, submission kind, cost, predecessor, digest,
 signature, high-S signature, rotation scope, revocation, and the bounded
 revocation set. Existing v1 and v2 behavior remains in the full suite.
+
+The signed `public_submission` grant and request are also frozen in the
+identity-session fixture. TypeScript and the independent Python verifier both
+recompute the grant digest, EIP-191 root signature, canonical request body
+digest, session signature, root binding, endpoint/audience binding, and zero
+cost. This is portable contract evidence only; it does not advertise or
+verify a live MCP/HTTP capability.
 
 ## Independent review
 
