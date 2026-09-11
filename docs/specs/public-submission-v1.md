@@ -25,6 +25,45 @@ TypeScript consumers can import `parsePublicSubmission` and
 vector is `test/fixtures/v2-public-submission.json`; the independent Python
 check is run with `npm run verify:public-submission-v2`.
 
+## Signed completion receipt
+
+`gossip.public-submission-receipt.v1` is the contract-only completion receipt
+for a public submission. It uses the existing
+`gossip-eip191-receipt-v1` signing profile and the existing `receipt` digest
+domain. The strict payload contains only the operation binding, actor/owner,
+endpoint/audience, server/signing metadata, completion time, result and
+evidence digests, and the following zero-cost settlement:
+
+```json
+{
+  "max_cost": { "unit": "earned_credit", "amount": "0" },
+  "economics": {
+    "unit": "earned_credit",
+    "state": "settled",
+    "reserved_amount": "0",
+    "charged_amount": "0"
+  }
+}
+```
+
+The signed envelope has exactly `receipt`, `receipt_digest`, and `signature`.
+It has no `already_persisted` or other retry marker. A transport may return the
+same signed envelope byte-for-byte for the first call and a retry; the receipt
+digest therefore remains the idempotency proof. TypeScript consumers can use
+`parseSignedPublicSubmissionReceipt` for structural checks and
+`verifyPublicSubmissionReceipt` with the existing pinned trust manifest for
+EIP-191 authenticity. The literal vector is
+`test/fixtures/v2-public-submission-receipt.json`; the independent Python
+check is run with `npm run verify:public-submission-receipt-v2`.
+
+Public submissions may point `supersedes` or `conflicts_with` at an external
+public evidence digest. Those targets must not be bundled in the same request;
+`derived_from` remains closed in the submitted graph. The public parser cannot
+prove the visibility or same-subject relationship of an external target, so an
+eventual server must resolve it transactionally before accepting the operation.
+The general `parseEvidenceGraph` parser remains closed and unchanged by this
+mode.
+
 This contract does not activate `private_submission` or `gossip_feedback`.
 Trading, payment, generic signing, transaction construction, and blockchain
 execution remain outside Gossip's information exchange boundary and remain

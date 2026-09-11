@@ -2,7 +2,7 @@
   "schema": "gossip.acceptance-envelope.v1",
   "statement": {
     "schema": "gossip.acceptance-statement.v1",
-    "suite_revision": "gossip-v2-conformance-2026-09-11.7",
+    "suite_revision": "gossip-v2-conformance-2026-09-11.8",
     "protocol": "gossip/2-draft.1",
     "generated_at": 1800000000,
     "source": {
@@ -214,6 +214,6 @@
   },
   "content_address": {
     "algorithm": "sha256",
-    "digest": "sha256:c11c8d79c6583a932201d1d210dbd078457f23c6b16fa7bb8d5643d616431a97"
+    "digest": "sha256:3d260e06154624e79d6253d30b3fd8ec49b929f8cd98d50cf4a0f811c674970f"
   }
 }

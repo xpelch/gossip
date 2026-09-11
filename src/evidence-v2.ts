@@ -582,7 +582,16 @@ export function evidenceDigest(input: unknown): string {
   return canonicalDigest("evidence", payload(input));
 }
 
-function topology(graph: EvidenceGraph): Map<string, EvidenceEnvelope> {
+type TopologyOptions = {
+  allowExternalPublicLineage?: boolean;
+};
+
+function topology(
+  graph: EvidenceGraph,
+  options: TopologyOptions = {},
+): Map<string, EvidenceEnvelope> {
+  const allowExternalPublicLineage =
+    options.allowExternalPublicLineage === true;
   const byDigest = new Map<string, EvidenceEnvelope>();
   for (const bundle of graph.bundles) {
     if (byDigest.has(bundle.digest)) {
@@ -605,12 +614,6 @@ function topology(graph: EvidenceGraph): Map<string, EvidenceEnvelope> {
     );
   };
 
-  const references = (evidence: Dict): string[] => [
-    ...(evidence.derived_from as string[]),
-    ...(evidence.supersedes === null ? [] : [evidence.supersedes as string]),
-    ...(evidence.conflicts_with as string[]),
-  ];
-
   const reachable = new Set<string>();
   const visitClosure = (digest: string): void => {
     const bundle = byDigest.get(digest);
@@ -623,18 +626,34 @@ function topology(graph: EvidenceGraph): Map<string, EvidenceEnvelope> {
     reachable.add(digest);
 
     const evidence = bundle.evidence as Dict;
-    for (const reference of references(evidence)) {
+    const validateReference = (reference: string, derived: boolean): void => {
       if (reference === digest) {
         fail("invalid_lineage");
       }
       const target = byDigest.get(reference);
       if (!target) {
+        if (allowExternalPublicLineage && !derived) {
+          return;
+        }
         fail("evidence_unavailable");
+      }
+      if (allowExternalPublicLineage && !derived) {
+        fail("invalid_lineage");
       }
       if (!canReference(evidence, target.evidence as Dict)) {
         fail("invalid_lineage");
       }
       visitClosure(reference);
+    };
+
+    for (const reference of evidence.derived_from as string[]) {
+      validateReference(reference, true);
+    }
+    if (evidence.supersedes !== null) {
+      validateReference(evidence.supersedes as string, false);
+    }
+    for (const reference of evidence.conflicts_with as string[]) {
+      validateReference(reference, false);
     }
   };
 
@@ -669,6 +688,9 @@ function topology(graph: EvidenceGraph): Map<string, EvidenceEnvelope> {
       ...(evidence.derived_from as string[]),
       ...(evidence.supersedes === null ? [] : [evidence.supersedes as string]),
     ]) {
+      if (!byDigest.has(parent) && allowExternalPublicLineage) {
+        continue;
+      }
       visitDag(parent, depth + 1);
     }
 
@@ -685,6 +707,21 @@ function topology(graph: EvidenceGraph): Map<string, EvidenceEnvelope> {
   return byDigest;
 }
 export function parseEvidenceGraph(input: unknown): EvidenceGraph {
+  return parseEvidenceGraphWithOptions(input);
+}
+
+export function parsePublicSubmissionEvidenceGraph(
+  input: unknown,
+): EvidenceGraph {
+  return parseEvidenceGraphWithOptions(input, {
+    allowExternalPublicLineage: true,
+  });
+}
+
+function parseEvidenceGraphWithOptions(
+  input: unknown,
+  options: TopologyOptions = {},
+): EvidenceGraph {
   canonicalJson(input);
   const result = strict(input, ["roots", "bundles"], ["roots", "bundles"]);
   const roots = digests(result.roots, 1);
@@ -693,7 +730,7 @@ export function parseEvidenceGraph(input: unknown): EvidenceGraph {
     parseEnvelope(item, false),
   );
   const graph = { roots, bundles };
-  const byDigest = topology(graph);
+  const byDigest = topology(graph, options);
   let references = 0;
   for (const bundle of bundles) {
     const evidence = bundle.evidence as Dict;
@@ -711,7 +748,10 @@ export function parseEvidenceGraph(input: unknown): EvidenceGraph {
       )
         fail("invalid_lineage");
     }
-    if (evidence.supersedes !== null) {
+    if (
+      evidence.supersedes !== null &&
+      byDigest.has(evidence.supersedes as string)
+    ) {
       const previous = byDigest.get(evidence.supersedes as string)!
         .evidence as Dict;
       if (
@@ -755,6 +795,28 @@ export function validateResultPacket(
 ): ResultManifest {
   const manifest = parseResultManifest(packet);
   const parsed = parseEvidenceGraph(graph);
+  if (canonicalJson(manifest.evidence_digests) !== canonicalJson(parsed.roots))
+    fail("digest_mismatch");
+  for (const root of parsed.roots) {
+    const bundle = parsed.bundles.find(
+      (candidate) => candidate.digest === root,
+    );
+    if (
+      !bundle ||
+      canonicalJson(bundle.evidence.subject) !== canonicalJson(manifest.subject)
+    ) {
+      fail("invalid_evidence");
+    }
+  }
+  return manifest;
+}
+
+export function validatePublicSubmissionResultPacket(
+  packet: unknown,
+  graph: unknown,
+): ResultManifest {
+  const manifest = parseResultManifest(packet);
+  const parsed = parsePublicSubmissionEvidenceGraph(graph);
   if (canonicalJson(manifest.evidence_digests) !== canonicalJson(parsed.roots))
     fail("digest_mismatch");
   for (const root of parsed.roots) {

@@ -10,9 +10,9 @@ import {
 } from "./protocol-v2.js";
 import { ProtocolError } from "./protocol-errors.js";
 import {
-  parseEvidenceGraph,
+  parsePublicSubmissionEvidenceGraph,
   parseResultManifest,
-  validateResultPacket,
+  validatePublicSubmissionResultPacket,
   type EvidenceGraph,
   type ResultManifest,
 } from "./evidence-v2.js";
@@ -67,12 +67,7 @@ function validatePublicEvidence(graph: EvidenceGraph): void {
     }
 
     for (const conflictDigest of bundle.evidence.conflicts_with) {
-      const conflicting = byDigest.get(conflictDigest);
-      if (
-        !conflicting ||
-        canonicalJson(conflicting.subject) !==
-          canonicalJson(bundle.evidence.subject)
-      ) {
+      if (byDigest.has(conflictDigest)) {
         throw new ProtocolError("invalid_lineage");
       }
     }
@@ -96,8 +91,8 @@ export function parsePublicSubmission(input: unknown): PublicSubmission {
   }
 
   const result = parseResultManifest(parsed.data.result);
-  const evidence = parseEvidenceGraph(parsed.data.evidence);
-  validateResultPacket(result, evidence);
+  const evidence = parsePublicSubmissionEvidenceGraph(parsed.data.evidence);
+  validatePublicSubmissionResultPacket(result, evidence);
   validatePublicEvidence(evidence);
 
   return {

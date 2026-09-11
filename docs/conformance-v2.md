@@ -22,8 +22,8 @@ The runner:
    lifecycle scripts disabled;
 4. invokes the installed CLI in a disposable empty state directory;
 5. runs the independent canonical, evidence, receipt-authentication,
-   identity-session, privacy, public-submission, and manifest verifiers from the
-   installed package;
+   identity-session, privacy, public-submission, public-submission-receipt, and
+   manifest verifiers from the installed package;
 6. scans public evidence summaries;
 7. writes `acceptance-manifest.json` and its referenced evidence files.
 

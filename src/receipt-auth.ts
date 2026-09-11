@@ -10,6 +10,7 @@ import {
   parseSignedReceipt,
   validateReceiptConsultation,
   validateReceiptTransitionChain,
+  type ReceiptPayload,
   type SignedReceipt,
 } from "./receipts-v2.js";
 import { ProtocolError } from "./protocol-errors.js";
@@ -52,6 +53,23 @@ export type VerifiedReceipt = SignedReceipt & {
     public_key: string;
     address: string;
   };
+};
+
+export type ReceiptSignatureEnvelope = {
+  receipt: Pick<
+    ReceiptPayload,
+    "auth_profile" | "server" | "signing" | "issued_at"
+  >;
+  receipt_digest: string;
+  signature: string;
+};
+
+export type ReceiptSigner = {
+  server_id: string;
+  profile: typeof RECEIPT_AUTH_PROFILE;
+  key_id: string;
+  public_key: string;
+  address: string;
 };
 
 function invalid(): never {
@@ -238,10 +256,10 @@ function receiptMessage(receiptDigest: string): string {
   return `Gossip receipt v1\n${PROTOCOL_REVISION}\n${receiptDigest}`;
 }
 
-function verifyOne(
-  parsed: SignedReceipt,
+function verifySignature(
+  parsed: ReceiptSignatureEnvelope,
   manifest: ReceiptTrustManifest,
-): VerifiedReceipt {
+): ReceiptSigner {
   const receipt = parsed.receipt;
   const signing = receipt.signing;
   if (
@@ -285,14 +303,21 @@ function verifyOne(
   }
 
   return {
+    server_id: manifest.server_id,
+    profile: manifest.profile,
+    key_id: key.key_id,
+    public_key: key.public_key,
+    address: key.address,
+  };
+}
+
+function verifyOne(
+  parsed: SignedReceipt,
+  manifest: ReceiptTrustManifest,
+): VerifiedReceipt {
+  return {
     ...parsed,
-    signer: {
-      server_id: manifest.server_id,
-      profile: manifest.profile,
-      key_id: key.key_id,
-      public_key: key.public_key,
-      address: key.address,
-    },
+    signer: verifySignature(parsed, manifest),
   };
 }
 
@@ -304,6 +329,14 @@ export function parseReceiptTrustManifest(
 
 export function receiptSigningMessage(receiptDigest: string): string {
   return receiptMessage(receiptDigest);
+}
+
+export function verifyReceiptSignature(
+  input: ReceiptSignatureEnvelope,
+  trustManifest: unknown,
+): ReceiptSigner {
+  const manifest = parseManifest(trustManifest);
+  return verifySignature(input, manifest);
 }
 
 export function verifySignedReceipt(

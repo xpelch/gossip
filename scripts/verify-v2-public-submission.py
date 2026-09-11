@@ -14,8 +14,11 @@ PROTOCOL = "gossip/2-draft.1"
 EVIDENCE_SCHEMA_REVISION = "2026-09-09"
 PUBLIC_SUBMISSION_SCHEMA_REVISION = "2026-09-11"
 DIGEST_PREFIX = "sha256:"
+DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 ADDRESS_PATTERN = re.compile(r"^0x[0-9a-f]{40}$")
 OPERATION_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+UINT_PATTERN = re.compile(r"^(?:0|[1-9][0-9]*)$")
+UINT256_MAX = (1 << 256) - 1
 
 
 def canonical_json(value: Any) -> str:
@@ -30,6 +33,45 @@ def digest(domain: str, value: Any) -> str:
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise AssertionError(message)
+
+
+def verify_https_url(value: Any, field: str) -> None:
+    require(
+        isinstance(value, str)
+        and 0 < len(value) <= 2048
+        and "#" not in value
+        and not re.search(r"[\s\x00-\x1f\x7f-\x9f]", value),
+        f"{field} is invalid",
+    )
+
+    try:
+        parsed = urlsplit(value)
+        port = parsed.port
+    except ValueError as error:
+        raise AssertionError(f"{field} is invalid") from error
+
+    require(
+        parsed.scheme == "https"
+        and parsed.netloc != ""
+        and parsed.hostname is not None
+        and parsed.username is None
+        and parsed.password is None
+        and parsed.fragment == ""
+        and parsed.path != ""
+        and parsed.geturl() == value
+        and parsed.netloc == parsed.netloc.lower()
+        and not parsed.netloc.endswith(":")
+        and (port is None or parsed.netloc.endswith(f":{port}"))
+        and port != 443,
+        f"{field} is invalid",
+    )
+    require(
+        all(
+            segment.lower().replace("%2e", ".") not in {".", ".."}
+            for segment in parsed.path.split("/")
+        ),
+        f"{field} is invalid",
+    )
 
 
 def verify_submission(submission: dict[str, Any]) -> str:
@@ -60,7 +102,9 @@ def verify_submission(submission: dict[str, Any]) -> str:
     actor = submission["actor"]
     require(
         set(actor) == {"chain_id", "address"}
-        and actor["chain_id"] == "4663"
+        and isinstance(actor["chain_id"], str)
+        and UINT_PATTERN.fullmatch(actor["chain_id"]) is not None
+        and 0 < int(actor["chain_id"]) <= UINT256_MAX
         and isinstance(actor["address"], str)
         and ADDRESS_PATTERN.fullmatch(actor["address"]) is not None,
         "actor is invalid",
@@ -70,28 +114,8 @@ def verify_submission(submission: dict[str, Any]) -> str:
         and OPERATION_PATTERN.fullmatch(submission["operation_id"]) is not None,
         "operation ID is invalid",
     )
-    endpoint = urlsplit(submission["endpoint"])
-    audience = urlsplit(submission["audience"])
-    require(
-        isinstance(submission["endpoint"], str)
-        and endpoint.scheme == "https"
-        and endpoint.netloc != ""
-        and endpoint.username is None
-        and endpoint.password is None
-        and "#" not in submission["endpoint"]
-        and not re.search(r"[\s\x00-\x1f\x7f-\x9f]", submission["endpoint"]),
-        "endpoint is invalid",
-    )
-    require(
-        isinstance(submission["audience"], str)
-        and audience.scheme == "https"
-        and audience.netloc != ""
-        and audience.username is None
-        and audience.password is None
-        and "#" not in submission["audience"]
-        and not re.search(r"[\s\x00-\x1f\x7f-\x9f]", submission["audience"]),
-        "audience is invalid",
-    )
+    verify_https_url(submission["endpoint"], "endpoint")
+    verify_https_url(submission["audience"], "audience")
     require(
         submission["max_cost"] == {"unit": "earned_credit", "amount": "0"},
         "cost is not exactly zero earned_credit",
@@ -121,10 +145,8 @@ def verify_submission(submission: dict[str, Any]) -> str:
             return
         reachable.add(reference)
         evidence = bundles[reference]["evidence"]
-        for parent in evidence["derived_from"] + evidence["conflicts_with"]:
+        for parent in evidence["derived_from"]:
             visit(parent)
-        if evidence["supersedes"] is not None:
-            visit(evidence["supersedes"])
 
     for root in graph["roots"]:
         visit(root)
@@ -144,16 +166,29 @@ def verify_submission(submission: dict[str, Any]) -> str:
                 source["location"]["visibility"] == "public",
                 "private source is present",
             )
-        for reference in evidence["derived_from"] + evidence["conflicts_with"]:
+        for reference in evidence["derived_from"]:
+            require(
+                isinstance(reference, str)
+                and DIGEST_PATTERN.fullmatch(reference) is not None,
+                "derived reference is invalid",
+            )
             require(reference in bundles, "graph reference is unavailable")
         for reference in evidence["conflicts_with"]:
             require(
-                bundles[reference]["evidence"]["subject"] == evidence["subject"],
-                "conflicting evidence has a different subject",
+                isinstance(reference, str)
+                and DIGEST_PATTERN.fullmatch(reference) is not None,
+                "conflict reference is invalid",
             )
+            require(reference not in bundles, "conflict target must be external")
         if evidence["supersedes"] is not None:
             require(
-                evidence["supersedes"] in bundles, "superseded evidence is unavailable"
+                isinstance(evidence["supersedes"], str)
+                and DIGEST_PATTERN.fullmatch(evidence["supersedes"]) is not None,
+                "supersedes reference is invalid",
+            )
+            require(
+                evidence["supersedes"] not in bundles,
+                "superseded evidence must be external",
             )
         require(
             evidence["subject"] == result["subject"],
@@ -166,13 +201,10 @@ def verify_submission(submission: dict[str, Any]) -> str:
 def submission_with_public_parent(
     submission: dict[str, Any],
     relation: str,
-    parent_address: str | None = None,
 ) -> dict[str, Any]:
     linked = copy.deepcopy(submission)
     root = linked["evidence"]["bundles"][0]
     parent_evidence = copy.deepcopy(root["evidence"])
-    if parent_address is not None:
-        parent_evidence["subject"]["address"] = parent_address
     parent_digest = digest("evidence", parent_evidence)
 
     root["evidence"][relation] = [parent_digest]
@@ -180,6 +212,23 @@ def submission_with_public_parent(
     linked["evidence"]["bundles"].append(
         {"digest": parent_digest, "evidence": parent_evidence}
     )
+    linked["evidence"]["roots"] = [root["digest"]]
+    linked["result"]["evidence_digests"] = [root["digest"]]
+    return linked
+
+
+def submission_with_external_lineage(
+    submission: dict[str, Any], relation: str
+) -> dict[str, Any]:
+    linked = copy.deepcopy(submission)
+    root = linked["evidence"]["bundles"][0]
+    external_digest = "sha256:" + "d" * 64
+    if relation == "supersedes":
+        root["evidence"]["supersedes"] = external_digest
+        root["evidence"]["correction_reason"] = "Corrects a prior public observation."
+    else:
+        root["evidence"]["conflicts_with"] = [external_digest]
+    root["digest"] = digest("evidence", root["evidence"])
     linked["evidence"]["roots"] = [root["digest"]]
     linked["result"]["evidence_digests"] = [root["digest"]]
     return linked
@@ -230,17 +279,47 @@ def main() -> None:
     public_lineage = submission_with_public_parent(submission, "derived_from")
     verify_submission(public_lineage)
 
-    cross_subject_conflict = submission_with_public_parent(
-        submission,
-        "conflicts_with",
-        "0x3333333333333333333333333333333333333333",
+    verify_submission(submission_with_external_lineage(submission, "supersedes"))
+    verify_submission(submission_with_external_lineage(submission, "conflicts_with"))
+
+    malformed_lineage = submission_with_external_lineage(submission, "conflicts_with")
+    malformed_evidence = malformed_lineage["evidence"]["bundles"][0]["evidence"]
+    malformed_evidence["conflicts_with"] = ["not-a-digest"]
+    malformed_lineage["evidence"]["bundles"][0]["digest"] = digest(
+        "evidence", malformed_evidence
     )
+    malformed_lineage["evidence"]["roots"] = [
+        malformed_lineage["evidence"]["bundles"][0]["digest"]
+    ]
+    malformed_lineage["result"]["evidence_digests"] = malformed_lineage["evidence"][
+        "roots"
+    ]
     try:
-        verify_submission(cross_subject_conflict)
+        verify_submission(malformed_lineage)
     except AssertionError:
         pass
     else:
-        raise AssertionError("cross-subject conflict was accepted")
+        raise AssertionError("malformed external lineage was accepted")
+
+    malformed_url = copy.deepcopy(submission)
+    malformed_url["endpoint"] = "https://gossip.example:bad/mcp"
+    try:
+        verify_submission(malformed_url)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("malformed endpoint was accepted")
+
+    bundled_conflict = submission_with_public_parent(
+        submission,
+        "conflicts_with",
+    )
+    try:
+        verify_submission(bundled_conflict)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("bundled conflict target was accepted")
 
     require(
         fixture["canonical"] != fixture["canonical"] + " ",

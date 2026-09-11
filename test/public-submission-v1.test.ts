@@ -5,7 +5,7 @@ import {
   publicSubmissionDigest,
   parsePublicSubmission,
 } from "../src/public-submission-v1.js";
-import { evidenceDigest } from "../src/evidence-v2.js";
+import { evidenceDigest, parseEvidenceGraph } from "../src/evidence-v2.js";
 import { canonicalJson } from "../src/canonical.js";
 import { ProtocolError } from "../src/protocol-errors.js";
 
@@ -30,7 +30,6 @@ function expectCode(action: () => unknown, code: ProtocolError["code"]): void {
 
 function submissionWithPublicParent(
   relation: "derived_from" | "conflicts_with",
-  differentSubject = false,
 ): Record<string, any> {
   const submission = structuredClone(fixture.valid);
   const graph = submission.evidence as {
@@ -39,15 +38,36 @@ function submissionWithPublicParent(
   };
   const root = graph.bundles[0]!;
   const parentEvidence = structuredClone(root.evidence);
-  if (differentSubject) {
-    parentEvidence.subject.address =
-      "0x3333333333333333333333333333333333333333";
-  }
   const parentDigest = evidenceDigest(parentEvidence);
 
   root.evidence[relation] = [parentDigest];
   root.digest = evidenceDigest(root.evidence);
   graph.bundles.push({ digest: parentDigest, evidence: parentEvidence });
+  graph.roots = [root.digest];
+  submission.result.evidence_digests = [root.digest];
+
+  return submission;
+}
+
+function submissionWithExternalLineage(
+  relation: "supersedes" | "conflicts_with",
+): Record<string, any> {
+  const submission = structuredClone(fixture.valid);
+  const graph = submission.evidence as {
+    roots: string[];
+    bundles: Array<{ digest: string; evidence: Record<string, any> }>;
+  };
+  const root = graph.bundles[0]!;
+  const externalDigest = "sha256:" + "d".repeat(64);
+
+  if (relation === "supersedes") {
+    root.evidence.supersedes = externalDigest;
+    root.evidence.correction_reason = "Corrects a prior public observation.";
+  } else {
+    root.evidence.conflicts_with = [externalDigest];
+  }
+
+  root.digest = evidenceDigest(root.evidence);
   graph.roots = [root.digest];
   submission.result.evidence_digests = [root.digest];
 
@@ -136,17 +156,41 @@ test("rejects root mismatch, nonzero cost, and canonical tampering", () => {
   assert.notEqual(publicSubmissionDigest(tampered), fixture.digest);
 });
 
-test("accepts closed public lineage and rejects cross-subject conflicts", () => {
+test("accepts closed public derivation and rejects bundled mutation targets", () => {
   const derived = parsePublicSubmission(
     submissionWithPublicParent("derived_from"),
   );
   assert.equal(derived.evidence.bundles.length, 2);
 
   expectCode(
-    () =>
-      parsePublicSubmission(submissionWithPublicParent("conflicts_with", true)),
+    () => parsePublicSubmission(submissionWithPublicParent("conflicts_with")),
     "invalid_lineage",
   );
+});
+
+test("accepts external public corrections and conflicts", () => {
+  const externalSupersedes = submissionWithExternalLineage("supersedes");
+  const externalConflicts = submissionWithExternalLineage("conflicts_with");
+  assert.doesNotThrow(() => parsePublicSubmission(externalSupersedes));
+  assert.doesNotThrow(() => parsePublicSubmission(externalConflicts));
+  expectCode(
+    () => parseEvidenceGraph(externalSupersedes.evidence),
+    "evidence_unavailable",
+  );
+
+  const bundledSupersedes = submissionWithPublicParent("derived_from");
+  const graph = bundledSupersedes.evidence as {
+    bundles: Array<{ digest: string; evidence: Record<string, any> }>;
+  };
+  const root = graph.bundles[0]!;
+  root.evidence.supersedes = graph.bundles[1]!.digest;
+  root.evidence.correction_reason = "Bundled references are not allowed.";
+  root.digest = evidenceDigest(root.evidence);
+  (bundledSupersedes.evidence as Record<string, any>).roots = [root.digest];
+  (bundledSupersedes.result as Record<string, any>).evidence_digests = [
+    root.digest,
+  ];
+  expectCode(() => parsePublicSubmission(bundledSupersedes), "invalid_lineage");
 });
 
 test("reuses v2 actor, endpoint, audience, and operation rules", () => {
