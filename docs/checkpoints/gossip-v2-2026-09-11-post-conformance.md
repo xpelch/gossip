@@ -98,8 +98,12 @@ private data handling or transaction execution.
 
 ## Resume sequence
 
-1. Review and merge Gossip #28 and Sherwood #464 together so their pinned
-   contracts remain aligned.
+1. Review and merge the two stacks from their `main` bases upward so their
+   pinned contracts remain aligned. Gossip order: #5, #7, #10, #13, #19,
+   #20, #21, #22, #23, #24, #25, #26, #27, #28. Sherwood order: #449,
+   #450, #451, #452, #453, #454, #455, #457, #458, #460, #463, #464.
+   Every listed PR is currently open and the GitHub mergeability audit found
+   no known conflict; recheck each head immediately before merging.
 2. Provision the public endpoint and release artifact, then record their exact
    identities and provenance.
 3. Run the published conformance command on each advertised host.
