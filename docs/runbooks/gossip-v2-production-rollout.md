@@ -7,10 +7,10 @@ Railway `Sherwood / production` environment and its `engine` service.
 ## Known production state
 
 The current known Sherwood production source is `main` at commit
-`d71207e96c21a28c1487436eff665ed14dc0a64b`. The deployment is healthy:
-`/health` returns HTTP 200, unauthenticated `POST /mcp` returns HTTP 401, and
-anonymous `GET /v2/gossip/capabilities` returns HTTP 401 because the v2 route is
-protected.
+`db968f5010b9491b67190aff749d62f2ad0e7a97`. Railway deployment `6415704531`
+completed successfully. `/health` returns HTTP 200, a missing public Smart Money
+projection returns HTTP 404 without authentication, and anonymous
+`GET /v2/gossip/capabilities` returns HTTP 401 because the v2 route is protected.
 
 These probes do not establish signed production acceptance. Treat every v2
 capability, advertised host, and package release as blocked until the steps
@@ -33,9 +33,13 @@ bind:
   storage versions used in acceptance.
 
 Do not publish a release from an unmerged feature branch or reuse the local
-synthetic signing keys. The package provenance workflow is artifact-only; tag,
-package, and endpoint publication remain explicit later actions after
-acceptance.
+synthetic signing keys. Gossip commit
+`56d280c899f5d47d5e8f0c9bf3fb5147834ce7d3` produced a repository-bound GitHub
+attestation in [workflow run 34725836485](https://github.com/xpelch/gossip/actions/runs/34725836485).
+The package artifact digest is
+`sha256:cb9321b6af32a9970fd5e1b78b1940e20bbc0ce92fcb597c95787aa93fdebe12`.
+This artifact-only evidence does not create a tag, publish a package, or promote
+endpoint or host acceptance.
 
 ## Candidate endpoint configuration
 
@@ -49,7 +53,7 @@ Sherwood__GossipV2__HttpBaseUrl=https://engine-production-c4d8.up.railway.app/
 Sherwood__GossipV2__Audience=https://engine-production-c4d8.up.railway.app/
 Sherwood__GossipV2__ServerId=sherwood
 Sherwood__GossipV2__ServerRevision=<merged-sherwood-commit>
-Sherwood__GossipV2__ReceiptSigningKeyFile=<absolute-protected-runtime-path>
+Sherwood__GossipV2__ReceiptSigningKeyEnvironmentVariable=GOSSIP_RECEIPT_SIGNING_KEY
 Sherwood__GossipV2__ReceiptSigningKeyId=<approved-production-key-id>
 Sherwood__GossipV2__ConsultationEnabled=true
 Sherwood__GossipV2__IdentitySessionEnabled=true
@@ -57,13 +61,20 @@ Sherwood__GossipV2__ConsultationAcceptanceVerified=false
 Sherwood__GossipV2__IdentitySessionAcceptanceVerified=false
 ```
 
-The receipt key file must contain exactly one lowercase 32-byte secp256k1 scalar
-encoded as 64 hexadecimal characters. Provision it through the approved
-Railway secret-file procedure with access limited to the engine process. The
-repository, deployment logs, acceptance artifacts, and agent prompts must never
-contain the scalar. The current engine service has no mounted volume, so the
-operator must establish a durable protected-file delivery and rotation method
-before enabling receipt signing.
+The Railway secret variable `GOSSIP_RECEIPT_SIGNING_KEY` must contain exactly one
+lowercase 32-byte secp256k1 scalar encoded as 64 hexadecimal characters. The
+Sherwood configuration stores only that variable's name. At startup, Sherwood
+reads the value, removes it from the process environment, validates it, builds
+the receipt signer, and clears its temporary byte buffers. The immutable .NET
+string returned by the operating system remains subject to garbage collection,
+so this mechanism must not be described as guaranteed in-memory erasure.
+
+Provision the secret through Railway's protected variable interface. Never put
+the value in a command transcript, repository file, deployment log, acceptance
+artifact, or agent prompt. Publish the matching uncompressed public key,
+Ethereum address, key ID, validity interval, and status in a separately reviewed
+`gossip.receipt-trust-manifest.v1`. Keep `ReceiptSigningKeyFile` unset because
+the engine accepts exactly one external receipt-key source.
 
 Leave `PrivateEvidenceEncryptionKeyFile` and
 `PrivateEvidenceEncryptionKeyId` unset. Production private submission remains
