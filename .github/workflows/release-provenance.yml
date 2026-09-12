@@ -10,7 +10,10 @@ permissions:
 
 jobs:
   provenance:
-    runs-on: ubuntu-latest
+    # The release suite currently includes Windows-only Anvil fixtures and the
+    # Windows protected-store acceptance test. Linux protected storage is a
+    # separate release gate and must not be implied by this artifact build.
+    runs-on: windows-latest
     steps:
       - name: Check out the requested commit
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -25,14 +28,14 @@ jobs:
       - name: Build and attest the package
         run: >-
           npm run release:provenance --
-          --output "$RUNNER_TEMP/gossip-release-provenance.json"
-          --artifact "$RUNNER_TEMP/gossip-agent-kit.tgz"
+          --output "$env:RUNNER_TEMP\gossip-release-provenance.json"
+          --artifact "$env:RUNNER_TEMP\gossip-agent-kit.tgz"
 
       - name: Verify the provenance against the checkout and artifact
         run: >-
           npm run verify:release-provenance --
-          --manifest "$RUNNER_TEMP/gossip-release-provenance.json"
-          --artifact "$RUNNER_TEMP/gossip-agent-kit.tgz"
+          --manifest "$env:RUNNER_TEMP\gossip-release-provenance.json"
+          --artifact "$env:RUNNER_TEMP\gossip-agent-kit.tgz"
 
       - name: Attest the package to this public repository and workflow
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4

@@ -92,6 +92,8 @@ test("release workflow creates a repository-bound package attestation", async ()
 
   assert.match(workflow, /id-token: write/u);
   assert.match(workflow, /attestations: write/u);
+  assert.match(workflow, /runs-on: windows-latest/u);
+  assert.match(workflow, /\$env:RUNNER_TEMP\\gossip-agent-kit\.tgz/u);
   assert.match(workflow, /uses: actions\/attest@[0-9a-f]{40}/u);
   assert.match(
     workflow,
