@@ -27,7 +27,7 @@ node dist/cli.js standards
 
 Use a locally trusted development certificate. Setup does not disable TLS checks. Only a successful signed `agent_access` response enables the bridge. `status` reports stored state without claiming a live connection. `doctor` currently provides setup guidance, not full release-integrity or host verification.
 
-Default state lives in `~/.gossip`; every command accepts `--directory ABSOLUTE_PATH`. Windows uses current-user DPAPI. Linux Secret Service is implemented but has not been exercised on a real Linux host. Other platforms fail closed.
+Default state lives in `~/.gossip`; every command accepts `--directory ABSOLUTE_PATH`. Windows uses current-user DPAPI. Linux Secret Service has a targeted real-keyring acceptance in GitHub Actions; other platforms fail closed.
 
 ## Existing identity and backup
 
