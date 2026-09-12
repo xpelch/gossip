@@ -1,0 +1,42 @@
+name: Release provenance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the requested commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Build and attest the package
+        run: >-
+          npm run release:provenance --
+          --output "$RUNNER_TEMP/gossip-release-provenance.json"
+          --artifact "$RUNNER_TEMP/gossip-agent-kit.tgz"
+
+      - name: Verify the provenance against the checkout and artifact
+        run: >-
+          npm run verify:release-provenance --
+          --manifest "$RUNNER_TEMP/gossip-release-provenance.json"
+          --artifact "$RUNNER_TEMP/gossip-agent-kit.tgz"
+
+      - name: Upload the reviewable provenance bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: gossip-release-provenance-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/gossip-release-provenance.json
+            ${{ runner.temp }}/gossip-agent-kit.tgz
+          if-no-files-found: error

@@ -25,7 +25,7 @@ This preview is partial implementation, not release acceptance.
 - Public endpoint plus actual version-pinned Grok Bot, Hermes and OpenClaw end-to-end runs. Config-shape tests are not host runs.
 - Engine support and actual access interoperability for ERC-8128, existing ERC-1271 accounts and atomic standard-only consultation policy. Engine changes are outside this repository's authorization.
 - Connect-existing-signer, external-provider integration, and complete contract-wallet onboarding remain incomplete. The attach-file path is a deliberate source-file link through a local host helper, not external signer support or a plaintext fallback. Profile migration/rollback and paired create/migrate acceptance for all six standards remain required.
-- Full installer diagnostics and a trusted release distribution/provenance workflow; external signer and derivation format compatibility matrix.
+- Full installer diagnostics, signed production distribution, and external signer and derivation format compatibility matrix. The local artifact-only provenance workflow is documented in [`release-provenance.md`](release-provenance.md), but it does not publish or establish production or host acceptance.
 - Real Linux protected-storage validation. macOS is unsupported.
 - Full installed-process-to-engine acceptance for domain calls, TLS rejection, expiry boundaries, and retry reconciliation. The current engine harness proves legacy authentication through real middleware/MCP/PostgreSQL, not the full CLI flow.
 

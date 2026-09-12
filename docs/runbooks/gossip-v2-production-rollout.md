@@ -6,20 +6,15 @@ Railway `Sherwood / production` environment and its `engine` service.
 
 ## Known production state
 
-Read-only verification on 2026-09-11 found:
+The current known Sherwood production source is `main` at commit
+`d71207e96c21a28c1487436eff665ed14dc0a64b`. The deployment is healthy:
+`/health` returns HTTP 200, unauthenticated `POST /mcp` returns HTTP 401, and
+anonymous `GET /v2/gossip/capabilities` returns HTTP 401 because the v2 route is
+protected.
 
-- service domain: `https://engine-production-c4d8.up.railway.app`;
-- deployed source: `xpelch/sherwood` `main` at
-  `33ed9bf96106087e46fcad25dc62a1191f278ee0`;
-- deployed image:
-  `sha256:9e1c8f58fd2374ad7c1f01aea10c273c1fe1f00c365880b25384e48dc554bc4e`;
-- `/health` returns HTTP 200;
-- unauthenticated `POST /mcp` returns HTTP 401;
-- `GET /v2/gossip/capabilities` returns HTTP 404.
-
-The public service is healthy, but it does not run the reviewed Gossip v2
-implementation. Treat every v2 capability as unavailable until the steps below
-produce a signed acceptance record.
+These probes do not establish signed production acceptance. Treat every v2
+capability, advertised host, and package release as blocked until the steps
+below produce a signed acceptance record.
 
 ## Release inputs
 
@@ -38,7 +33,9 @@ bind:
   storage versions used in acceptance.
 
 Do not publish a release from an unmerged feature branch or reuse the local
-synthetic signing keys.
+synthetic signing keys. The package provenance workflow is artifact-only; tag,
+package, and endpoint publication remain explicit later actions after
+acceptance.
 
 ## Candidate endpoint configuration
 

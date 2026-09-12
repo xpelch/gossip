@@ -66,6 +66,13 @@ npm pack --ignore-scripts
 
 Tests use synthetic identities only. [Engine interoperability](docs/engine-testing.md) uses a pinned private engine checkout and Docker PostgreSQL. [Standards evidence](docs/standards.md) distinguishes local implementation, contract fixtures, and server dependencies. [Artifact installation](docs/install.md) verifies a local tarball digest; no npm package or public endpoint has been published.
 
+Build a reviewable package provenance manifest from a clean checkout with
+[`docs/release-provenance.md`](docs/release-provenance.md). The manual workflow
+and local verifier bind the exact commit, package and lockfile identities,
+tarball digest and size, Node.js/npm versions, and install/typecheck/test/build
+status. They do not publish a tag, package, endpoint, or signed production or
+host claim.
+
 New code is Apache-2.0 licensed. Dependency licenses remain with their packages. Read `AGENTS.md`, `CONTEXT.md`, and relevant ADRs before contributing.
 
 For Linux agents missing Node 24, start with the [public prerequisite bootstrap](docs/bootstrap.md). It installs a dedicated runtime without replacing the host's Node version. A standalone `node dist/cli.js wallet create` creates or reuses a protected identity without an endpoint; it still requires Node 24 and working protected storage.
