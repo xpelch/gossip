@@ -1,0 +1,420 @@
+{
+  "schema": "gossip.acceptance-envelope.v1",
+  "statement": {
+    "schema": "gossip.acceptance-statement.v1",
+    "suite_revision": "gossip-v2-conformance-2026-09-11.12",
+    "protocol": "gossip/2-draft.1",
+    "generated_at": 1789160313,
+    "source": {
+      "repository": "https://github.com/xpelch/gossip",
+      "commit": "88779d3dbf4e5dc46c16bbf2abcbcda9b5394268",
+      "dirty": false
+    },
+    "artifacts": {
+      "gossip": {
+        "package": "@gossip/agent-kit",
+        "version": "0.1.0-dev.1",
+        "sha256": "sha256:7f52f30a0d68895b50ebf0dc71f36ad936eba8e6735c405f95722868826b5a05",
+        "bytes": 15091963
+      },
+      "sherwood": {
+        "repository": "https://github.com/xpelch/sherwood",
+        "commit": "bfcd2200a1cca4c8a4f78ec9f3c7357973bb7533",
+        "assembly": {
+          "sha256": "sha256:06a31ce5b7d8f85ed5b92a64037992411b1049dd6784bd7fbc5024657c88271d",
+          "bytes": 7808512
+        },
+        "image_digest": null
+      }
+    },
+    "runtime": {
+      "os": "win32",
+      "architecture": "x64",
+      "node": "24.13.1",
+      "npm": "11.8.0",
+      "python": "3.13.5",
+      "dotnet": "10.0.301",
+      "docker": "29.7.2",
+      "postgresql": "17"
+    },
+    "revisions": {
+      "schema": "2026-09-09",
+      "auth": "gossip-eip191-v2",
+      "mcp": "2025-11-25",
+      "engine": "synthetic-v1",
+      "database_migrations": "git-tree-f19988a33b66954bee7c4b8887ab42d84fc78984",
+      "fixture_suite": "gossip-v2-fixtures-1"
+    },
+    "fixtures": [
+      {
+        "name": "v2-canonical",
+        "path": "fixtures/v2-canonical.json",
+        "sha256": "sha256:b4b0c6af3ac730c10a70d071c812d53bf2ea8acbcb9fa02413cb7a6249e2955c",
+        "bytes": 80541
+      },
+      {
+        "name": "v2-evidence-receipts",
+        "path": "fixtures/v2-evidence-receipts.json",
+        "sha256": "sha256:62bae77f4385e179d24cbd4c48849df7045e4156b276f7bbae384f590ee7e1c3",
+        "bytes": 122546
+      },
+      {
+        "name": "v2-receipt-auth",
+        "path": "fixtures/v2-receipt-auth.json",
+        "sha256": "sha256:ca2a8ac09a0ca97c8de3b862e6a9eea30347e1da7e44d30ea6182ebad74bed9c",
+        "bytes": 2541
+      },
+      {
+        "name": "v2-http-auth",
+        "path": "fixtures/v2-http-auth.json",
+        "sha256": "sha256:0c8781af7a2ab843c673d0353a64e3c881ad8c2e367bbce8f22b949ba0c2600b",
+        "bytes": 962
+      },
+      {
+        "name": "v2-identity-session",
+        "path": "fixtures/v2-identity-session.json",
+        "sha256": "sha256:22b6f837f8b81a370ffc41508c9153497ec360551ab1f156ea4aeeb97bcaa4e2",
+        "bytes": 17762
+      },
+      {
+        "name": "v2-privacy",
+        "path": "fixtures/v2-privacy.json",
+        "sha256": "sha256:62452ac3ab5b1880c37ac61f53992e3e9192fdd4b8df1a94124454d1fcb1e59e",
+        "bytes": 9590
+      },
+      {
+        "name": "v2-public-submission",
+        "path": "fixtures/v2-public-submission.json",
+        "sha256": "sha256:f9aebf379d99ec502ccb166834317070371615c82e912b5aace1c921e237e4fd",
+        "bytes": 6445
+      },
+      {
+        "name": "v2-public-submission-receipt",
+        "path": "fixtures/v2-public-submission-receipt.json",
+        "sha256": "sha256:764288d73d8b2dfbdd075d2ce0c4fc1c3a36310ef97889695c9756231f92cfa5",
+        "bytes": 2246
+      },
+      {
+        "name": "v2-public-evidence-document",
+        "path": "fixtures/v2-public-evidence-document.json",
+        "sha256": "sha256:fc354947186f67448eec394899e8a74a8cc1057d28c34425f1aaed2336b55d2a",
+        "bytes": 2395
+      },
+      {
+        "name": "v2-conformance",
+        "path": "fixtures/v2-conformance.json",
+        "sha256": "sha256:9a26b0dc8329a6636d4809b0c7c1fe11588103495da80071289a3618a1a98c18",
+        "bytes": 8884
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "artifact_install",
+        "status": "verified",
+        "assertions": 6,
+        "evidence": [
+          {
+            "path": "evidence/artifact-install.json",
+            "sha256": "sha256:cdce59315dadbd264718a9696169ee6242f8c77a2d093b6db26cadbf3424c41a",
+            "bytes": 264
+          }
+        ]
+      },
+      {
+        "id": "installed_cli_process",
+        "status": "verified",
+        "assertions": 4,
+        "evidence": [
+          {
+            "path": "evidence/installed-cli.json",
+            "sha256": "sha256:75c981f78232be5d893152a758819419225b670012ea5dbca0ac3e6db4755c43",
+            "bytes": 109
+          }
+        ]
+      },
+      {
+        "id": "mcp_http_parity",
+        "status": "verified",
+        "assertions": 8,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "authentication_fail_closed",
+        "status": "verified",
+        "assertions": 15,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "session_scope_escape",
+        "status": "verified",
+        "assertions": 16,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "public_submission_transport",
+        "status": "verified",
+        "assertions": 18,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "operation_exactly_once",
+        "status": "verified",
+        "assertions": 7,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "operation_conflict",
+        "status": "verified",
+        "assertions": 4,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "zero_cost_reconciliation",
+        "status": "verified",
+        "assertions": 10,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "persistence_fault_recovery",
+        "status": "verified",
+        "assertions": 8,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "evidence_finality_reorg",
+        "status": "verified",
+        "assertions": 15,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "correction_supersession",
+        "status": "verified",
+        "assertions": 8,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "owner_isolation",
+        "status": "verified",
+        "assertions": 20,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "privacy_canary_scan",
+        "status": "verified",
+        "assertions": 12,
+        "evidence": [
+          {
+            "path": "evidence/sherwood-process.json",
+            "sha256": "sha256:ddb4ce6acaf99977cae8919bd257536280f2cd5f9235a76e023ee417347d337d",
+            "bytes": 8157
+          },
+          {
+            "path": "evidence/sherwood-process-capture.json",
+            "sha256": "sha256:967991c80d8b6da2f95478c2915676f80ba4491830f48d9f5cffdc6b3fed3b29",
+            "bytes": 1658
+          }
+        ]
+      },
+      {
+        "id": "independent_vectors",
+        "status": "verified",
+        "assertions": 9,
+        "evidence": [
+          {
+            "path": "evidence/independent-vectors.json",
+            "sha256": "sha256:d9ec0bd2d176f143adb84b82c5770adc380050505aaee8651f2bf5b2e4e1e634",
+            "bytes": 377
+          }
+        ]
+      },
+      {
+        "id": "clean_checkout_reproduction",
+        "status": "blocked",
+        "reason": "A second clean-checkout replay has not been compared.",
+        "next_action": "Replay pinned sources and compare scenario and capability decisions."
+      }
+    ],
+    "capabilities": [
+      {
+        "name": "atomic_consult",
+        "state": "installed",
+        "reason": "Complete zero-cost consultation, bounded crash recovery, terminal persistence faults, and controlled evidence failures passed without production acceptance.",
+        "next_action": "Pass the production endpoint, trust, SLO, and real-host gates."
+      },
+      {
+        "name": "durable_operations",
+        "state": "installed",
+        "reason": "Restart, exactly-once, conflict and fault recovery passed; independent replay and production acceptance remain unverified.",
+        "next_action": "Pass independent clean replay and production acceptance."
+      },
+      {
+        "name": "signed_receipts",
+        "state": "installed",
+        "reason": "The tested assembly issued a valid receipt chain without a production key trust path.",
+        "next_action": "Verify packaged receipt issuance and the pinned trust anchor."
+      },
+      {
+        "name": "evidence",
+        "state": "installed",
+        "reason": "Retained evidence, deterministic refusal, conflict and correction lineage, transactional rollback, and post-publication reorg quarantine passed without production trust acceptance.",
+        "next_action": "Pass production receipt trust, endpoint, SLO, and real-host acceptance."
+      },
+      {
+        "name": "session_keys",
+        "state": "installed",
+        "reason": "The server registry and bounded session transports passed, but protected client storage and real host integration remain unverified.",
+        "next_action": "Pass protected storage and version-pinned Grok Bot, Hermes and OpenClaw acceptance."
+      },
+      {
+        "name": "public_submission",
+        "state": "installed",
+        "reason": "Signed public-only submission, exact retrieval, retries, restart, conflicts, corrections, and scoped sessions passed through the packaged process.",
+        "next_action": "Pass the pinned production endpoint and host acceptance before advertising verified support."
+      },
+      {
+        "name": "private_submission",
+        "state": "blocked",
+        "reason": "The synthetic encrypted lifecycle passed, but production retention, holds, key rotation and backup erasure are not approved.",
+        "next_action": "Approve the production privacy policy and operational deletion and key-management gates."
+      },
+      {
+        "name": "http",
+        "state": "installed",
+        "reason": "Process parity passed for the tested assembly without deployment acceptance.",
+        "next_action": "Pass the pinned production image, TLS and host acceptance gates."
+      },
+      {
+        "name": "tasks",
+        "state": "not_applicable",
+        "reason": "MCP Tasks are outside the current core profile.",
+        "next_action": "Negotiate a separately pinned Tasks profile before use."
+      }
+    ],
+    "decision": "blocked"
+  },
+  "content_address": {
+    "algorithm": "sha256",
+    "digest": "sha256:94eb14d2dd600c7b15fb5c6cc4d63f45b1b88c8ef6da347f5ec876d63b62e0ed"
+  }
+}

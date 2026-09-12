@@ -1,0 +1,178 @@
+{
+  "result": "passed",
+  "repository": "https://github.com/xpelch/sherwood",
+  "commit": "bfcd2200a1cca4c8a4f78ec9f3c7357973bb7533",
+  "assembly": {
+    "sha256": "sha256:06a31ce5b7d8f85ed5b92a64037992411b1049dd6784bd7fbc5024657c88271d",
+    "bytes": 7808512
+  },
+  "runtime": {
+    "dotnet": "10.0.301",
+    "docker": "29.7.2",
+    "postgresql": "17"
+  },
+  "revisions": {
+    "engine": "synthetic-v1",
+    "database_migrations": "git-tree-f19988a33b66954bee7c4b8887ab42d84fc78984"
+  },
+  "test_fqns": [
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_signed_http_and_mcp_and_replays_after_restart",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_enforces_concurrency_conflicts_authentication_and_owner_isolation",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_registered_identity_session_over_http_and_mcp_and_preserves_root_ownership_after_restart",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_persists_public_submission_receipts_evidence_and_session_scope_after_restart",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_enforces_identity_session_replay_revocation_rate_and_malformed_downgrade_fail_closed",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_paused_process_kill_restarts_into_reconciliation_without_reexecution",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rolls_back_each_terminal_persistence_cut_point",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_reconciles_when_the_retained_source_dependency_is_unavailable",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_keeps_private_export_owner_scoped_and_matches_http_with_mcp",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_keeps_private_lifecycle_owner_scoped_and_matches_http_with_mcp",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rolls_back_private_faults_and_retries_after_restart",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rejects_stale_wrong_chain_wrong_boundary_and_reorged_source_over_http_and_mcp",
+    "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_quarantines_published_evidence_without_rewriting_history_and_repeats_idempotently"
+  ],
+  "test_results": [
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_signed_http_and_mcp_and_replays_after_restart",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_enforces_concurrency_conflicts_authentication_and_owner_isolation",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_serves_registered_identity_session_over_http_and_mcp_and_preserves_root_ownership_after_restart",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_persists_public_submission_receipts_evidence_and_session_scope_after_restart",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_enforces_identity_session_replay_revocation_rate_and_malformed_downgrade_fail_closed",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_paused_process_kill_restarts_into_reconciliation_without_reexecution",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rolls_back_each_terminal_persistence_cut_point",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_reconciles_when_the_retained_source_dependency_is_unavailable",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_keeps_private_export_owner_scoped_and_matches_http_with_mcp",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_keeps_private_lifecycle_owner_scoped_and_matches_http_with_mcp",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rolls_back_private_faults_and_retries_after_restart",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_rejects_stale_wrong_chain_wrong_boundary_and_reorged_source_over_http_and_mcp",
+      "outcome": "passed"
+    },
+    {
+      "fqn": "Sherwood.Tests.GossipV2ProcessConformanceTests.A_real_process_quarantines_published_evidence_without_rewriting_history_and_repeats_idempotently",
+      "outcome": "passed"
+    }
+  ],
+  "counters": {
+    "total": 13,
+    "executed": 13,
+    "passed": 13,
+    "failed": 0,
+    "error": 0,
+    "notExecuted": 0,
+    "skipped": 0
+  },
+  "process_capture": {
+    "schema": "sherwood.gossip-v2-process-capture.v1",
+    "redaction_profile": "digests-and-counts-only",
+    "sha256": "sha256:e890ae7743c5465046ad7a0eb80f1138bde54d9dd9d4f1eb820231c8dc03236a",
+    "bytes": 1658
+  },
+  "scenario_assertions": {
+    "mcp_http_parity": 8,
+    "privacy_canary_scan": 12,
+    "operation_exactly_once": 7,
+    "operation_conflict": 4,
+    "authentication_fail_closed": 15,
+    "session_scope_escape": 16,
+    "public_submission_transport": 18,
+    "zero_cost_reconciliation": 10,
+    "persistence_fault_recovery": 8,
+    "evidence_finality_reorg": 15,
+    "correction_supersession": 8,
+    "owner_isolation": 20
+  },
+  "transport": "loopback-http",
+  "logical_endpoint_scheme": "https",
+  "signed_http_complete_zero_cost": true,
+  "signed_mcp_complete_zero_cost": true,
+  "canonical_transport_parity": true,
+  "public_submission_http_mcp_parity": true,
+  "public_receipt_replay_exact": true,
+  "public_evidence_retrieval_exact": true,
+  "public_session_zero_cost": true,
+  "public_lookup_root_only": true,
+  "public_correction_lineage": true,
+  "public_conflict_lineage": true,
+  "public_missing_target_rollback": true,
+  "private_export_transport_parity": true,
+  "private_export_replay_exact": true,
+  "private_export_owner_isolation": true,
+  "private_lifecycle_transport_parity": true,
+  "private_lifecycle_fault_recovery": true,
+  "mcp_structured_content_parity": true,
+  "private_payload_canary_scanned": true,
+  "foreign_private_partition_excluded": true,
+  "stale_evidence_refused": true,
+  "wrong_chain_refused": true,
+  "wrong_boundary_refused": true,
+  "reorged_source_refused": true,
+  "missing_source_refused": true,
+  "retained_source_outage_reconciled": true,
+  "post_publication_reorg_quarantined": true,
+  "quarantine_idempotent": true,
+  "quarantine_history_preserved": true,
+  "rejected_evidence_transport_parity": true,
+  "rejected_without_partial_evidence": true,
+  "durable_operation_singleton": true,
+  "operation_exactly_once": true,
+  "operation_conflict": true,
+  "authentication_fail_closed": true,
+  "owner_isolation_non_enumeration": true,
+  "identity_session_registry": true,
+  "session_scope_enforced": true,
+  "session_replay_rejected": true,
+  "session_revocation_enforced": true,
+  "session_root_ownership_preserved": true,
+  "session_subscriber_absent": true,
+  "session_shared_rate_cap": true,
+  "legacy_session_downgrade_rejected": true,
+  "crash_recovery_reconciled": true,
+  "persistence_transaction_rolled_back": true,
+  "zero_cost_preserved_after_fault": true,
+  "retained_source_not_reexecuted": true,
+  "receipt_chain_verified": true,
+  "restart_replay_exact": true,
+  "diagnostics_clean": true,
+  "test_source_sha256": "sha256:aae2fed16f2d46f4c4f1481dcff3ef037e9091459d57236e66d218e3297c2006",
+  "test_source_bytes": 179605,
+  "runbook_source_sha256": "sha256:935fe5779ce2154cd7c0fee85b76002f20c9e3663b96b8493f6578a40d5a11f9",
+  "runbook_source_bytes": 25426,
+  "stdout_sha256": "sha256:3a1c0e7679a4db20320da304b431bdeaa2437ed588c1c8c3d83084f259967e12",
+  "stdout_bytes": 575,
+  "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_bytes": 0,
+  "trx_sha256": "sha256:3a354ed24976c82fd1c2fbad332bbe439c6dc9270bcabbbf21859408334c275d",
+  "trx_bytes": 24280
+}

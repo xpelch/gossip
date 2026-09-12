@@ -5,8 +5,39 @@ reconciliation.
 
 Design source: [Gossip Protocol v2 proposal](../proposals/gossip-protocol-v2.md).
 Tracking issue: [#3](https://github.com/xpelch/gossip/issues/3).
-This epic specifies proposed work. It does not claim that v2, a public endpoint,
-or its optional standards are implemented.
+First active child: [WS1 contract foundation #4](https://github.com/xpelch/gossip/issues/4),
+with [implementation notes](../protocol-v2.md).
+The sections below preserve the approved design and acceptance requirements.
+
+## Current status — 2026-09-11
+
+The portable protocol and the Sherwood implementation are complete on the
+coordinated review branches:
+
+- [Gossip #28](https://github.com/xpelch/gossip/pull/28), tested source commit
+  `88779d3dbf4e5dc46c16bbf2abcbcda9b5394268`;
+- [Sherwood #464](https://github.com/xpelch/sherwood/pull/464), tested engine
+  commit `bfcd2200a1cca4c8a4f78ec9f3c7357973bb7533`.
+
+The public suite passes 193 tests with two expected Windows skips. The Sherwood
+Gossip v2 and wallet-authentication suite passes 361 tests. Two clean-source conformance runs each pass
+the exact thirteen-test process contract and independently match on their
+stable replay projection. The published suite `.12` verifies 15 local scenarios,
+including HTTP/MCP parity, exactly-once and zero-cost behavior, authentication,
+sessions, owner isolation, private lifecycle controls, terminal persistence
+faults, evidence finality and reorg behavior, and public conflict, correction,
+and supersession lineage. See the
+[published evidence](../acceptance/evidence/gossip-v2-2026-09-11/README.md).
+
+The public v2 release is not approved yet. [WS7 #18](https://github.com/xpelch/gossip/issues/18)
+still requires a public HTTPS endpoint and audience, a provenance-bound release
+artifact, real version-pinned Grok Bot/Hermes/OpenClaw runs, applicable Linux
+protected storage, production receipt trust and rotation, approved numeric
+SLOs, and private-lifecycle policy approval. Capabilities remain `installed` or
+`blocked` until their own production evidence passes.
+
+Gossip exchanges, verifies, enriches, and propagates intelligence. It does not
+prepare, sign, submit, or execute trades or blockchain transactions.
 
 ## Problem Statement
 

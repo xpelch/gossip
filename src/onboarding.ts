@@ -24,10 +24,14 @@ const standardNames = [
 const standardNextSteps: Record<(typeof standardNames)[number], string> = {
   "EIP-55": "Select a wallet to validate its checksummed address.",
   "EIP-191": "Select a wallet to verify a fresh local signing proof.",
-  "EIP-712": "Verify the concrete AgentWalletSet proof with a supported signer and registry.",
-  "ERC-1271": "An EOA is not a contract wallet; existing contract accounts need a compatible signer and engine verifier.",
-  "ERC-8004": "Select a verified registry and agent ID to check ownership and wallet association.",
-  "ERC-8128": "A compatible engine and signer are required before activating ERC-8128.",
+  "EIP-712":
+    "Verify the concrete AgentWalletSet proof with a supported signer and registry.",
+  "ERC-1271":
+    "An EOA is not a contract wallet; existing contract accounts need a compatible signer and engine verifier.",
+  "ERC-8004":
+    "Select a verified registry and agent ID to check ownership and wallet association.",
+  "ERC-8128":
+    "A compatible engine and signer are required before activating ERC-8128.",
 };
 
 export async function onboardingCommand(
@@ -43,6 +47,7 @@ export async function onboardingCommand(
     "--address",
     "--endpoint",
     "--audience",
+    "--profile",
     "--config",
     "--network",
     "--rpc",

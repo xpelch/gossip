@@ -59,11 +59,11 @@ pending until an official tested loading path exists.
 
 For network readiness, validate an explicitly supplied RPC and retain it when
 working. If none exists, test `https://robinhood-rpc.publicnode.com` on chain
-4663 before reporting RPC ready. RPC failure must not block legacy identity-only
-Gossip setup. The current supported Gossip authentication profile is legacy
-Sherwood EIP-191; pass `--endpoint HTTPS --audience HTTPS` to attempt signed
-connection verification. A missing endpoint or audience leaves connection
-pending. `--profile` is not currently supported. For network checks, use
+4663 before reporting RPC ready. RPC failure must not block identity-only
+Gossip setup. Pass `--endpoint HTTPS --audience HTTPS --profile
+gossip-eip191-v2` to select the signed v2 engine and six-tool bridge. Omitting
+`--profile` keeps the legacy Sherwood EIP-191 path. A missing endpoint or
+audience leaves connection pending. For network checks, use
 `--network configure` with optional `--rpc HTTPS`, or `--network check`;
 validate chain 4663 and fresh block reads before reporting RPC readiness.
 

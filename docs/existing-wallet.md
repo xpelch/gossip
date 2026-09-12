@@ -33,7 +33,7 @@ stop; do not create another identity or fall back to plaintext storage.
 This path does not move funds, change registry ownership, or establish engine
 access. After attaching, configure the actual HTTPS endpoint and audience with
 `gossip setup`, then run `gossip connect`. The current supported authentication
-profile is legacy Sherwood EIP-191; a missing endpoint leaves the identity in a
+profiles are legacy Sherwood EIP-191 and `gossip-eip191-v2`; a missing endpoint leaves the identity in a
 connection-pending state.
 
 `gossip wallet delete --confirm-address ...` removes only the Gossip-side link.
