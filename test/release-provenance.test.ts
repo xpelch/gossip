@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { validateManifest } from "../scripts/release-provenance.mjs";
 
@@ -80,5 +81,24 @@ test("rejects a manifest with a failed build or test check", () => {
   assert.throws(
     () => validateManifest(failed, actual),
     /checks did not all pass/u,
+  );
+});
+
+test("release workflow creates a repository-bound package attestation", async () => {
+  const workflow = await readFile(
+    new URL("../.github/workflows/release-provenance.yml", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(workflow, /id-token: write/u);
+  assert.match(workflow, /attestations: write/u);
+  assert.match(workflow, /uses: actions\/attest@[0-9a-f]{40}/u);
+  assert.match(
+    workflow,
+    /subject-path: \$\{\{ runner\.temp \}\}\/gossip-agent-kit\.tgz/u,
+  );
+  assert.doesNotMatch(
+    workflow,
+    /uses: actions\/(?:checkout|setup-node|upload-artifact|attest)@v\d/u,
   );
 });
