@@ -5,6 +5,7 @@ This preview is partial implementation, not release acceptance.
 ## Implemented locally
 
 - Protected EOA creation/reuse and encrypted JSON import/backup with address preservation; Windows DPAPI round trip.
+- Linux Secret Service round trip is covered by `.github/workflows/linux-secret-service.yml` on `ubuntu-24.04`. The job creates a private D-Bus session and temporary `gnome-keyring` home, then exercises identity creation, idempotent reuse, protected-key read and removal through `CredentialStore`; it does not run setup or connect.
 - Existing-wallet attach-file flow documents the tested source format labels (`raw-hex`, `json-privateKey`, `json-private_key`), checksummed address continuity, source preservation, and link-only deletion. It does not claim a completed Grok host run.
 - Four-tool MCP bridge, exact legacy signing, ERC-8128 client profile, strict endpoint binding and no redirects.
 - Submission-kind permission and conservative SQLite reservations shared by processes using one state directory.
@@ -26,7 +27,8 @@ This preview is partial implementation, not release acceptance.
 - Engine support and actual access interoperability for ERC-8128, existing ERC-1271 accounts and atomic standard-only consultation policy. Engine changes are outside this repository's authorization.
 - Connect-existing-signer, external-provider integration, and complete contract-wallet onboarding remain incomplete. The attach-file path is a deliberate source-file link through a local host helper, not external signer support or a plaintext fallback. Profile migration/rollback and paired create/migrate acceptance for all six standards remain required.
 - Full installer diagnostics, signed production distribution, and external signer and derivation format compatibility matrix. The local artifact-only provenance workflow is documented in [`release-provenance.md`](release-provenance.md), but it does not publish or establish production or host acceptance.
-- Real Linux protected-storage validation. macOS is unsupported.
 - Full installed-process-to-engine acceptance for domain calls, TLS rejection, expiry boundaries, and retry reconciliation. The current engine harness proves legacy authentication through real middleware/MCP/PostgreSQL, not the full CLI flow.
 
 No production wallet, onchain transaction, registration, endpoint deployment or package publication is part of these checks. No universal Ethereum compliance is claimed.
+
+The release baseline used for this acceptance work is commit `56d280c899f5d47d5e8f0c9bf3fb5147834ce7d3`; its provenance run is [GitHub Actions run 34725836485](https://github.com/xpelch/gossip/actions/runs/34725836485), and the attested artifact SHA-256 is `cb9321b6af32a9970fd5e1b78b1940e20bbc0ce92fcb597c95787aa93fdebe12`.

@@ -49,6 +49,7 @@
     "test": "tsx --test --test-concurrency=1 test/*.test.ts",
     "test:protocol-v2": "tsx --test test/canonical.test.ts test/protocol-v2.test.ts test/protocol-v2-vectors.test.ts",
     "test:receipt-auth": "tsx --test test/receipt-auth.test.ts",
+    "test:linux-secret-service": "tsx --test test/linux-secret-service.test.ts",
     "verify:protocol-v2": "python scripts/verify-v2-vectors.py",
     "verify:evidence-v2": "python scripts/verify-v2-evidence-receipts.py",
     "verify:http-auth-v2": "python scripts/verify-v2-http-auth.py",
