@@ -55,6 +55,10 @@ manifest. Generate the final manifest beside the built artifact: embedding a
 package's own commit or digest in tracked package content would change the
 artifact and invalidate the embedded values.
 
+Obtain an explicit product-owner decision on the proposed
+[production acceptance policy](../proposals/gossip-v2-production-acceptance-policy.md)
+before measuring or filling any SLO or private-policy field.
+
 ## Candidate endpoint configuration
 
 The canonical candidate values for the existing Railway domain are:

@@ -67,12 +67,17 @@
     }
   },
   "slos": {
+    "capability_discovery_latency": null,
+    "durable_acknowledgment_latency": null,
     "consultation_latency": null,
     "pending_operation_age": null,
     "reconciliation_window": null,
-    "replay_rejection": null,
-    "rpc_divergence": null,
-    "correction_latency": null
+    "authentication_replay_rejection": null,
+    "exact_operation_retry": null,
+    "changed_content_conflict": null,
+    "source_divergence_safety": null,
+    "reorg_quarantine": null,
+    "correction_publication": null
   },
   "private_submission": {
     "enabled": false,
