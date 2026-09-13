@@ -12,7 +12,7 @@ import {
 const endpoint = "https://gossip.test/mcp";
 const audience = "https://gossip.test/";
 
-function capabilities(now: number) {
+function capabilities(now: number, issuedAtOffsetSeconds = -10) {
   const feature = (capability: string) => ({
     capability,
     status: "verified",
@@ -26,7 +26,7 @@ function capabilities(now: number) {
     server: { id: "synthetic-engine", revision: "test" },
     endpoint,
     audience,
-    issued_at: now - 10,
+    issued_at: now + issuedAtOffsetSeconds,
     expires_at: now + 600,
     limits: {
       max_request_bytes: 65_536,
@@ -53,7 +53,10 @@ function jsonResponse(id: number, result: unknown, serverNow: number) {
   });
 }
 
-async function exerciseBoundedClockSkew(skewDirection: -1 | 1) {
+async function exerciseBoundedClockSkew(
+  skewDirection: -1 | 1,
+  issuedAtOffsetSeconds = -10,
+) {
   const wallet = Wallet.createRandom();
   let serverNow = 2_000_000_000;
   let capabilityCalls = 0;
@@ -122,7 +125,7 @@ async function exerciseBoundedClockSkew(skewDirection: -1 | 1) {
     if (message.method === "tools/call") {
       assert.equal(message.params?.name, "gossip_capabilities");
       capabilityCalls++;
-      const report = capabilities(serverNow);
+      const report = capabilities(serverNow, issuedAtOffsetSeconds);
       return jsonResponse(
         message.id!,
         {
@@ -163,6 +166,10 @@ async function exerciseBoundedClockSkew(skewDirection: -1 | 1) {
 test("v2 engine connects and refreshes with bounded host clock skew", async () => {
   await exerciseBoundedClockSkew(-1);
   await exerciseBoundedClockSkew(1);
+});
+
+test("v2 engine accepts capability issuance in the next HTTP Date second", async () => {
+  await exerciseBoundedClockSkew(1, 1);
 });
 
 test("v2 engine reports missing authoritative server time clearly", async () => {

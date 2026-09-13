@@ -302,16 +302,22 @@ test("accepts installed public submission as a non-core advertised capability", 
   );
 });
 
-test("capability report validity uses an inclusive issue and exclusive expiry", () => {
+test("capability report validity tolerates HTTP Date precision at issue time", () => {
   assert.doesNotThrow(() =>
     negotiateCapabilities(capabilities(), expectedConnection, 1_000),
+  );
+  assert.doesNotThrow(() =>
+    negotiateCapabilities(capabilities(), expectedConnection, 999),
+  );
+  assert.doesNotThrow(() =>
+    negotiateCapabilities(capabilities(), expectedConnection, 1_999),
   );
   expectCode(
     () => negotiateCapabilities(capabilities(), expectedConnection, 2_000),
     "expired_capabilities",
   );
   expectCode(
-    () => negotiateCapabilities(capabilities(), expectedConnection, 999),
+    () => negotiateCapabilities(capabilities(), expectedConnection, 998),
     "expired_capabilities",
   );
 });
