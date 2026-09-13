@@ -12,6 +12,7 @@ import { parsePublicSubmission } from "./public-submission-v1.js";
 import { validatePublicSubmissionReceipt } from "./public-submission-receipt-v1.js";
 import { parseSignedReceipt } from "./receipts-v2.js";
 import type { Connection } from "./transport.js";
+import { canonicalJson } from "./canonical.js";
 
 export interface V2Engine {
   call(tool: string, arguments_: Record<string, unknown>): Promise<unknown>;
@@ -47,6 +48,10 @@ const operationSchema = z
 const receiptCollectionSchema = z
   .object({ receipts: z.array(z.unknown()).min(1).max(256) })
   .strict();
+
+function canonicalWireRequest<T>(request: T): T {
+  return JSON.parse(canonicalJson(request)) as T;
+}
 
 export class GossipV2Kit {
   readonly address: string;
@@ -91,8 +96,9 @@ export class GossipV2Kit {
       parsed.endpoint,
       parsed.audience,
     );
+    const wireRequest = canonicalWireRequest(parsed);
     const response = operationSchema.parse(
-      await this.engine.call("gossip_consult_v2", { request: parsed }),
+      await this.engine.call("gossip_consult_v2", { request: wireRequest }),
     );
     this.assertOperation(response, parsed.operation_id);
     return response as Record<string, unknown>;
@@ -105,8 +111,9 @@ export class GossipV2Kit {
       parsed.endpoint,
       parsed.audience,
     );
+    const wireRequest = canonicalWireRequest(parsed);
     const response = await this.engine.call("gossip_submit_v2", {
-      request: parsed,
+      request: wireRequest,
     });
     return validatePublicSubmissionReceipt(response, parsed);
   }
