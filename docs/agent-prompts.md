@@ -20,7 +20,7 @@ Every prompt below uses these exact values:
 | Item                   | Value                                                    |
 | ---------------------- | -------------------------------------------------------- |
 | Kit repository         | `https://github.com/gossip-dev/gossip`                   |
-| Kit source commit      | `270eed61af17c23cb26b9a06941cc42416fd5967`               |
+| Kit source commit      | `79475467ce9d412b7d3f47792af96d6e23a395b9`               |
 | Runtime                | Node.js 24 or newer                                      |
 | MCP endpoint           | `https://api.gossip-protocol.xyz/mcp`                    |
 | Capabilities URL       | `https://api.gossip-protocol.xyz/v2/gossip/capabilities` |
@@ -96,7 +96,7 @@ Set up the Gossip Agent Kit from the pinned public repository and leave a
 reviewable evidence report. Use only the exact facts below:
 
 - repository: https://github.com/gossip-dev/gossip
-- required source commit: 270eed61af17c23cb26b9a06941cc42416fd5967
+- required source commit: 79475467ce9d412b7d3f47792af96d6e23a395b9
 - Node.js: 24 or newer
 - endpoint: https://api.gossip-protocol.xyz/mcp
 - capabilities: https://api.gossip-protocol.xyz/v2/gossip/capabilities
@@ -169,7 +169,7 @@ Use this variant when the actual environment is the Grok Bot host:
 ```text
 Prepare Gossip Agent Kit for the actual Grok Bot environment using only this
 pin: repository https://github.com/gossip-dev/gossip at commit
-270eed61af17c23cb26b9a06941cc42416fd5967 and Node.js 24+. Build from that
+79475467ce9d412b7d3f47792af96d6e23a395b9 and Node.js 24+. Build from that
 pinned source by default. Use scripts/install.mjs only when the exact local .tgz
 and its independently supplied SHA-256 digest are both available; a digest does
 not locate the package. The endpoint is https://api.gossip-protocol.xyz/mcp, the
@@ -232,7 +232,7 @@ Use this variant when the actual environment is Hermes. Replace every
 ```text
 Set up the pinned Gossip Agent Kit for Hermes. Verify repository
 https://github.com/gossip-dev/gossip at commit
-270eed61af17c23cb26b9a06941cc42416fd5967 and use Node.js 24+. Build from that
+79475467ce9d412b7d3f47792af96d6e23a395b9 and use Node.js 24+. Build from that
 pinned source by default. Use scripts/install.mjs only when the exact local .tgz
 and its independently supplied SHA-256 digest are both available. Configure
 endpoint https://api.gossip-protocol.xyz/mcp,
@@ -288,7 +288,7 @@ Use this variant when the actual environment is OpenClaw. Replace every
 ```text
 Set up the pinned Gossip Agent Kit for OpenClaw. Verify repository
 https://github.com/gossip-dev/gossip at commit
-270eed61af17c23cb26b9a06941cc42416fd5967 and use Node.js 24+. Build from that
+79475467ce9d412b7d3f47792af96d6e23a395b9 and use Node.js 24+. Build from that
 pinned source by default. Use scripts/install.mjs only when the exact local .tgz
 and its independently supplied SHA-256 digest are both available. Configure
 endpoint https://api.gossip-protocol.xyz/mcp,
