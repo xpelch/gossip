@@ -136,6 +136,14 @@ actual absolute host config path if the selected host supports configuration.
 The local bridge is the signer and must sign each request; do not implement or
 duplicate cryptography in a wrapper.
 
+For Grok Bot, do not invent a settings file. After `gossip connect` succeeds,
+run `node dist/cli.js host-config --host grok-bot --directory
+ABSOLUTE_STATE_DIRECTORY`. Pass its emitted `configuration.arguments`
+unchanged to the host's `AddMcpServer` tool, then call `RestartMcpServers`.
+In the next message, verify `GetMcpServerStatus` and `GetDynamicTools` before
+reporting `loaded=true`. The emitted command is the actual Node executable;
+never replace it with a guessed runtime path.
+
 Check the signed canonical capabilities request, MCP initialize, and
 tools/list. Record replay and invalid-signature probes as 401 when those
 checks are available. Report runtime, identity, host loading, skills,
@@ -174,11 +182,9 @@ Read the pinned README, AGENTS.md, setup-gossip skill, and host evidence first.
 Verify the commit, ensure Node.js 24, run npm ci --ignore-scripts, and build.
 Skip bootstrap when Node.js 24 is already verified; missing xz blocks only a
 bootstrap that still needs the Node.js archive. Detect and use the actual local
-environment. Grok Bot's native MCP
-configuration/loading path is undocumented and unverified: do not invent a
-remote configuration, claim native loading, or edit an unknown file. If the
-only available route is a terminal/setup fallback, label it exactly as a
-fallback. If there is no observed host load result, report loaded=false.
+environment. Do not invent or edit a Grok Bot settings file. The supported host
+path is the agent-only `AddMcpServer` tool; the terminal kit cannot invoke that
+tool itself.
 
 Choose an existing Gossip Identity, an existing local EOA, or a fresh protected
 identity. For the common EOA attach-file path accept only raw-hex,
@@ -193,15 +199,29 @@ audience, profile, and RPC. Let the local bridge sign every request; do not
 duplicate its cryptography. Check signed capabilities plus MCP initialize and
 tools/list, and record replay=401 and invalid-signature=401 when probed.
 
+Run `gossip connect` before native host registration. If it remains pending,
+do not call `AddMcpServer`; report the engine capability blockers. After a
+successful connect, run `node dist/cli.js host-config --host grok-bot
+--directory ABSOLUTE_STATE_DIRECTORY`. Pass the emitted
+`configuration.arguments` unchanged to `AddMcpServer`; this preserves the
+actual `process.execPath` and absolute CLI path instead of guessing a Node
+runtime location. Call `RestartMcpServers`. The tools become available in the
+next message, where you must verify `GetMcpServerStatus` reports Gossip
+connected and `GetDynamicTools` exposes exactly `gossip_capabilities`,
+`gossip_consult_v2`, `gossip_submit_v2`, `gossip_operation`,
+`gossip_receipt_v2`, and `gossip_feedback`. A successful AddMcpServer call
+alone is not host acceptance. Report `loaded=false` unless both checks pass,
+and verify persistence again in a new conversation.
+
 Return evidence and blockers separately. Preserve these values: signed
 capabilities and MCP initialize/tools-list are 200; productionVerified=false;
 hostAcceptanceVerified=false; supportedClients=[]; HTTP transport and
 `durable_operations` are installed; `atomic_consult`, `signed_receipts`,
 evidence, `public_submission`, and `private_submission` are blocked;
 `session_keys` and tasks are `not_applicable`; tools/list is discovery only.
-Native Grok Bot loading remains unverified even if setup and
-the local bridge succeed. Do not fund, trade, approve, register, submit,
-consult, spend earned credit, or widen permissions.
+Native Grok Bot acceptance remains unverified until the status, exact tool
+surface, and new-conversation persistence checks pass. Do not fund, trade,
+approve, register, submit, consult, spend earned credit, or widen permissions.
 ```
 
 ## Hermes

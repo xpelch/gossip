@@ -4,7 +4,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdtemp, rm, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 import { loadConfiguration } from "../src/configuration.js";
 const run = promisify(execFile);
 const cli = [
@@ -27,6 +27,14 @@ test("setup-gossip inspection reports missing prerequisites without creating a w
     assert.equal(report.wallet.status, "pending");
     assert.equal(report.gossip.status, "pending");
     assert.equal(report.host.verified, false);
+    assert.equal(report.host.format, "agent-tool");
+    assert.equal(report.host.configuration.tool, "AddMcpServer");
+    assert.equal(report.host.configuration.arguments.command, process.execPath);
+    const hostArgs = report.host.configuration.arguments.args;
+    assert.equal(isAbsolute(hostArgs[0]), true);
+    assert.match(hostArgs[0], /dist[\\/]cli\.js$/u);
+    assert.deepEqual(hostArgs.slice(1), ["serve", "--directory", directory]);
+    assert.match(report.host.nextStep, /AddMcpServer/);
     assert.equal(report.trading.executionAuthorized, false);
     for (const standard of ["EIP-55", "EIP-191"]) {
       assert.match(

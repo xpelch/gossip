@@ -199,7 +199,7 @@ export async function onboardingCommand(
         configured: hostConfigured,
         nextStep:
           host === "grok-bot"
-            ? "Use terminal tools while native MCP host integration remains unverified."
+            ? "After gossip connect succeeds, pass the emitted arguments to AddMcpServer, call RestartMcpServers, then verify GetMcpServerStatus and GetDynamicTools in the next message."
             : "Verify the installed tools in the actual host; a configuration fragment alone is not a loaded connection.",
         ...hostConfiguration(host as SupportedHost, process.execPath, hostArgs),
       },

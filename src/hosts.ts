@@ -1,7 +1,7 @@
 export type SupportedHost = "hermes" | "openclaw" | "grok-bot";
 
 export interface HostConfiguration {
-  format: "json" | "yaml" | "instructions";
+  format: "json" | "yaml" | "agent-tool";
   configuration: unknown;
   instructions: string;
   verified: boolean;
@@ -43,10 +43,16 @@ export function hostConfiguration(
   }
 
   return {
-    format: "instructions",
-    configuration: null,
+    format: "agent-tool",
+    configuration: {
+      tool: "AddMcpServer",
+      arguments: { name: "gossip", command, args: [...args] },
+      reloadTool: "RestartMcpServers",
+      statusTool: "GetMcpServerStatus",
+      discoveryTool: "GetDynamicTools",
+    },
     instructions:
-      "Grok Bot MCP installation/configuration is unverified because no current official host configuration or install API is documented. Do not claim setup succeeded; use the documented Gossip release and host guidance when an official integration becomes available.",
+      "After `gossip connect` succeeds, call Grok Bot's additive AddMcpServer agent tool with the emitted arguments. Then call RestartMcpServers; in the next message, verify GetMcpServerStatus and GetDynamicTools before reporting loaded=true. Do not invent or edit a host configuration file.",
     verified: false,
   };
 }

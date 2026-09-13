@@ -102,7 +102,7 @@ test("conflicts, symlinks, and Grok fail closed without overwriting", async (t) 
     const before = await readFile(path, "utf8");
     await assert.rejects(
       () => installHost("grok-bot", path, "gossip", ["serve"]),
-      /unavailable|documented/i,
+      /agent-only AddMcpServer/i,
     );
     assert.equal(await readFile(path, "utf8"), before);
     try {

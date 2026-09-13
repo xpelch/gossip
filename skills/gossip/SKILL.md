@@ -49,9 +49,11 @@ use the host's read-only doctor/status command before starting the bridge. A
 host status result is not proof that Gossip loaded the bridge or that engine
 authentication succeeded.
 
-Grok Bot host installation is currently unverified: do not invent an install
-API, config path, or successful connection. Report the support gap and stop
-until current official documentation establishes the integration.
+Grok Bot host acceptance remains unverified: use the additive `AddMcpServer`
+arguments emitted by `host-config` after `gossip connect`; do not invent a
+config path or successful connection. Call `RestartMcpServers`, then verify
+`GetMcpServerStatus` and `GetDynamicTools` in the next message before reporting
+the bridge as loaded.
 
 Host E2E verification is unavailable from this skill. A local configuration
 shape check is not proof that a host loaded the server or that engine

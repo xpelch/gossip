@@ -25,10 +25,11 @@ node dist/cli.js setup-gossip --host hermes --directory ABSOLUTE_STATE
 ```
 
 The host value is one of `grok-bot`, `hermes`, or `openclaw`. Pass
-`--config ABSOLUTE_HOST_CONFIG` for host configuration and
+`--config ABSOLUTE_HOST_CONFIG` only for Hermes or OpenClaw file configuration and
 `--skills-directory ABSOLUTE_DIRECTORY` to install the `setup-gossip` and
 `gossip` skills. Skill installation preserves unrelated files and refuses
-conflicts. Grok Bot MCP loading remains unverified; a terminal fallback must
+conflicts. Grok Bot MCP loading remains unverified; `host-config --host grok-bot`
+emits an additive `AddMcpServer` host-tool payload, and a terminal fallback must
 be labeled as such.
 
 Wallet selection is performed before endpoint or RPC setup:
@@ -64,7 +65,9 @@ HTTPS, chain 4663, fresh block reads and timeouts; retain a working explicit RPC
 and report a failing one before any replacement.
 
 Hermes and OpenClaw require a real documented configuration path and additive
-conflict-safe host installation. Grok Bot MCP loading remains unverified; use a
+conflict-safe host installation. Grok Bot MCP loading remains unverified; use the
+emitted `AddMcpServer` payload only after `gossip connect`, then verify
+`RestartMcpServers`, `GetMcpServerStatus`, and `GetDynamicTools`. Use a
 documented terminal fallback only when available and label it as such.
 
 For RPC readiness, retain a working configured provider after validating HTTPS,

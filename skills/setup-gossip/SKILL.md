@@ -14,8 +14,9 @@ host integration, Gossip connection, RPC, standards, and trading.
 
 1. Identify the actual host: Grok Bot, Hermes, OpenClaw, or another environment.
    Do not treat ordinary Grok chat as Grok Bot host support. Grok MCP loading is
-   still unverified; use documented terminal tools only as a clearly labeled
-   fallback.
+   still requires a real host check. Grok Bot exposes the agent-only
+   `AddMcpServer` path; use the exact payload emitted by `host-config` only
+   after `gossip connect`, then verify the host status and dynamic tools.
 2. Use the pinned checkout and read its `README.md`, `AGENTS.md`,
    `skills/setup-gossip/SKILL.md`, and `docs/setup-gossip.md`. Build from the
    pinned source by default. Use `scripts/install.mjs` only when the exact local
@@ -33,7 +34,7 @@ host integration, Gossip connection, RPC, standards, and trading.
    Add `--config ABSOLUTE_HOST_CONFIG` for the selected host and
    `--skills-directory ABSOLUTE_DIRECTORY` to install both setup skills while
    preserving unrelated files and refusing conflicts. The accepted hosts are
-   `grok-bot`, `hermes`, and `openclaw`; Grok MCP remains unverified. The
+   `grok-bot`, `hermes`, and `openclaw`; Grok MCP acceptance remains unverified. The
    orchestrator must report each readiness facet independently and give one
    concrete next action for every blocker.
 
@@ -58,8 +59,12 @@ wallet onboarding are not silently substituted with a new EOA.
 ## Continue independently
 
 Install only documented host configuration. Hermes and OpenClaw require their
-real config path and additive conflict-safe installation. Grok Bot remains
-pending until an official tested loading path exists.
+real config path and additive conflict-safe installation. For Grok Bot, run
+`host-config --host grok-bot --directory ABSOLUTE_STATE` after a successful
+`gossip connect`, pass its emitted `configuration.arguments` unchanged to
+`AddMcpServer`, call `RestartMcpServers`, and verify `GetMcpServerStatus` plus
+`GetDynamicTools` in the next message. Do not invent a settings file or
+hardcode the Node executable path.
 
 For network readiness, validate an explicitly supplied RPC and retain it when
 working. If none exists, test `https://robinhood-rpc.publicnode.com` on chain

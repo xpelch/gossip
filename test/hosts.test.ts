@@ -22,12 +22,33 @@ test("OpenClaw uses its documented mcp.servers shape", () => {
   });
 });
 
-test("Grok Bot reports the documented support gap without inventing config", () => {
-  const result = hostConfiguration("grok-bot", "gossip", ["serve"]);
-  assert.equal(result.format, "instructions");
+test("Grok Bot returns an additive AddMcpServer tool call", () => {
+  const result = hostConfiguration("grok-bot", "/opt/gossip/node", [
+    "/workspace/gossip/dist/cli.js",
+    "serve",
+    "--directory",
+    "/workspace/state",
+  ]);
+  assert.equal(result.format, "agent-tool");
   assert.equal(result.verified, false);
-  assert.equal(result.configuration, null);
-  assert.match(result.instructions, /documented|unsupported|unverified/i);
+  assert.deepEqual(result.configuration, {
+    tool: "AddMcpServer",
+    arguments: {
+      name: "gossip",
+      command: "/opt/gossip/node",
+      args: [
+        "/workspace/gossip/dist/cli.js",
+        "serve",
+        "--directory",
+        "/workspace/state",
+      ],
+    },
+    reloadTool: "RestartMcpServers",
+    statusTool: "GetMcpServerStatus",
+    discoveryTool: "GetDynamicTools",
+  });
+  assert.match(result.instructions, /after.*gossip connect/i);
+  assert.match(result.instructions, /next message/i);
   assert.doesNotMatch(result.instructions, /mcp_servers|mcp\.servers/);
 });
 

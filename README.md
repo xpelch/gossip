@@ -47,7 +47,7 @@ node dist/cli.js host-install --host hermes --config /absolute/hermes-config.yam
 node dist/cli.js serve
 ```
 
-Configuration tests do not establish compatibility with a running host. Grok Bot integration is blocked pending a documented and tested path. See [host evidence](docs/hosts.md) and the [setup skill](skills/gossip/SKILL.md).
+Configuration tests do not establish compatibility with a running host. For Grok Bot, `host-config --host grok-bot` emits arguments for the host's additive `AddMcpServer` agent tool using the actual running Node executable and CLI path. Run it only after `gossip connect` succeeds, then verify `GetMcpServerStatus` and `GetDynamicTools` in the host. See [host evidence](docs/hosts.md) and the [setup skill](skills/gossip/SKILL.md).
 
 Submissions and earned-credit use are denied by default. `policy --daily-credit-budget 3 --allow-kind token_discovery` displays the proposed policy and requires local confirmation. A budget reserves one unit per logical consultation, including uncertain outcomes and standard responses. Reservations persist across restarts and concurrent processes sharing the same state directory. Separate installations do not share a budget.
 

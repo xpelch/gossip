@@ -74,7 +74,7 @@ function shapeFor(
   }
   if (host === "grok-bot")
     throw new Error(
-      "Grok Bot installation is unavailable: no documented configuration API.",
+      "Grok Bot installation uses the agent-only AddMcpServer API. Run host-config --host grok-bot and pass its emitted arguments to that host tool.",
     );
   if (typeof command !== "string" || command.trim() === "")
     throw new Error("A non-empty host command is required.");
