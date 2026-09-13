@@ -6,6 +6,7 @@ import type { Connection } from "./transport.js";
 import { createSignedFetch, createV2SignedFetch } from "./transport.js";
 import type { Engine } from "./kit.js";
 import { IDENTITY_SESSION_TOOLS } from "./identity-session.js";
+import { ProtocolError } from "./protocol-errors.js";
 import { z } from "zod";
 import {
   MCP_REVISION,
@@ -144,8 +145,16 @@ export async function connectV2Engine(
       },
       Math.floor(Date.now() / 1000),
     );
-  } catch {
+  } catch (error) {
     await client.close().catch(() => undefined);
+    if (
+      error instanceof ProtocolError &&
+      error.code === "unsupported_capability"
+    ) {
+      throw new Error(
+        "Engine connection is pending because required Gossip v2 capabilities are not verified.",
+      );
+    }
     throw new Error(
       "Engine connection failed. Verify endpoint, HTTPS trust, v2 capabilities and signing-profile support.",
     );
