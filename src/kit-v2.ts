@@ -15,6 +15,7 @@ import type { Connection } from "./transport.js";
 
 export interface V2Engine {
   call(tool: string, arguments_: Record<string, unknown>): Promise<unknown>;
+  serverNowSeconds(): Promise<number>;
 }
 
 const operationSchema = z
@@ -71,7 +72,7 @@ export class GossipV2Kit {
         mcp_revision: "2025-11-25",
         auth_profile: "gossip-eip191-v2",
       },
-      Math.floor(Date.now() / 1000),
+      await this.engine.serverNowSeconds(),
     );
     return report;
   }
@@ -81,7 +82,10 @@ export class GossipV2Kit {
   }
 
   async consult(request: unknown): Promise<Record<string, unknown>> {
-    const parsed = parseConsultation(request, Math.floor(Date.now() / 1000));
+    const parsed = parseConsultation(
+      request,
+      await this.engine.serverNowSeconds(),
+    );
     this.assertOwnerAndConnection(
       parsed.actor,
       parsed.endpoint,

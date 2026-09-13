@@ -53,6 +53,15 @@ leaves a missing endpoint connection pending. RPC configuration validates
 HTTPS, chain 4663, fresh block reads and timeouts; retain a working explicit RPC
 and report a failing one before any replacement.
 
+The v2 transport handles a host clock skew below 300 seconds inside the normal
+kit process. It uses only a valid, timely `Date` header from the exact configured
+HTTPS endpoint, keeps the offset per connection, and refreshes stale evidence
+before later deadline checks. Use the generated ordinary `serve --directory
+ABSOLUTE_STATE` command; do not add an external time wrapper. The kit rejects
+missing, malformed, slow, stale, or out-of-range server-time evidence and never
+changes the host's system clock. This does not establish Grok Bot or another
+host's acceptance.
+
 Hermes and OpenClaw require a real documented configuration path and additive
 conflict-safe host installation. Grok Bot MCP loading remains unverified; use a
 documented terminal fallback only when available and label it as such.

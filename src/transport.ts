@@ -3,6 +3,84 @@ import { createHash, randomUUID } from "node:crypto";
 import { computeAddress, getAddress, hashMessage, SigningKey } from "ethers";
 import { gossipV2AuthHeaders, gossipV2AuthMessage } from "./http-auth-v2.js";
 
+export const MAX_ABSOLUTE_CLOCK_SKEW_SECONDS = 300;
+export const MAX_SERVER_TIME_ROUND_TRIP_MS = 20_000;
+export const SERVER_TIME_FRESHNESS_MS = 300_000;
+
+const V2_REQUEST_LIFETIME_SECONDS = 240;
+const HTTP_DATE =
+  /^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$/u;
+
+export class ServerClockError extends Error {}
+
+export type V2SignedFetch = typeof fetch & {
+  serverNowSeconds(): number;
+};
+
+class ServerClock {
+  private offsetMs: number | undefined;
+  private observedAtMs: number | undefined;
+
+  constructor(private readonly localNowMs: () => number) {}
+
+  signingNowSeconds(): number {
+    return Math.floor((this.localNowMs() + (this.offsetMs ?? 0)) / 1_000);
+  }
+
+  serverNowSeconds(): number {
+    const localNow = this.localNowMs();
+    if (
+      this.offsetMs === undefined ||
+      this.observedAtMs === undefined ||
+      localNow < this.observedAtMs ||
+      localNow - this.observedAtMs > SERVER_TIME_FRESHNESS_MS
+    ) {
+      throw new ServerClockError(
+        "Trusted server time is unavailable or stale. Retry the Gossip connection.",
+      );
+    }
+
+    return Math.floor((localNow + this.offsetMs) / 1_000);
+  }
+
+  observe(dateHeader: string | null, startedAtMs: number): void {
+    const receivedAtMs = this.localNowMs();
+    const roundTripMs = receivedAtMs - startedAtMs;
+    if (roundTripMs < 0 || roundTripMs > MAX_SERVER_TIME_ROUND_TRIP_MS) {
+      throw new ServerClockError(
+        "The HTTPS server-time response took too long to establish a trusted clock.",
+      );
+    }
+    if (dateHeader === null || !HTTP_DATE.test(dateHeader)) {
+      throw new ServerClockError(
+        "The Gossip HTTPS response did not contain a valid Date header for trusted server time.",
+      );
+    }
+
+    const serverSecondMs = Date.parse(dateHeader);
+    if (
+      !Number.isFinite(serverSecondMs) ||
+      new Date(serverSecondMs).toUTCString() !== dateHeader
+    ) {
+      throw new ServerClockError(
+        "The Gossip HTTPS response contained malformed server time.",
+      );
+    }
+
+    const minimumOffsetMs = serverSecondMs - receivedAtMs;
+    const maximumOffsetMs = serverSecondMs + 999 - startedAtMs;
+    const maximumSkewMs = MAX_ABSOLUTE_CLOCK_SKEW_SECONDS * 1_000;
+    if (minimumOffsetMs < -maximumSkewMs || maximumOffsetMs > maximumSkewMs) {
+      throw new ServerClockError(
+        `The local clock differs from the Gossip server by more than ${MAX_ABSOLUTE_CLOCK_SKEW_SECONDS} seconds.`,
+      );
+    }
+
+    this.offsetMs = Math.round((minimumOffsetMs + maximumOffsetMs) / 2);
+    this.observedAtMs = receivedAtMs;
+  }
+}
+
 export interface IdentitySigner {
   readonly address: string;
   signMessage(message: string | Uint8Array): Promise<string>;
@@ -39,19 +117,21 @@ export function createV2SignedFetch(
   wallet: IdentitySigner,
   connection: Pick<Connection, "endpoint" | "audience">,
   send: typeof fetch = fetch,
-): typeof fetch {
+  localNowMs: () => number = Date.now,
+): V2SignedFetch {
   const endpoint = canonicalHttpsUrl(connection.endpoint, "Endpoint");
   const audience = canonicalHttpsUrl(connection.audience, "Audience");
+  const clock = new ServerClock(localNowMs);
 
-  return async (input, init) => {
-    const request = new Request(input, { ...init, redirect: "error" });
-    if (request.url !== endpoint.href) {
+  const signedFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const original = new Request(input, { ...init, redirect: "error" });
+    if (original.url !== endpoint.href) {
       throw new Error(
         "Signing destination does not match the configured MCP endpoint.",
       );
     }
     if (
-      [...request.headers.keys()].some((name) => {
+      [...original.headers.keys()].some((name) => {
         const normalized = name.toLowerCase();
         return (
           normalized === "authorization" ||
@@ -63,31 +143,63 @@ export function createV2SignedFetch(
       throw new Error("Caller-supplied authentication headers are forbidden.");
     }
 
-    const body = new Uint8Array(await request.clone().arrayBuffer());
-    const nonce = randomUUID();
-    const expires = String(Math.floor(Date.now() / 1000) + 240);
-    const target = endpoint.pathname + endpoint.search;
-    const message = gossipV2AuthMessage({
-      audience: audience.href,
-      endpoint: endpoint.href,
-      method: request.method,
-      target,
-      body,
-      nonce,
-      expires,
-    });
-    const proof = await checkedSignature(wallet, message);
-    const headers = gossipV2AuthHeaders({
-      publicKey: proof.publicKey,
-      signature: proof.signature,
-      nonce,
-      expires,
-    });
-    for (const [name, value] of Object.entries(headers)) {
-      request.headers.set(name, value);
+    const sendAttempt = async () => {
+      const request = original.clone();
+      const body = new Uint8Array(await request.clone().arrayBuffer());
+      const nonce = randomUUID();
+      const signingNow = clock.signingNowSeconds();
+      const expires = String(signingNow + V2_REQUEST_LIFETIME_SECONDS);
+      const target = endpoint.pathname + endpoint.search;
+      const message = gossipV2AuthMessage({
+        audience: audience.href,
+        endpoint: endpoint.href,
+        method: request.method,
+        target,
+        body,
+        nonce,
+        expires,
+      });
+      const proof = await checkedSignature(wallet, message);
+      const headers = gossipV2AuthHeaders({
+        publicKey: proof.publicKey,
+        signature: proof.signature,
+        nonce,
+        expires,
+      });
+      for (const [name, value] of Object.entries(headers)) {
+        request.headers.set(name, value);
+      }
+
+      const startedAtMs = localNowMs();
+      const response = await send(request);
+      if (
+        response.redirected ||
+        (response.url !== "" && response.url !== endpoint.href)
+      ) {
+        throw new ServerClockError(
+          "Trusted server time must come from the exact configured HTTPS endpoint.",
+        );
+      }
+      clock.observe(response.headers.get("date"), startedAtMs);
+
+      return { response, signingNow };
+    };
+
+    const first = await sendAttempt();
+    if (
+      first.response.status === 401 &&
+      clock.signingNowSeconds() !== first.signingNow
+    ) {
+      await first.response.body?.cancel();
+      return (await sendAttempt()).response;
     }
-    return send(request);
+
+    return first.response;
   };
+
+  return Object.assign(signedFetch, {
+    serverNowSeconds: () => clock.serverNowSeconds(),
+  }) as V2SignedFetch;
 }
 
 export function createSignedFetch(

@@ -12,8 +12,46 @@ import { WalletVault } from "../src/wallet.js";
 import { createCredentialStore } from "../src/credential-store.js";
 import { prepareConnection } from "../src/setup-connection.js";
 import { loadConfiguration } from "../src/configuration.js";
+import {
+  AUTH_PROFILE,
+  MCP_REVISION,
+  PROTOCOL_REVISION,
+  SCHEMA_REVISION,
+} from "../src/protocol-v2.js";
+import { ProtocolError } from "../src/protocol-errors.js";
 
 const address = "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf";
+const endpoint = "https://gossip.test/mcp";
+const audience = "https://gossip.test/";
+
+function feature(capability: string) {
+  return { capability, status: "verified", evidence_revision: "engine-1" };
+}
+
+function capabilities() {
+  return {
+    protocols: [PROTOCOL_REVISION],
+    schema_revisions: [SCHEMA_REVISION],
+    auth_profiles: [AUTH_PROFILE],
+    mcp_revision: MCP_REVISION,
+    server: { id: "sherwood", revision: "engine-1" },
+    endpoint,
+    audience,
+    issued_at: 1_000,
+    expires_at: 2_000,
+    limits: {
+      max_request_bytes: 32_768,
+      max_depth: 8,
+      max_collection_items: 128,
+    },
+    features: [
+      feature("atomic_consult"),
+      feature("durable_operations"),
+      feature("signed_receipts"),
+      feature("evidence"),
+    ],
+  };
+}
 
 test("setup accepts the installable v2 profile for an existing EOA file", async () => {
   const root = await mkdtemp(join(tmpdir(), "gossip-v2-setup-"));
@@ -44,6 +82,56 @@ test("setup accepts the installable v2 profile for an existing EOA file", async 
   }
 });
 
+test("the v2 kit uses authoritative server time for capability expiry and consultation deadlines", async () => {
+  let calls = 0;
+  const kit = new GossipV2Kit(
+    "unused",
+    address,
+    {
+      call: async () => {
+        calls++;
+        return capabilities();
+      },
+      serverNowSeconds: async () => 2_000,
+    },
+    { endpoint, audience },
+  );
+
+  await assert.rejects(
+    kit.capabilities(),
+    (error: unknown) =>
+      error instanceof ProtocolError && error.code === "expired_capabilities",
+  );
+  await assert.rejects(
+    kit.consult({
+      protocol: PROTOCOL_REVISION,
+      schema_revision: SCHEMA_REVISION,
+      auth_profile: AUTH_PROFILE,
+      operation_id: "expired_consultation",
+      actor: { chain_id: "4663", address: address.toLowerCase() },
+      subject: {
+        kind: "token",
+        chain_id: "4663",
+        address: "0x2222222222222222222222222222222222222222",
+      },
+      capability: "token_overview",
+      endpoint,
+      audience,
+      quality: {
+        tier: "standard",
+        max_age_seconds: 300,
+        finality: "safe",
+        allow_partial: false,
+      },
+      max_cost: { unit: "earned_credit", amount: "0" },
+      deadline: 2_000,
+    }),
+    (error: unknown) =>
+      error instanceof ProtocolError && error.code === "expired_deadline",
+  );
+  assert.equal(calls, 1);
+});
+
 test("the v2 bridge exposes exactly the six v2 tools and never forwards feedback", async () => {
   const directory = await mkdtemp(join(tmpdir(), "gossip-v2-bridge-"));
   let calls = 0;
@@ -55,8 +143,9 @@ test("the v2 bridge exposes exactly the six v2 tools and never forwards feedback
         calls++;
         return {};
       },
+      serverNowSeconds: async () => 1_000,
     },
-    { endpoint: "https://gossip.test/mcp", audience: "https://gossip.test/" },
+    { endpoint, audience },
   );
   const server = createV2Bridge(kit);
   const client = new Client({ name: "test", version: "1" });
