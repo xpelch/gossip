@@ -6,6 +6,12 @@ endpoint, standards interoperability, RPC access, or trading is supported in a
 particular environment. The command reports runtime, wallet, host integration,
 Gossip connection, RPC, standards, and trading readiness independently.
 
+For copy-paste onboarding instructions with the pinned public endpoint,
+audience, v2 profile, wallet branches, host variants, and diagnostic truth,
+see [canonical agent prompts](agent-prompts.md). This workflow remains the
+normative command reference; prompts do not replace the protocol or
+cryptographic specifications.
+
 Use a pinned checkout and an absolute state directory. Read the repository
 instructions before running it, use the checked-in Linux bootstrap where
 applicable, and never execute an unpinned fetched script:

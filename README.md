@@ -81,7 +81,7 @@ An existing local EOA file can now be attached without copying its key or using 
 
 ## Setup entry point and Robinhood Chain preview
 
-Use the [setup-gossip skill and command](docs/setup-gossip.md) for wallet-first onboarding, additive host/skill installation, optional signed Gossip connection and default RPC configuration. All options can be orchestrated by the agent from that one skill. Encrypted-keystore migration continues through the existing local `wallet import` command, followed by `setup-gossip --wallet reuse`.
+Use the [setup-gossip skill and command](docs/setup-gossip.md) for wallet-first onboarding, additive host/skill installation, optional signed Gossip connection and default RPC configuration. The [canonical agent prompts](docs/agent-prompts.md) provide copy-paste General, Grok Bot, Hermes, and OpenClaw variants with the pinned endpoint, audience, profile, RPC, wallet branches, and evidence boundaries. All options can be orchestrated by the agent from that one skill. Encrypted-keystore migration continues through the existing local `wallet import` command, followed by `setup-gossip --wallet reuse`.
 
 The `network` commands validate chain 4663 and provide read-only balances, token decimals, allowances, receipts and fee data. RPC URLs are saved locally with owner-only file mode where supported; provider paths/query strings are omitted from diagnostic output. Keep provider credentials out of prompts and public configuration.
 
