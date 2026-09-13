@@ -50,7 +50,7 @@ const SLOS = [
  * @property {UnknownRecord} deployment
  * @property {UnknownRecord} contract
  * @property {UnknownRecord} receipt_trust
- * @property {Record<string, boolean>} production_checks
+ * @property {Record<string, UnknownRecord>} production_checks
  * @property {Record<string, UnknownRecord>} hosts
  * @property {UnknownRecord[]} measurement_windows
  * @property {Record<string, UnknownRecord|null>} slos
@@ -362,8 +362,20 @@ function validateTrust(receiptTrust, passed) {
 function validateProductionChecks(checks, passed) {
   exactKeys(checks, PRODUCTION_CHECKS, "production_checks");
   for (const name of PRODUCTION_CHECKS) {
-    boolean(checks[name], `production_checks.${name}`);
-    if (passed && checks[name] !== true) {
+    const check = checks[name];
+    exactKeys(
+      check,
+      ["passed", "evidence_sha256"],
+      `production_checks.${name}`,
+    );
+    boolean(check.passed, `production_checks.${name}.passed`);
+    if (check.passed && check.evidence_sha256 === null) {
+      fail("passed production check evidence is missing");
+    }
+    digest(check.evidence_sha256, `production_checks.${name}.evidence_sha256`, {
+      nullable: true,
+    });
+    if (passed && check.passed !== true) {
       fail("production checks did not all pass");
     }
   }
@@ -375,7 +387,13 @@ function validateHosts(hosts, passed) {
     const host = hosts[name];
     exactKeys(
       host,
-      ["version", "operating_system", "protected_storage", "verified"],
+      [
+        "version",
+        "operating_system",
+        "protected_storage",
+        "evidence_sha256",
+        "verified",
+      ],
       `hosts.${name}`,
     );
     text(host.version, `hosts.${name}.version`, { nullable: !passed });
@@ -386,6 +404,12 @@ function validateHosts(hosts, passed) {
       nullable: !passed,
     });
     boolean(host.verified, `hosts.${name}.verified`);
+    if (host.verified && host.evidence_sha256 === null) {
+      fail("verified host evidence is missing");
+    }
+    digest(host.evidence_sha256, `hosts.${name}.evidence_sha256`, {
+      nullable: true,
+    });
     if (passed && host.verified !== true) {
       fail("hosts are not all verified");
     }

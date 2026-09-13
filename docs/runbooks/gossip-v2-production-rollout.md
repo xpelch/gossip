@@ -66,6 +66,10 @@ Every SLO result references both windows, at least 50 observations from each,
 their content-addressed summaries, and the exact release, deployment, trust, and
 contract revisions. The verifier rejects a `passed` result when any reference,
 host, production check, SLO, policy decision, or verification field is missing.
+Every passed production check and verified host cites a content-addressed evidence
+bundle. A host bundle must contain the commands, versions, exit codes, redacted
+diagnostics, install/configured/connected/verified state transitions, wallet path,
+restart and lifecycle journeys, and prohibited-data scan required by issue #18.
 It validates the record's structure, cross-references, key/address binding, and
 chronology. The independent verifier must still fetch the cited artifacts,
 recompute their digests and SLO summaries, verify provenance and receipts, and

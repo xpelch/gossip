@@ -53,7 +53,13 @@ function passedManifest(): Ws7ProductionManifest {
     manifest_digest: `sha256:${"f".repeat(64)}`,
   };
   manifest.production_checks = Object.fromEntries(
-    Object.keys(manifest.production_checks).map((name) => [name, true]),
+    Object.keys(manifest.production_checks).map((name, index) => [
+      name,
+      {
+        passed: true,
+        evidence_sha256: `sha256:${((index % 9) + 1).toString().repeat(64)}`,
+      },
+    ]),
   ) as Ws7ProductionManifest["production_checks"];
   manifest.hosts = Object.fromEntries(
     Object.entries(manifest.hosts).map(([name, host]) => [
@@ -63,6 +69,7 @@ function passedManifest(): Ws7ProductionManifest {
         version: "1.0.0",
         operating_system: "linux",
         protected_storage: "secret-service",
+        evidence_sha256: `sha256:${"9".repeat(64)}`,
         verified: true,
       },
     ]),
@@ -149,12 +156,24 @@ test("rejects passed manifests when any release, deployment, or trust identity i
 
 test("rejects passed manifests with an unverified production check, host, SLO, or gate", () => {
   const productionCheck = passedManifest();
-  productionCheck.production_checks.signed_capabilities = false;
+  productionCheck.production_checks.signed_capabilities.passed = false;
   assert.throws(() => validateManifest(productionCheck), /production checks/u);
+
+  const missingProductionEvidence = passedManifest();
+  missingProductionEvidence.production_checks.signed_capabilities.evidence_sha256 =
+    null;
+  assert.throws(
+    () => validateManifest(missingProductionEvidence),
+    /production check evidence/u,
+  );
 
   const host = passedManifest();
   host.hosts.hermes.verified = false;
   assert.throws(() => validateManifest(host), /hosts/u);
+
+  const missingHostEvidence = passedManifest();
+  missingHostEvidence.hosts.hermes.evidence_sha256 = null;
+  assert.throws(() => validateManifest(missingHostEvidence), /host evidence/u);
 
   const slo = passedManifest();
   slo.slos.consultation_latency = {

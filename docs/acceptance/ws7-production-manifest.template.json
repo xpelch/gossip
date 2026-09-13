@@ -35,34 +35,46 @@
     "manifest_digest": null
   },
   "production_checks": {
-    "signed_capabilities": false,
-    "standard_zero_cost_consultation": false,
-    "evidence_reproduction": false,
-    "receipt_chain": false,
-    "exact_retry": false,
-    "changed_content_conflict": false,
-    "owner_isolation": false,
-    "restart_upgrade_rollback": false,
-    "session_rotation_revocation": false,
-    "telemetry_scan": false
+    "signed_capabilities": { "passed": false, "evidence_sha256": null },
+    "standard_zero_cost_consultation": {
+      "passed": false,
+      "evidence_sha256": null
+    },
+    "evidence_reproduction": { "passed": false, "evidence_sha256": null },
+    "receipt_chain": { "passed": false, "evidence_sha256": null },
+    "exact_retry": { "passed": false, "evidence_sha256": null },
+    "changed_content_conflict": { "passed": false, "evidence_sha256": null },
+    "owner_isolation": { "passed": false, "evidence_sha256": null },
+    "restart_upgrade_rollback": {
+      "passed": false,
+      "evidence_sha256": null
+    },
+    "session_rotation_revocation": {
+      "passed": false,
+      "evidence_sha256": null
+    },
+    "telemetry_scan": { "passed": false, "evidence_sha256": null }
   },
   "hosts": {
     "grok_bot": {
       "version": null,
       "operating_system": null,
       "protected_storage": null,
+      "evidence_sha256": null,
       "verified": false
     },
     "hermes": {
       "version": null,
       "operating_system": null,
       "protected_storage": null,
+      "evidence_sha256": null,
       "verified": false
     },
     "openclaw": {
       "version": null,
       "operating_system": null,
       "protected_storage": null,
+      "evidence_sha256": null,
       "verified": false
     }
   },
