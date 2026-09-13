@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { GossipV2Kit } from "../src/kit-v2.js";
@@ -19,10 +20,25 @@ import {
   SCHEMA_REVISION,
 } from "../src/protocol-v2.js";
 import { ProtocolError } from "../src/protocol-errors.js";
+import { canonicalJson, parseCanonicalJson } from "../src/canonical.js";
 
 const address = "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf";
 const endpoint = "https://gossip.test/mcp";
 const audience = "https://gossip.test/";
+
+const publicSubmissionFixture = JSON.parse(
+  readFileSync(
+    new URL("./fixtures/v2-public-submission.json", import.meta.url),
+    "utf8",
+  ),
+) as { valid: Record<string, unknown> };
+
+const publicSubmissionReceiptFixture = JSON.parse(
+  readFileSync(
+    new URL("./fixtures/v2-public-submission-receipt.json", import.meta.url),
+    "utf8",
+  ),
+) as { receipt: Record<string, unknown> };
 
 function feature(capability: string) {
   return { capability, status: "verified", evidence_revision: "engine-1" };
@@ -130,6 +146,86 @@ test("the v2 kit uses authoritative server time for capability expiry and consul
       error instanceof ProtocolError && error.code === "expired_deadline",
   );
   assert.equal(calls, 1);
+});
+
+test("consult sends canonical JSON property order to the engine", async () => {
+  let wireRequest: unknown;
+  const kit = new GossipV2Kit(
+    "unused",
+    address,
+    {
+      call: async (_tool, arguments_) => {
+        wireRequest = arguments_.request;
+        parseCanonicalJson(JSON.stringify(wireRequest));
+        return {
+          protocol: PROTOCOL_REVISION,
+          schema_revision: SCHEMA_REVISION,
+          schema: "gossip.operation.v2",
+          operation_id: "canonical-consultation",
+          status: "accepted",
+          economic_state: "free",
+          version: 0,
+          reserved_amount: "0",
+          unmet_requirements: [],
+        };
+      },
+      serverNowSeconds: async () => 1_000,
+    },
+    { endpoint, audience },
+  );
+
+  await kit.consult({
+    protocol: PROTOCOL_REVISION,
+    schema_revision: SCHEMA_REVISION,
+    auth_profile: AUTH_PROFILE,
+    operation_id: "canonical-consultation",
+    actor: { chain_id: "4663", address: address.toLowerCase() },
+    subject: {
+      kind: "token",
+      chain_id: "4663",
+      address: "0x2222222222222222222222222222222222222222",
+    },
+    capability: "token_overview",
+    endpoint,
+    audience,
+    quality: {
+      tier: "standard",
+      max_age_seconds: 300,
+      finality: "safe",
+      allow_partial: false,
+    },
+    max_cost: { unit: "earned_credit", amount: "0" },
+    deadline: 1_300,
+  });
+
+  const serializedRequest = JSON.stringify(wireRequest);
+  assert.equal(serializedRequest, canonicalJson(wireRequest));
+});
+
+test("submit sends canonical JSON property order to the engine", async () => {
+  let wireRequest: unknown;
+  const validSubmission = publicSubmissionFixture.valid;
+  const actor = validSubmission.actor as { address: string };
+  const submissionEndpoint = validSubmission.endpoint as string;
+  const submissionAudience = validSubmission.audience as string;
+  const kit = new GossipV2Kit(
+    "unused",
+    actor.address,
+    {
+      call: async (_tool, arguments_) => {
+        wireRequest = arguments_.request;
+        parseCanonicalJson(JSON.stringify(wireRequest));
+        return publicSubmissionReceiptFixture.receipt;
+      },
+      serverNowSeconds: async () => 1_000,
+    },
+    { endpoint: submissionEndpoint, audience: submissionAudience },
+  );
+
+  await kit.submit(validSubmission);
+
+  const serializedRequest = JSON.stringify(wireRequest);
+  assert.equal(serializedRequest, canonicalJson(wireRequest));
 });
 
 test("the v2 bridge exposes exactly the six v2 tools and never forwards feedback", async () => {
