@@ -17,9 +17,13 @@ host integration, Gossip connection, RPC, standards, and trading.
    still unverified; use documented terminal tools only as a clearly labeled
    fallback.
 2. Use the pinned checkout and read its `README.md`, `AGENTS.md`,
-   `skills/setup-gossip/SKILL.md`, and `docs/setup-gossip.md`. Run the checked-in
-   Linux bootstrap when applicable. Never fetch and execute an unpinned script.
-   Do not replace the host's system Node or broaden permissions silently.
+   `skills/setup-gossip/SKILL.md`, and `docs/setup-gossip.md`. Build from the
+   pinned source by default. Use `scripts/install.mjs` only when the exact local
+   `.tgz` and its independently supplied SHA-256 digest are both available.
+   Run the checked-in Linux bootstrap only when Node.js 24 is not already
+   verified; missing `xz` blocks that bootstrap, not an existing verified
+   runtime. Never fetch and execute an unpinned script. Do not replace the
+   host's system Node or broaden permissions silently.
 3. Run the orchestrator with an absolute state directory:
 
    ```text

@@ -12,9 +12,13 @@ see [canonical agent prompts](agent-prompts.md). This workflow remains the
 normative command reference; prompts do not replace the protocol or
 cryptographic specifications.
 
-Use a pinned checkout and an absolute state directory. Read the repository
-instructions before running it, use the checked-in Linux bootstrap where
-applicable, and never execute an unpinned fetched script:
+Use a pinned checkout and an absolute state directory. Source installation is
+the default: verify Node.js 24, run `npm ci --ignore-scripts`, and build that
+checkout. Use `scripts/install.mjs` only when the exact local `.tgz` and its
+independently supplied SHA-256 digest are both available. A digest is not an
+artifact locator. Run the checked-in Linux bootstrap only when Node.js 24 is not
+already verified; missing `xz` blocks that bootstrap, not an existing verified
+runtime. Never execute an unpinned fetched script:
 
 ```text
 node dist/cli.js setup-gossip --host hermes --directory ABSOLUTE_STATE

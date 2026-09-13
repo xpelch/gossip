@@ -17,20 +17,19 @@ canonicalization, signing, authentication, receipts, and capability schemas:
 
 Every prompt below uses these exact values:
 
-| Item                                         | Value                                                              |
-| -------------------------------------------- | ------------------------------------------------------------------ |
-| Kit repository                               | `https://github.com/gossip-dev/gossip`                             |
-| Kit source commit                            | `ba360730e872534270ed54b3690a3c60b47c52cc`                         |
-| Packaged kit SHA-256, when a package is used | `e73f5bb2c17a1d5f184acf6a7f39b995ef5aee2cc5956790aecb93cedd8a2b5a` |
-| Runtime                                      | Node.js 24 or newer                                                |
-| MCP endpoint                                 | `https://api.gossip-protocol.xyz/mcp`                              |
-| Capabilities URL                             | `https://api.gossip-protocol.xyz/v2/gossip/capabilities`           |
-| Audience                                     | `https://api.gossip-protocol.xyz/`                                 |
-| Authentication profile                       | `gossip-eip191-v2`                                                 |
-| Protocol                                     | `gossip/2-draft.1`                                                 |
-| Schema revision                              | `2026-09-09`                                                       |
-| Robinhood Chain                              | `4663`                                                             |
-| Default RPC                                  | `https://robinhood-rpc.publicnode.com`                             |
+| Item                   | Value                                                    |
+| ---------------------- | -------------------------------------------------------- |
+| Kit repository         | `https://github.com/gossip-dev/gossip`                   |
+| Kit source commit      | `ba360730e872534270ed54b3690a3c60b47c52cc`               |
+| Runtime                | Node.js 24 or newer                                      |
+| MCP endpoint           | `https://api.gossip-protocol.xyz/mcp`                    |
+| Capabilities URL       | `https://api.gossip-protocol.xyz/v2/gossip/capabilities` |
+| Audience               | `https://api.gossip-protocol.xyz/`                       |
+| Authentication profile | `gossip-eip191-v2`                                       |
+| Protocol               | `gossip/2-draft.1`                                       |
+| Schema revision        | `2026-09-09`                                             |
+| Robinhood Chain        | `4663`                                                   |
+| Default RPC            | `https://robinhood-rpc.publicnode.com`                   |
 
 The local bridge signs each request. Do not reproduce or modify its signing
 algorithm in a prompt, host configuration, or wrapper. Read the linked
@@ -43,8 +42,13 @@ The four prompts share these requirements:
 - Detect the actual host before changing files. Ordinary chat is not proof of
   Grok Bot, Hermes, or OpenClaw support.
 - Use an isolated checkout or an already selected checkout and verify the kit
-  commit. Install prerequisites with Node.js 24 and `npm ci --ignore-scripts`,
-  then build the pinned kit. Never execute an unpinned fetched script.
+  commit. Build from that pinned source by default with Node.js 24 and
+  `npm ci --ignore-scripts`. Use `scripts/install.mjs` only when the exact local
+  `.tgz` and its independently supplied SHA-256 digest are both available; a
+  digest is not an artifact locator. Never execute an unpinned fetched script.
+- If Node.js 24 is already verified, skip the runtime bootstrap. Missing `xz`
+  blocks bootstrap only when the pinned Node.js archive still needs to be
+  installed or verified from that archive.
 - Branch explicitly between an existing Gossip Identity, an existing local
   wallet, and a fresh protected identity. Reuse must preserve the existing
   identity; fresh creation requires supported protected storage.
@@ -93,7 +97,6 @@ reviewable evidence report. Use only the exact facts below:
 
 - repository: https://github.com/gossip-dev/gossip
 - required source commit: ba360730e872534270ed54b3690a3c60b47c52cc
-- packaged kit SHA-256, if using a package: e73f5bb2c17a1d5f184acf6a7f39b995ef5aee2cc5956790aecb93cedd8a2b5a
 - Node.js: 24 or newer
 - endpoint: https://api.gossip-protocol.xyz/mcp
 - capabilities: https://api.gossip-protocol.xyz/v2/gossip/capabilities
@@ -105,8 +108,12 @@ reviewable evidence report. Use only the exact facts below:
 First detect whether this is Grok Bot, Hermes, OpenClaw, or another host. Do
 not call ordinary chat Grok Bot support. Read the pinned checkout's README,
 AGENTS.md, skills/setup-gossip/SKILL.md, and docs/setup-gossip.md. Verify the
-commit before installing. Ensure Node.js 24, run npm ci --ignore-scripts, and
-build the kit from that checkout. Do not execute unpinned fetched code.
+commit before installing. Build from that checkout by default: ensure Node.js
+24, run npm ci --ignore-scripts, and build the kit. Use scripts/install.mjs only
+when the exact local .tgz and its independently supplied SHA-256 digest are both
+available. A digest alone does not locate or attest an artifact. If Node.js 24
+is already verified, skip bootstrap; missing xz blocks only a bootstrap that
+still needs the Node.js archive. Do not execute unpinned fetched code.
 
 Choose exactly one identity branch after inspecting the state:
 
@@ -154,17 +161,20 @@ Use this variant when the actual environment is the Grok Bot host:
 ```text
 Prepare Gossip Agent Kit for the actual Grok Bot environment using only this
 pin: repository https://github.com/gossip-dev/gossip at commit
-ba360730e872534270ed54b3690a3c60b47c52cc, Node.js 24+, and package SHA-256
-e73f5bb2c17a1d5f184acf6a7f39b995ef5aee2cc5956790aecb93cedd8a2b5a when a
-package is used. The endpoint is https://api.gossip-protocol.xyz/mcp, the
+ba360730e872534270ed54b3690a3c60b47c52cc and Node.js 24+. Build from that
+pinned source by default. Use scripts/install.mjs only when the exact local .tgz
+and its independently supplied SHA-256 digest are both available; a digest does
+not locate the package. The endpoint is https://api.gossip-protocol.xyz/mcp, the
 capabilities URL is https://api.gossip-protocol.xyz/v2/gossip/capabilities,
 the exact audience is https://api.gossip-protocol.xyz/, and the selected
 profile/protocol/schema are gossip-eip191-v2 / gossip/2-draft.1 / 2026-09-09.
 Use chain 4663 and https://robinhood-rpc.publicnode.com as the default RPC.
 
 Read the pinned README, AGENTS.md, setup-gossip skill, and host evidence first.
-Verify the commit, install Node.js 24 prerequisites, run npm ci --ignore-scripts
-and build. Detect and use the actual local environment. Grok Bot's native MCP
+Verify the commit, ensure Node.js 24, run npm ci --ignore-scripts, and build.
+Skip bootstrap when Node.js 24 is already verified; missing xz blocks only a
+bootstrap that still needs the Node.js archive. Detect and use the actual local
+environment. Grok Bot's native MCP
 configuration/loading path is undocumented and unverified: do not invent a
 remote configuration, claim native loading, or edit an unknown file. If the
 only available route is a terminal/setup fallback, label it exactly as a
@@ -202,9 +212,10 @@ Use this variant when the actual environment is Hermes. Replace every
 ```text
 Set up the pinned Gossip Agent Kit for Hermes. Verify repository
 https://github.com/gossip-dev/gossip at commit
-ba360730e872534270ed54b3690a3c60b47c52cc, use Node.js 24+, and verify package
-SHA-256 e73f5bb2c17a1d5f184acf6a7f39b995ef5aee2cc5956790aecb93cedd8a2b5a when
-using a package. Configure endpoint https://api.gossip-protocol.xyz/mcp,
+ba360730e872534270ed54b3690a3c60b47c52cc and use Node.js 24+. Build from that
+pinned source by default. Use scripts/install.mjs only when the exact local .tgz
+and its independently supplied SHA-256 digest are both available. Configure
+endpoint https://api.gossip-protocol.xyz/mcp,
 audience https://api.gossip-protocol.xyz/, capabilities
 https://api.gossip-protocol.xyz/v2/gossip/capabilities, profile
 gossip-eip191-v2, protocol gossip/2-draft.1, schema 2026-09-09, chain 4663,
@@ -212,7 +223,9 @@ and RPC https://robinhood-rpc.publicnode.com.
 
 Inspect the actual Hermes installation and use its real absolute config path:
 ABSOLUTE_HERMES_CONFIG. Verify the pinned checkout, install Node.js 24
-prerequisites, run npm ci --ignore-scripts, and build. Install the setup-gossip
+prerequisites only when Node.js 24 is not already verified, run npm ci
+--ignore-scripts, and build. Missing xz blocks only a bootstrap that still needs
+the Node.js archive. Install the setup-gossip
 and gossip skills additively. Merge this local server into the existing YAML
 without replacing other servers:
 
@@ -255,9 +268,10 @@ Use this variant when the actual environment is OpenClaw. Replace every
 ```text
 Set up the pinned Gossip Agent Kit for OpenClaw. Verify repository
 https://github.com/gossip-dev/gossip at commit
-ba360730e872534270ed54b3690a3c60b47c52cc, use Node.js 24+, and verify package
-SHA-256 e73f5bb2c17a1d5f184acf6a7f39b995ef5aee2cc5956790aecb93cedd8a2b5a when
-using a package. Configure endpoint https://api.gossip-protocol.xyz/mcp,
+ba360730e872534270ed54b3690a3c60b47c52cc and use Node.js 24+. Build from that
+pinned source by default. Use scripts/install.mjs only when the exact local .tgz
+and its independently supplied SHA-256 digest are both available. Configure
+endpoint https://api.gossip-protocol.xyz/mcp,
 audience https://api.gossip-protocol.xyz/, capabilities
 https://api.gossip-protocol.xyz/v2/gossip/capabilities, profile
 gossip-eip191-v2, protocol gossip/2-draft.1, schema 2026-09-09, chain 4663,
@@ -265,7 +279,9 @@ and RPC https://robinhood-rpc.publicnode.com.
 
 Inspect the actual OpenClaw installation and use its real absolute config path:
 ABSOLUTE_OPENCLAW_CONFIG. Verify the pinned checkout, install Node.js 24
-prerequisites, run npm ci --ignore-scripts, and build. Install the setup-gossip
+prerequisites only when Node.js 24 is not already verified, run npm ci
+--ignore-scripts, and build. Missing xz blocks only a bootstrap that still needs
+the Node.js archive. Install the setup-gossip
 and gossip skills additively. Merge this local server into the existing JSON
 without replacing other servers:
 
