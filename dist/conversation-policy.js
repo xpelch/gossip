@@ -199,6 +199,7 @@ function detectLanguage(text) {
         "ça",
         "ce",
         "comme",
+        "c’est",
         "dans",
         "des",
         "est",
@@ -211,6 +212,9 @@ function detectLanguage(text) {
         "que",
         "qui",
         "sur",
+        "ici",
+        "quoi",
+        "risque",
         "une",
         "vous",
     ]);
@@ -252,7 +256,7 @@ function detectLanguage(text) {
 function hasCasualSignal(text) {
     return (/\p{Extended_Pictographic}/u.test(text) ||
         /(?:!{2,}|\?{2,})/u.test(text) ||
-        /\b(?:coucou|hey|haha|lol|salut|stp|yo)\b/iu.test(text) ||
+        /\b(?:ben|bro|coucou|genre|haha|hey|lol|mec|ngl|ouais|salut|stp|yo)\b/iu.test(text) ||
         /\b(?:j['’]ai|j['’]suis|t['’]as|tu|ça|i['’]m|you['’]re|can['’]t|don['’]t|let['’]s)\b/iu.test(text));
 }
 function completeSentence(value) {
