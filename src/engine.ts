@@ -6,6 +6,7 @@ import type { Connection } from "./transport.js";
 import { createSignedFetch, createV2SignedFetch } from "./transport.js";
 import type { Engine } from "./kit.js";
 import { IDENTITY_SESSION_TOOLS } from "./identity-session.js";
+import { z } from "zod";
 import {
   MCP_REVISION,
   AUTH_PROFILE,
@@ -18,6 +19,19 @@ const allowedTools = new Set([
   "gossip_submit",
   "gossip_receipt",
 ]);
+
+const v2ToolsDiscoverySchema = z.object({
+  tools: z.array(
+    z.object({
+      name: z
+        .string()
+        .min(1)
+        .refine((name) => name === name.trim()),
+    }),
+  ),
+  nextCursor: z.string().optional(),
+});
+
 export async function connectEngine(
   wallet: IdentitySigner,
   connection: Connection,
@@ -110,7 +124,10 @@ export async function connectV2Engine(
 
   try {
     await client.connect(transport as Transport, { timeout: 20_000 });
-    const discovery = await client.listTools();
+    const discovery = await client.request(
+      { method: "tools/list" },
+      v2ToolsDiscoverySchema,
+    );
     const discovered = new Set(discovery.tools.map((tool) => tool.name));
     if ([...allowedTools].some((tool) => !discovered.has(tool))) {
       throw new Error("Engine lacks a required Gossip v2 tool.");
