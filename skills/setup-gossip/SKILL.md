@@ -17,9 +17,13 @@ host integration, Gossip connection, RPC, standards, and trading.
    still unverified; use documented terminal tools only as a clearly labeled
    fallback.
 2. Use the pinned checkout and read its `README.md`, `AGENTS.md`,
-   `skills/setup-gossip/SKILL.md`, and `docs/setup-gossip.md`. Run the checked-in
-   Linux bootstrap when applicable. Never fetch and execute an unpinned script.
-   Do not replace the host's system Node or broaden permissions silently.
+   `skills/setup-gossip/SKILL.md`, and `docs/setup-gossip.md`. Build from the
+   pinned source by default. Use `scripts/install.mjs` only when the exact local
+   `.tgz` and its independently supplied SHA-256 digest are both available.
+   Run the checked-in Linux bootstrap only when Node.js 24 is not already
+   verified; missing `xz` blocks that bootstrap, not an existing verified
+   runtime. Never fetch and execute an unpinned script. Do not replace the
+   host's system Node or broaden permissions silently.
 3. Run the orchestrator with an absolute state directory:
 
    ```text
@@ -59,11 +63,11 @@ pending until an official tested loading path exists.
 
 For network readiness, validate an explicitly supplied RPC and retain it when
 working. If none exists, test `https://robinhood-rpc.publicnode.com` on chain
-4663 before reporting RPC ready. RPC failure must not block legacy identity-only
-Gossip setup. The current supported Gossip authentication profile is legacy
-Sherwood EIP-191; pass `--endpoint HTTPS --audience HTTPS` to attempt signed
-connection verification. A missing endpoint or audience leaves connection
-pending. `--profile` is not currently supported. For network checks, use
+4663 before reporting RPC ready. RPC failure must not block identity-only
+Gossip setup. Pass `--endpoint HTTPS --audience HTTPS --profile
+gossip-eip191-v2` to select the signed v2 engine and six-tool bridge. Omitting
+`--profile` keeps the legacy Sherwood EIP-191 path. A missing endpoint or
+audience leaves connection pending. For network checks, use
 `--network configure` with optional `--rpc HTTPS`, or `--network check`;
 validate chain 4663 and fresh block reads before reporting RPC readiness.
 

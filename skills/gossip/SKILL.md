@@ -7,9 +7,9 @@ description: Use the versioned Gossip Agent Kit after setup-gossip has prepared 
 
 For one-prompt onboarding across runtime, wallet, host, network, standards, and
 trading readiness, use `skills/setup-gossip/SKILL.md`. The current orchestrator
-accepts `--host`, optional `--wallet`, `--endpoint`/`--audience`,
-`--network configure|check`, `--config`, and `--skills-directory`; it does not
-accept `--profile`. This skill covers the
+accepts `--host`, optional `--wallet`, `--endpoint`/`--audience`, optional
+`--profile gossip-eip191-v2`, `--network configure|check`, `--config`, and
+`--skills-directory`. This skill covers the
 Gossip-specific operational steps after that orchestration, and remains useful
 when setup-gossip is unavailable.
 

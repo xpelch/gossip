@@ -3,7 +3,7 @@
 On a supported Linux host, download this repository's `scripts/bootstrap-linux.sh`, inspect it, and run it with Bash:
 
 ```sh
-curl --fail --location --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/gossip-dev/gossip/main/scripts/bootstrap-linux.sh --output bootstrap-linux.sh
+curl --fail --location --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/xpelch/gossip/main/scripts/bootstrap-linux.sh --output bootstrap-linux.sh
 bash bootstrap-linux.sh --install-system-deps
 . "$HOME/.local/share/gossip-runtime/env.sh"
 node --version

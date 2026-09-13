@@ -4,7 +4,7 @@ Open-source agent tools for onchain intelligence and private contributions, powe
 
 ## Developer preview
 
-This repository contains a Node.js 24 CLI, a local MCP bridge, protected identity storage, encrypted-keystore import/backup, and Ethereum verification adapters. It is **not yet the public one-prompt release**; see [remaining acceptance work](docs/acceptance.md).
+This repository contains a Node.js 24 CLI, a local MCP bridge, protected identity storage, encrypted-keystore import/backup, and Ethereum verification adapters. It is **not yet the public one-prompt release**. Spec [#1](https://github.com/xpelch/gossip/issues/1) remains open; see [remaining acceptance work](docs/acceptance.md).
 
 ## Run from source
 
@@ -27,7 +27,7 @@ node dist/cli.js standards
 
 Use a locally trusted development certificate. Setup does not disable TLS checks. Only a successful signed `agent_access` response enables the bridge. `status` reports stored state without claiming a live connection. `doctor` currently provides setup guidance, not full release-integrity or host verification.
 
-Default state lives in `~/.gossip`; every command accepts `--directory ABSOLUTE_PATH`. Windows uses current-user DPAPI. Linux Secret Service is implemented but has not been exercised on a real Linux host. Other platforms fail closed.
+Default state lives in `~/.gossip`; every command accepts `--directory ABSOLUTE_PATH`. Windows uses current-user DPAPI. Linux Secret Service has a targeted real-keyring acceptance in GitHub Actions; other platforms fail closed.
 
 ## Existing identity and backup
 
@@ -40,7 +40,7 @@ Passwords are entered through a hidden local terminal, never a CLI argument or a
 
 ## Agent integration
 
-The bridge exposes exactly `agent_access`, `agent_consult`, `gossip_submit`, and `gossip_receipt`. Generate a fragment with `host-config --host hermes` or `--host openclaw`. Explicit host installation requires an absolute user-selected config path:
+The legacy bridge exposes exactly `agent_access`, `agent_consult`, `gossip_submit`, and `gossip_receipt`. A setup using `--profile gossip-eip191-v2` selects the v2 bridge, which exposes exactly `gossip_capabilities`, `gossip_consult_v2`, `gossip_submit_v2`, `gossip_operation`, `gossip_receipt_v2`, and `gossip_feedback`. Generate a fragment with `host-config --host hermes` or `--host openclaw`. Explicit host installation requires an absolute user-selected config path:
 
 ```sh
 node dist/cli.js host-install --host hermes --config /absolute/hermes-config.yaml
@@ -66,6 +66,13 @@ npm pack --ignore-scripts
 
 Tests use synthetic identities only. [Engine interoperability](docs/engine-testing.md) uses a pinned private engine checkout and Docker PostgreSQL. [Standards evidence](docs/standards.md) distinguishes local implementation, contract fixtures, and server dependencies. [Artifact installation](docs/install.md) verifies a local tarball digest; no npm package or public endpoint has been published.
 
+Build a reviewable package provenance manifest from a clean checkout with
+[`docs/release-provenance.md`](docs/release-provenance.md). The manual workflow
+and local verifier bind the exact commit, package and lockfile identities,
+tarball digest and size, Node.js/npm versions, and install/typecheck/test/build
+status. They do not publish a tag, package, endpoint, or signed production or
+host claim.
+
 New code is Apache-2.0 licensed. Dependency licenses remain with their packages. Read `AGENTS.md`, `CONTEXT.md`, and relevant ADRs before contributing.
 
 For Linux agents missing Node 24, start with the [public prerequisite bootstrap](docs/bootstrap.md). It installs a dedicated runtime without replacing the host's Node version. A standalone `node dist/cli.js wallet create` creates or reuses a protected identity without an endpoint; it still requires Node 24 and working protected storage.
@@ -74,7 +81,7 @@ An existing local EOA file can now be attached without copying its key or using 
 
 ## Setup entry point and Robinhood Chain preview
 
-Use the [setup-gossip skill and command](docs/setup-gossip.md) for wallet-first onboarding, additive host/skill installation, optional signed Gossip connection and default RPC configuration. All options can be orchestrated by the agent from that one skill. Encrypted-keystore migration continues through the existing local `wallet import` command, followed by `setup-gossip --wallet reuse`.
+Use the [setup-gossip skill and command](docs/setup-gossip.md) for wallet-first onboarding, additive host/skill installation, optional signed Gossip connection and default RPC configuration. The [canonical agent prompts](docs/agent-prompts.md) provide copy-paste General, Grok Bot, Hermes, and OpenClaw variants with the pinned endpoint, audience, profile, RPC, wallet branches, and evidence boundaries. All options can be orchestrated by the agent from that one skill. Encrypted-keystore migration continues through the existing local `wallet import` command, followed by `setup-gossip --wallet reuse`.
 
 The `network` commands validate chain 4663 and provide read-only balances, token decimals, allowances, receipts and fee data. RPC URLs are saved locally with owner-only file mode where supported; provider paths/query strings are omitted from diagnostic output. Keep provider credentials out of prompts and public configuration.
 
@@ -91,8 +98,21 @@ Authoritative deployment inventory: https://developers.uniswap.org/docs/protocol
 [Gossip Protocol v2](docs/proposals/gossip-protocol-v2.md) proposes the next
 protocol layer: typed evidence with provenance and freshness, durable receipts,
 server-side reconciliation, scoped identities, optional trust adapters, and an
-eventual bounded settlement plane. It is a design proposal, not implemented or
-accepted compatibility.
+eventual bounded settlement plane. Its contracts are implemented incrementally
+as inactive candidates; none establish accepted live server or host support.
 
-The execution dependency map and acceptance plan live in
+Execution is tracked in [epic #3](https://github.com/xpelch/gossip/issues/3),
+with its dependency map and acceptance plan mirrored in
 [the repository documentation](docs/epics/gossip-protocol-v2.md).
+
+The first executable candidate is the [v2 contract foundation](docs/protocol-v2.md):
+bounded canonical JSON, consultation envelopes, explicit capability negotiation,
+and shared integrity vectors. Selecting the `gossip-eip191-v2` setup profile
+enables the signed v2 engine connection and six-tool bridge after capability
+negotiation; it does not change wallet permissions.
+
+The [v2 conformance harness](docs/conformance-v2.md) installs the packaged kit,
+runs its independent verifiers, and emits a content-addressed acceptance
+manifest. Until the packaged Sherwood, fault, privacy, and clean-replay
+scenarios pass, that manifest deliberately reports live capabilities as
+installed or blocked rather than verified.

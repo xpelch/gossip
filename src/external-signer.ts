@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { isAbsolute } from "node:path";
 import { randomUUID } from "node:crypto";
 import { getAddress, verifyMessage } from "ethers";
+import { isSupportedGossipSigningMessage } from "./local-file-signer.js";
 import type { IdentitySigner } from "./transport.js";
 
 export type ExistingKeyFile = {
@@ -40,12 +41,9 @@ export function existingFileSigner(
   return {
     address: expectedAddress,
     async signMessage(message) {
-      if (
-        typeof message !== "string" ||
-        !/^(Sherwood request v1|Gossip signer verification v1)\n/.test(message)
-      ) {
+      if (!isSupportedGossipSigningMessage(message)) {
         throw new Error(
-          "External wallet supports the legacy Gossip signing profile only",
+          "External wallet received an unsupported Gossip signing message",
         );
       }
       const helper = fileURLToPath(

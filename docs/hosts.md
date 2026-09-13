@@ -1,5 +1,10 @@
 # Host onboarding
 
+The [canonical agent prompts](agent-prompts.md) contain standalone General,
+Grok Bot, Hermes, and OpenClaw instructions. They preserve the distinction
+between additive configuration, a locally loaded bridge, and actual host
+acceptance.
+
 `hostConfiguration(host, command, args)` returns a configuration fragment and
 instructions. Its `verified` value is false for every host: documented schema
 support is not a live host or engine verification.

@@ -2,7 +2,7 @@
 
 Read README.md, CONTEXT.md and relevant architecture decisions before work.
 
-Use GitHub Issues on gossip-dev/gossip through gh. Specifications use ready-for-agent. The triage vocabulary is needs-triage, needs-info, ready-for-agent, ready-for-human and wontfix. Read dependencies; ready-for-agent does not mean external dependencies are delivered.
+Use GitHub Issues on xpelch/gossip through gh. Specifications use ready-for-agent. The triage vocabulary is needs-triage, needs-info, ready-for-agent, ready-for-human and wontfix. Read dependencies; ready-for-agent does not mean external dependencies are delivered.
 
 Gossip is the public product; Sherwood is the engine. Preserve exact authentication identifiers. Follow the approved spec; do not improvise cryptography, credential fallbacks, spending permissions or host compatibility.
 
@@ -12,7 +12,7 @@ Test external behavior at the kit process/MCP-to-engine boundary with synthetic 
 
 ### Issue tracker
 
-GitHub Issues on gossip-dev/gossip, operated through gh. See docs/agents/issue-tracker.md.
+GitHub Issues on xpelch/gossip, operated through gh. See docs/agents/issue-tracker.md.
 
 ### Triage labels
 
