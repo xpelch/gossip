@@ -1,7 +1,7 @@
 # Gossip v2 production acceptance policy
 
-Status: proposed for product-owner approval. These values are not active release
-claims and have not been measured in production.
+Status: approved as written. These values are active production-acceptance
+criteria, but they remain unmeasured and are not release claims.
 
 ## Release decision
 
@@ -75,12 +75,11 @@ revisions.
 
 ## Approval record
 
-Approval must record the approver, UTC timestamp, exact commit, and one of these
-decisions:
+Product owner `xpelch` approved this policy as written on
+`2026-09-13T01:24:10Z`. The approved proposal is commit
+`9935d89c2f091a6c6540e5a28e004a87f86cefcf`, merged by
+`663f28c3db39cbe805421522bbc686c561484371`.
 
-- approved as written;
-- approved with listed changes; or
-- rejected with a replacement proposal.
-
-Until that record exists, the WS7 manifest keeps SLO and private-policy approval
-fields false or null.
+This approval activates the measurement criteria. It does not assert that any
+objective has passed, approve private submissions, or set a production
+acceptance flag.
