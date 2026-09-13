@@ -3,19 +3,19 @@
   "result": "blocked",
   "generated_at": null,
   "release": {
-    "gossip_commit": "95fcf79d9b31557e75b5ab472f4486548561a65a",
-    "sherwood_commit": "db968f5010b9491b67190aff749d62f2ad0e7a97",
+    "gossip_commit": null,
+    "sherwood_commit": null,
     "package": "@gossip/agent-kit@0.1.0-dev.1",
-    "artifact_sha256": "sha256:66a958af73a354ffea46f1588733f3eddc124a29e62bbbe4764d9794eb795c2c",
-    "lockfile_sha256": "sha256:76742ae5cc7a79f97a4dc85f552a16f0d6c78f912fd484e2f53f73c18d9bc7d1",
-    "provenance_run": "https://github.com/xpelch/gossip/actions/runs/34726756316",
+    "artifact_sha256": null,
+    "lockfile_sha256": null,
+    "provenance_run": null,
     "release_tag": null
   },
   "deployment": {
     "provider": "railway",
     "environment": "production",
     "service": "engine",
-    "deployment_id": "6415704531",
+    "deployment_id": null,
     "image_digest": null,
     "endpoint": "https://engine-production-c4d8.up.railway.app/mcp",
     "audience": "https://engine-production-c4d8.up.railway.app/"
@@ -86,6 +86,7 @@
     "verified_at": null
   },
   "blockers": [
+    "release and deployment evidence has not been copied into this template",
     "production receipt signer and public trust manifest are not provisioned",
     "signed production acceptance has not run",
     "real Grok Bot, Hermes, and OpenClaw acceptance has not run",
