@@ -35,6 +35,7 @@ const CORE_FEATURES = [
   "signed_receipts",
   "evidence",
 ] as const;
+const CAPABILITY_ISSUANCE_GRACE_SECONDS = 1;
 
 function isUint256(value: string, positive: boolean): boolean {
   if (!/^(?:0|[1-9][0-9]*)$/.test(value)) {
@@ -366,7 +367,9 @@ export function negotiateCapabilities(
   }
   const report = parsed.data;
 
-  if (now < report.issued_at || now >= report.expires_at) {
+  const issuedTooFarInFuture =
+    report.issued_at - now > CAPABILITY_ISSUANCE_GRACE_SECONDS;
+  if (issuedTooFarInFuture || now >= report.expires_at) {
     throw new ProtocolError("expired_capabilities");
   }
   if (

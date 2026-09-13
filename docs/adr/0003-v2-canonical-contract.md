@@ -122,8 +122,11 @@ revision. All objects reject unknown fields.
 
 Limits are positive integers named `max_request_bytes`, `max_depth`, and
 `max_collection_items`, capped at 65,536, 16, and 256 respectively. Smaller
-server limits are retained. Times use the same Unix-second range as deadlines;
-`issued_at <= now < expires_at` and `0 < expires_at - issued_at <= 3600`.
+server limits are retained. Times use the same Unix-second range as deadlines.
+Capability reports remain valid while `now < expires_at`, with up to one second
+of issuance grace for the whole-second precision of a trusted HTTP `Date`
+header. Reports more than one second ahead of `now` are rejected. Their declared
+interval must still satisfy `0 < expires_at - issued_at <= 3600`.
 
 Successful negotiation returns `protocol`, `schema_revision`, `auth_profile`,
 `mcp_revision`, `endpoint`, `audience`, `server`, `expires_at`, and `limits`.
