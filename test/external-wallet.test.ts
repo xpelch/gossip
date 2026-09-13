@@ -4,6 +4,11 @@ import { mkdtemp, writeFile, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Wallet, verifyMessage } from "ethers";
+import {
+  GOSSIP_V2_HEADERS,
+  verifyGossipV2HttpRequest,
+} from "../src/http-auth-v2.js";
+import { createV2SignedFetch } from "../src/transport.js";
 import { WalletVault } from "../src/wallet.js";
 
 const unavailableStore = {
@@ -39,10 +44,71 @@ test("attach reuses an existing file wallet without keyring access or source mut
       verifyMessage(message, await signer.signMessage(message)),
       wallet.address,
     );
+    await assert.rejects(
+      signer.signMessage("arbitrary message"),
+      /unsupported Gossip signing message/,
+    );
     const profile = await readFile(join(directory, "wallet.json"), "utf8");
     assert.ok(!profile.includes(wallet.privateKey));
     await vault.remove();
     assert.equal(await readFile(source, "utf8"), content);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("attached json-private_key signer authenticates a v2 HTTP request", async () => {
+  const root = await mkdtemp(join(tmpdir(), "gossip-attach-v2-"));
+  const source = join(root, "owner-wallet.json");
+  const wallet = Wallet.createRandom();
+  await writeFile(source, JSON.stringify({ private_key: wallet.privateKey }), {
+    mode: 0o600,
+  });
+  const directory = join(root, "gossip");
+  const vault = new WalletVault(directory, unavailableStore);
+  const endpoint = "https://gossip.test/mcp";
+  const audience = "https://gossip.test/";
+  let captured: Request | undefined;
+
+  try {
+    await vault.attachFile(wallet.address, {
+      keyFile: source,
+      format: "json-private_key",
+    });
+    const signer = await vault.signer();
+    const signed = createV2SignedFetch(
+      signer,
+      { endpoint, audience },
+      async (input, init) => {
+        captured = new Request(input, init);
+        return new Response("{}", {
+          headers: { "content-type": "application/json" },
+        });
+      },
+    );
+    const body = '{"jsonrpc":"2.0","id":1,"method":"tools/list"}';
+
+    await signed(endpoint, { method: "POST", body });
+
+    assert.ok(captured);
+    const bodyBytes = new Uint8Array(await captured.clone().arrayBuffer());
+    const verified = verifyGossipV2HttpRequest(
+      {
+        audience,
+        endpoint,
+        method: captured.method,
+        target: "/mcp",
+        body: bodyBytes,
+        headers: Object.fromEntries(captured.headers.entries()),
+      },
+      Math.floor(Date.now() / 1000),
+      { audience, endpoint },
+    );
+    assert.equal(verified.address, wallet.address.toLowerCase());
+    assert.equal(
+      captured.headers.get(GOSSIP_V2_HEADERS.profile),
+      "gossip-eip191-v2",
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }

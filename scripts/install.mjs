@@ -20,6 +20,7 @@ import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 
 const IDENTITY_FILE = ".gossip-install.json";
+const INSTALL_TIMEOUT_MS = 600_000;
 
 function usage() {
   return "Usage: node scripts/install.mjs --artifact /absolute/path/package.tgz --sha256 <64-hex> --destination /absolute/empty/path";
@@ -98,7 +99,7 @@ async function runNpm(args, cwd) {
     const timeout = setTimeout(() => {
       child.kill();
       reject(new Error("npm install timed out"));
-    }, 120_000);
+    }, INSTALL_TIMEOUT_MS);
     child.once("error", () => reject(new Error("npm could not be started")));
     child.once("exit", (code, signal) => {
       clearTimeout(timeout);

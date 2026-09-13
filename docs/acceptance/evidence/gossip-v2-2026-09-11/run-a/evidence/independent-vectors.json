@@ -1,0 +1,14 @@
+{
+  "result": "passed",
+  "verifiers": [
+    "verify-v2-vectors.py",
+    "verify-v2-evidence-receipts.py",
+    "verify-v2-http-auth.py",
+    "verify-v2-identity-session.py",
+    "verify-v2-privacy.py",
+    "verify-v2-public-submission.py",
+    "verify-v2-public-submission-receipt.py",
+    "verify-v2-public-evidence-document.py",
+    "verify-v2-conformance-manifest.py"
+  ]
+}

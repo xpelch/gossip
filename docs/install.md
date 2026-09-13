@@ -1,6 +1,10 @@
 # Installing a packaged Gossip kit
 
-The installer accepts one locally supplied package artifact and an expected SHA-256 digest. It never resolves a package name or URL. The digest is an out-of-band trust decision: matching it proves that the bytes are the bytes you were given, but does not by itself prove who published them.
+Source installation from the pinned checkout is the default onboarding path.
+Use this artifact installer only when the exact local package and its expected
+SHA-256 digest have been supplied separately.
+
+The installer accepts one locally supplied package artifact and an expected SHA-256 digest. It never resolves a package name or URL. The digest is an out-of-band trust decision and is not an artifact locator: matching it proves that the bytes are the bytes you were given, but does not by itself prove who published them.
 
 Use Node.js 24 or newer and an absolute destination path that does not exist:
 

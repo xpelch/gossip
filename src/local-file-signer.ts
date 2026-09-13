@@ -8,12 +8,22 @@ import { Wallet, getAddress } from "ethers";
 
 const MAX_KEY_FILE_BYTES = 16 * 1024;
 const MAX_REQUEST_BYTES = 128 * 1024;
-const MESSAGE_PREFIXES = [
+const GOSSIP_SIGNING_MESSAGE_PREFIXES = [
   "Sherwood request v1\n",
   "Gossip signer verification v1\n",
+  "Gossip request v2\n",
 ] as const;
 const FORMATS = ["raw-hex", "json-privateKey", "json-private_key"] as const;
 type KeyFormat = (typeof FORMATS)[number];
+
+export function isSupportedGossipSigningMessage(
+  message: unknown,
+): message is string {
+  return (
+    typeof message === "string" &&
+    GOSSIP_SIGNING_MESSAGE_PREFIXES.some((prefix) => message.startsWith(prefix))
+  );
+}
 
 export type SignerArguments = {
   keyFile: string;
@@ -151,7 +161,7 @@ async function readRequest(): Promise<{ version: 1; message: string }> {
   )
     throw new Error("signing request must be {version:1,message:string}");
   const message = (parsed as { message: string }).message;
-  if (!MESSAGE_PREFIXES.some((prefix) => message.startsWith(prefix)))
+  if (!isSupportedGossipSigningMessage(message))
     throw new Error("message has an unsupported signing prefix");
   return { version: 1, message };
 }

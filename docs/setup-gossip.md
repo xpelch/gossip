@@ -6,9 +6,19 @@ endpoint, standards interoperability, RPC access, or trading is supported in a
 particular environment. The command reports runtime, wallet, host integration,
 Gossip connection, RPC, standards, and trading readiness independently.
 
-Use a pinned checkout and an absolute state directory. Read the repository
-instructions before running it, use the checked-in Linux bootstrap where
-applicable, and never execute an unpinned fetched script:
+For copy-paste onboarding instructions with the pinned public endpoint,
+audience, v2 profile, wallet branches, host variants, and diagnostic truth,
+see [canonical agent prompts](agent-prompts.md). This workflow remains the
+normative command reference; prompts do not replace the protocol or
+cryptographic specifications.
+
+Use a pinned checkout and an absolute state directory. Source installation is
+the default: verify Node.js 24, run `npm ci --ignore-scripts`, and build that
+checkout. Use `scripts/install.mjs` only when the exact local `.tgz` and its
+independently supplied SHA-256 digest are both available. A digest is not an
+artifact locator. Run the checked-in Linux bootstrap only when Node.js 24 is not
+already verified; missing `xz` blocks that bootstrap, not an existing verified
+runtime. Never execute an unpinned fetched script:
 
 ```text
 node dist/cli.js setup-gossip --host hermes --directory ABSOLUTE_STATE
@@ -45,12 +55,13 @@ node dist/cli.js setup-gossip --host hermes --network check --directory ABSOLUTE
 node dist/cli.js setup-gossip --host hermes --endpoint https://ENGINE/mcp --audience https://ENGINE --directory ABSOLUTE_STATE
 ```
 
-`--endpoint` and `--audience` attempt signed connection verification. The
-current authentication profile is legacy Sherwood EIP-191; `--profile` is not a
-supported setup-gossip option. A missing endpoint leaves Gossip connection
-pending. RPC configuration validates HTTPS, chain 4663, fresh block reads and
-timeouts; retain a working explicit RPC and report a failing one before any
-replacement.
+`--endpoint` and `--audience` attempt signed connection verification.
+`setup-gossip` accepts `--profile gossip-eip191-v2` to select the signed v2
+engine and six-tool bridge; legacy setup remains the default. It continues to
+orchestrate wallet, host, and RPC readiness and
+leaves a missing endpoint connection pending. RPC configuration validates
+HTTPS, chain 4663, fresh block reads and timeouts; retain a working explicit RPC
+and report a failing one before any replacement.
 
 Hermes and OpenClaw require a real documented configuration path and additive
 conflict-safe host installation. Grok Bot MCP loading remains unverified; use a

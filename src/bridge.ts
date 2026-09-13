@@ -2,6 +2,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { GossipKit } from "./kit.js";
 import { operationId, submissionSchema } from "./schemas.js";
+import { consultationSchema, operationIdV2Schema } from "./protocol-v2.js";
+import { publicSubmissionSchema } from "./public-submission-v1.js";
 
 export function createBridge(
   kit: GossipKit,
@@ -77,25 +79,117 @@ export function createBridge(
   return server;
 }
 
+export function createV2Bridge(
+  kit: GossipV2Kit,
+  beforeCall: () => Promise<void> = async () => {},
+) {
+  const server = new McpServer({
+    name: "gossip-agent-kit",
+    version: "0.1.0-dev.1",
+  });
+
+  async function invoke(operation: () => Promise<unknown>) {
+    try {
+      await beforeCall();
+      const result = await operation();
+      return {
+        structuredContent: result as Record<string, unknown>,
+        content: [{ type: "text" as const, text: JSON.stringify(result) }],
+      };
+    } catch {
+      return {
+        isError: true,
+        content: [
+          {
+            type: "text" as const,
+            text: "Gossip v2 operation failed. Check the local connection and access status.",
+          },
+        ],
+      };
+    }
+  }
+
+  server.registerTool(
+    "gossip_capabilities",
+    {
+      description: "Discover the exact Gossip v2 capabilities of the engine.",
+      inputSchema: {},
+      annotations: { readOnlyHint: true },
+    },
+    () => invoke(() => kit.capabilities()),
+  );
+  server.registerTool(
+    "gossip_consult_v2",
+    {
+      description: "Run an owner-scoped Gossip v2 consultation.",
+      inputSchema: { request: consultationSchema },
+    },
+    (args) => invoke(() => kit.consult(args.request)),
+  );
+  server.registerTool(
+    "gossip_submit_v2",
+    {
+      description: "Submit one public Gossip v2 evidence graph.",
+      inputSchema: { request: publicSubmissionSchema },
+    },
+    (args) => invoke(() => kit.submit(args.request)),
+  );
+  server.registerTool(
+    "gossip_operation",
+    {
+      description: "Read one owner-scoped Gossip v2 operation.",
+      inputSchema: { operation_id: operationIdV2Schema },
+      annotations: { readOnlyHint: true },
+    },
+    (args) => invoke(() => kit.operation(args.operation_id)),
+  );
+  server.registerTool(
+    "gossip_receipt_v2",
+    {
+      description: "Read one Gossip v2 operation's signed receipt chain.",
+      inputSchema: { operation_id: operationIdV2Schema },
+      annotations: { readOnlyHint: true },
+    },
+    (args) => invoke(() => kit.receipt(args.operation_id)),
+  );
+  server.registerTool(
+    "gossip_feedback",
+    {
+      description: "Gossip v2 feedback is currently unavailable.",
+      inputSchema: { request: z.record(z.string(), z.unknown()).optional() },
+    },
+    (args) => invoke(() => kit.feedback(args.request)),
+  );
+  return server;
+}
+
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { GossipKit as RuntimeKit } from "./kit.js";
 import { WalletVault } from "./wallet.js";
 import { createCredentialStore } from "./credential-store.js";
 import { loadConfiguration } from "./configuration.js";
 import { connectEngine } from "./engine.js";
+import { connectV2Engine } from "./engine.js";
+import { GossipV2Kit } from "./kit-v2.js";
 
 async function openKit(directory: string) {
   const configuration = await loadConfiguration(directory);
   const vault = new WalletVault(directory, createCredentialStore(directory));
   const signer = await vault.signer();
-  const engine = await connectEngine(signer, configuration);
+  const engine =
+    configuration.profile === "gossip-eip191-v2"
+      ? await connectV2Engine(signer, configuration)
+      : await connectEngine(signer, configuration);
   try {
-    const kit = new RuntimeKit(
-      directory,
-      signer.address,
-      engine,
-      configuration.policy,
-    );
+    const kit =
+      configuration.profile === "gossip-eip191-v2"
+        ? new GossipV2Kit(directory, signer.address, engine, configuration)
+        : new RuntimeKit(
+            directory,
+            signer.address,
+            engine,
+            configuration.policy,
+          );
     return { kit, engine, configuration };
   } catch (error) {
     await engine.close();
@@ -121,7 +215,7 @@ export async function serve(directory: string): Promise<void> {
     throw new Error("Gossip is disconnected.");
   }
   let closed = false;
-  const server = createBridge(kit, async () => {
+  const beforeCall = async () => {
     const current = await loadConfiguration(directory);
     if (
       !current.enabled ||
@@ -131,7 +225,11 @@ export async function serve(directory: string): Promise<void> {
         "Gossip is disconnected or its configuration changed. Restart the bridge.",
       );
     }
-  });
+  };
+  const server =
+    configuration.profile === "gossip-eip191-v2"
+      ? createV2Bridge(kit as GossipV2Kit, beforeCall)
+      : createBridge(kit as RuntimeKit, beforeCall);
   const close = async () => {
     if (closed) return;
     closed = true;

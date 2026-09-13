@@ -9,7 +9,7 @@ export interface Configuration {
   schemaVersion: 1;
   endpoint: string;
   audience: string;
-  profile: "sherwood-eip191-personal-sign-v1" | "erc8128";
+  profile: "sherwood-eip191-personal-sign-v1" | "gossip-eip191-v2" | "erc8128";
   chainId: 4663;
   enabled: boolean;
   policy: { dailyCreditBudget: number; submissionKinds: string[] };
@@ -26,7 +26,11 @@ const configurationSchema = z
       .string()
       .url()
       .refine((value) => new URL(value).protocol === "https:"),
-    profile: z.enum(["sherwood-eip191-personal-sign-v1", "erc8128"]),
+    profile: z.enum([
+      "sherwood-eip191-personal-sign-v1",
+      "gossip-eip191-v2",
+      "erc8128",
+    ]),
     chainId: z.literal(4663),
     enabled: z.boolean(),
     policy: policySchema,
