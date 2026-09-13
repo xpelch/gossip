@@ -11,7 +11,7 @@ This preview is partial implementation, not release acceptance.
 - Submission-kind permission and conservative SQLite reservations shared by processes using one state directory.
 - Additive host config editing, conflict protection, explicit removal and local disconnect.
 - EIP-55 vectors, ERC-8004 metadata/read validation and AgentWalletSet typed-data preparation, actual local ERC-1271 contract fixture.
-- Checksum-verified local artifact installer; package build and isolated process tests.
+- Checksum-verified local artifact installer; package build and isolated process tests. The current full attested Windows artifact completed through the real installer in 72,897 ms and passed idempotent rerun plus installed `help`, `status`, and `doctor` checks; see [`full-artifact-install-2026-09-12.md`](acceptance/full-artifact-install-2026-09-12.md).
 - Draft Gossip v2 private-evidence contract with exhaustive synthetic retention,
   owner operations, minimal tombstones, root-signed publication consent, and
   closed observability schemas. Private submission remains blocked until the
@@ -26,9 +26,9 @@ This preview is partial implementation, not release acceptance.
 - Public endpoint plus actual version-pinned Grok Bot, Hermes and OpenClaw end-to-end runs. Config-shape tests are not host runs.
 - Engine support and actual access interoperability for ERC-8128, existing ERC-1271 accounts and atomic standard-only consultation policy. Engine changes are outside this repository's authorization.
 - Connect-existing-signer, external-provider integration, and complete contract-wallet onboarding remain incomplete. The attach-file path is a deliberate source-file link through a local host helper, not external signer support or a plaintext fallback. Profile migration/rollback and paired create/migrate acceptance for all six standards remain required.
-- Full installer diagnostics, signed production distribution, and external signer and derivation format compatibility matrix. The local artifact-only provenance workflow is documented in [`release-provenance.md`](release-provenance.md), but it does not publish or establish production or host acceptance.
+- Signed production distribution and external signer and derivation format compatibility matrix. The artifact provenance workflow is documented in [`release-provenance.md`](release-provenance.md), but it does not publish to npm or establish production or host acceptance.
 - Full installed-process-to-engine acceptance for domain calls, TLS rejection, expiry boundaries, and retry reconciliation. The current engine harness proves legacy authentication through real middleware/MCP/PostgreSQL, not the full CLI flow.
 
 No production wallet, onchain transaction, registration, endpoint deployment or package publication is part of these checks. No universal Ethereum compliance is claimed.
 
-The release baseline used for this acceptance work is commit `56d280c899f5d47d5e8f0c9bf3fb5147834ce7d3`; its provenance run is [GitHub Actions run 34725836485](https://github.com/xpelch/gossip/actions/runs/34725836485), and the attested artifact SHA-256 is `cb9321b6af32a9970fd5e1b78b1940e20bbc0ce92fcb597c95787aa93fdebe12`.
+The current release baseline is commit `95fcf79d9b31557e75b5ab472f4486548561a65a`; its provenance run is [GitHub Actions run 34726756316](https://github.com/xpelch/gossip/actions/runs/34726756316), and the independently verified attested artifact SHA-256 is `66a958af73a354ffea46f1588733f3eddc124a29e62bbbe4764d9794eb795c2c`.

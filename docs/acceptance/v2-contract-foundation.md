@@ -9,18 +9,18 @@ All identities, URLs, timestamps, and chain tests are synthetic or controlled.
 
 ## Results
 
-| Boundary | Result |
-| --- | --- |
-| TypeScript typecheck | Passed |
-| Full kit test suite | 96 tests: 94 passed, 2 skipped, 0 failed |
-| New v2 contract tests within that suite | 21 passed |
-| TypeScript build | Passed |
-| Deterministic source formatting | 6 TypeScript files via Prettier; Python verifier via Black; checks passed |
-| Independent Python vectors | 17 passed: 5 valid, 12 invalid |
-| Installed Node vector execution | 17 vectors and 15 literal digests passed |
-| Installed consultation boundary | Full envelope digest matched; expiry and wrong auth profile rejected |
-| Installed capability boundary | Core selection passed; wrong MCP revision and missing core rejected |
-| Frozen v1 source boundary | Bridge, engine client, transport, v1 schemas, journal, and external signer unchanged |
+| Boundary                                | Result                                                                               |
+| --------------------------------------- | ------------------------------------------------------------------------------------ |
+| TypeScript typecheck                    | Passed                                                                               |
+| Full kit test suite                     | 96 tests: 94 passed, 2 skipped, 0 failed                                             |
+| New v2 contract tests within that suite | 21 passed                                                                            |
+| TypeScript build                        | Passed                                                                               |
+| Deterministic source formatting         | 6 TypeScript files via Prettier; Python verifier via Black; checks passed            |
+| Independent Python vectors              | 17 passed: 5 valid, 12 invalid                                                       |
+| Installed Node vector execution         | 17 vectors and 15 literal digests passed                                             |
+| Installed consultation boundary         | Full envelope digest matched; expiry and wrong auth profile rejected                 |
+| Installed capability boundary           | Core selection passed; wrong MCP revision and missing core rejected                  |
+| Frozen v1 source boundary               | Bridge, engine client, transport, v1 schemas, journal, and external signer unchanged |
 
 The two platform skips are the symlink scenario unavailable on this Windows
 runner and the Linux-only existing-file permission policy. They are not evidence
@@ -52,6 +52,10 @@ match the built files used for this acceptance run.
 The time-limit failure remains a WS0 / issue #1 installer acceptance finding.
 Successful direct npm installation does not establish that the installer wrapper
 completed, nor that installation is fast on a cold Windows host.
+
+This finding describes the `bfdbb23` baseline. It was retested and resolved for
+the current attested package on 2026-09-12; see
+[full artifact installation acceptance](full-artifact-install-2026-09-12.md).
 
 ## Limits of this result
 
