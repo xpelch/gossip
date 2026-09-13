@@ -52,7 +52,6 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepare": "npm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "tsx --test --test-concurrency=1 test/*.test.ts",
     "test:protocol-v2": "tsx --test test/canonical.test.ts test/protocol-v2.test.ts test/protocol-v2-vectors.test.ts",
