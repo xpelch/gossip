@@ -40,7 +40,9 @@ availability failures and must never be removed from reports.
 No percentile is reported with fewer than 100 eligible observations across the two
 windows, with at least 50 in each window. Report the sample count, time window,
 client region, server revision, deployment ID, and excluded deterministic refusal
-count beside every result.
+count beside every result. Bind each window to the exact Gossip artifact, Sherwood
+revision, receipt trust manifest, protocol, schema, authentication, and MCP
+revisions, and content-address its result summary.
 
 Consultation availability counts a schema-valid authenticated 2xx response with a
 complete result, or a protocol-allowed partial result carrying an authentic receipt,

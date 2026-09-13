@@ -27,6 +27,7 @@
     "scripts/verify-v2-public-submission-receipt.py",
     "scripts/verify-v2-public-evidence-document.py",
     "scripts/verify-v2-conformance-manifest.py",
+    "scripts/verify-ws7-production-manifest.mjs",
     "scripts/release-provenance.mjs",
     "scripts/verify-release-provenance.mjs",
     "scripts/run-v2-conformance.mjs",
@@ -59,6 +60,7 @@
     "verify:public-submission-receipt-v2": "python scripts/verify-v2-public-submission-receipt.py",
     "verify:public-evidence-document-v2": "python scripts/verify-v2-public-evidence-document.py",
     "verify:conformance-v2": "python scripts/verify-v2-conformance-manifest.py",
+    "verify:ws7-manifest": "node scripts/verify-ws7-production-manifest.mjs",
     "conformance:v2:offline": "node scripts/run-v2-conformance.mjs",
     "release:provenance": "node scripts/release-provenance.mjs",
     "verify:release-provenance": "node scripts/verify-release-provenance.mjs"

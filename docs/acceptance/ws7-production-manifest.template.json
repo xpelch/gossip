@@ -66,6 +66,7 @@
       "verified": false
     }
   },
+  "measurement_windows": [],
   "slos": {
     "capability_discovery_latency": null,
     "durable_acknowledgment_latency": null,

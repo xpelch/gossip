@@ -55,6 +55,23 @@ manifest. Generate the final manifest beside the built artifact: embedding a
 package's own commit or digest in tracked package content would change the
 artifact and invalidate the embedded values.
 
+Validate both blocked checkpoints and the final release record with:
+
+```text
+npm run verify:ws7-manifest -- --manifest <absolute-manifest-path>
+```
+
+The final record must contain two non-overlapping 30-minute measurement windows.
+Every SLO result references both windows, at least 50 observations from each,
+their content-addressed summaries, and the exact release, deployment, trust, and
+contract revisions. The verifier rejects a `passed` result when any reference,
+host, production check, SLO, policy decision, or verification field is missing.
+It validates the record's structure, cross-references, key/address binding, and
+chronology. The independent verifier must still fetch the cited artifacts,
+recompute their digests and SLO summaries, verify provenance and receipts, and
+repeat the required host and production checks; structural validation alone is
+not release evidence.
+
 Obtain an explicit product-owner decision on the proposed
 [production acceptance policy](../proposals/gossip-v2-production-acceptance-policy.md)
 before measuring or filling any SLO or private-policy field.
