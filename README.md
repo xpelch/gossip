@@ -40,6 +40,12 @@ Passwords are entered through a hidden local terminal, never a CLI argument or a
 
 ## Agent integration
 
+Embedding agents can use the transport-independent
+[`conversation-policy` utilities](docs/conversation-policy.md) for bounded
+in-process conversation memory, gradual voice and language hints, strict
+evidence-summary parsing, and compact plain-text replies. The module does not
+change Gossip tools, transport, authentication, or spending policy.
+
 The legacy bridge exposes exactly `agent_access`, `agent_consult`, `gossip_submit`, and `gossip_receipt`. A setup using `--profile gossip-eip191-v2` selects the v2 bridge, which exposes exactly `gossip_capabilities`, `gossip_consult_v2`, `gossip_submit_v2`, `gossip_operation`, `gossip_receipt_v2`, and `gossip_feedback`. Generate a fragment with `host-config --host hermes` or `--host openclaw`. Explicit host installation requires an absolute user-selected config path:
 
 ```sh

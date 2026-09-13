@@ -10,6 +10,12 @@
   "bin": {
     "gossip": "dist/cli.js"
   },
+  "exports": {
+    "./conversation-policy": {
+      "types": "./dist/conversation-policy.d.ts",
+      "import": "./dist/conversation-policy.js"
+    }
+  },
   "files": [
     "dist",
     "skills",
