@@ -37,6 +37,15 @@ The function's `verified` flag describes the documented configuration shape;
 it does not claim that a particular host installation or engine connection was
 tested. Host end-to-end verification remains unavailable in this package.
 
+For the v2 profile, host configurations should start the kit's ordinary
+`serve --directory ABSOLUTE_STATE` command. The kit learns a per-connection
+clock offset only from the exact configured HTTPS endpoint's `Date` response
+header, accepts a conservative absolute skew below 300 seconds, and refreshes
+stale server-time evidence during a long-running bridge. No host-specific clock
+wrapper or system-clock change is required. Missing, malformed, slow, stale, or
+out-of-range evidence stops the operation. This transport behavior does not by
+itself establish compatibility with a running host.
+
 Grok Bot returns an instructions result with `verified: false` and no invented
 configuration because current official documentation does not establish an
 MCP installation or configuration API for the host.

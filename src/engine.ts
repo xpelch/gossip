@@ -4,7 +4,9 @@ import type { IdentitySigner } from "./transport.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import type { Connection } from "./transport.js";
 import { createSignedFetch, createV2SignedFetch } from "./transport.js";
+import { ServerClockError } from "./transport.js";
 import type { Engine } from "./kit.js";
+import type { V2Engine } from "./kit-v2.js";
 import { IDENTITY_SESSION_TOOLS } from "./identity-session.js";
 import {
   MCP_REVISION,
@@ -85,7 +87,9 @@ export async function connectEngine(
 export async function connectV2Engine(
   wallet: IdentitySigner,
   connection: Connection,
-): Promise<Engine & { close(): Promise<void> }> {
+  send: typeof fetch = fetch,
+  localNowMs: () => number = Date.now,
+): Promise<V2Engine & { close(): Promise<void> }> {
   if (connection.profile !== "gossip-eip191-v2") {
     throw new Error("Gossip v2 engine requires the gossip-eip191-v2 profile.");
   }
@@ -95,7 +99,7 @@ export async function connectV2Engine(
     version: "0.1.0-dev.1",
   });
   const allowedTools = new Set<string>(IDENTITY_SESSION_TOOLS);
-  const signedFetch = createV2SignedFetch(wallet, connection);
+  const signedFetch = createV2SignedFetch(wallet, connection, send, localNowMs);
   const boundedFetch: typeof fetch = (input, init) =>
     signedFetch(input, {
       ...init,
@@ -125,10 +129,13 @@ export async function connectV2Engine(
         mcp_revision: MCP_REVISION,
         auth_profile: AUTH_PROFILE,
       },
-      Math.floor(Date.now() / 1000),
+      signedFetch.serverNowSeconds(),
     );
-  } catch {
+  } catch (error) {
     await client.close().catch(() => undefined);
+    if (error instanceof ServerClockError) {
+      throw error;
+    }
     throw new Error(
       "Engine connection failed. Verify endpoint, HTTPS trust, v2 capabilities and signing-profile support.",
     );
@@ -139,6 +146,17 @@ export async function connectV2Engine(
       if (!allowedTools.has(tool))
         throw new Error("Unsupported Gossip v2 operation.");
       return callTool(client, tool, arguments_);
+    },
+    async serverNowSeconds() {
+      try {
+        return signedFetch.serverNowSeconds();
+      } catch (error) {
+        if (!(error instanceof ServerClockError)) {
+          throw error;
+        }
+        await callTool(client, "gossip_capabilities", {});
+        return signedFetch.serverNowSeconds();
+      }
     },
     close: () => client.close(),
   };

@@ -176,20 +176,30 @@ async function openKit(directory: string) {
   const configuration = await loadConfiguration(directory);
   const vault = new WalletVault(directory, createCredentialStore(directory));
   const signer = await vault.signer();
-  const engine =
-    configuration.profile === "gossip-eip191-v2"
-      ? await connectV2Engine(signer, configuration)
-      : await connectEngine(signer, configuration);
+  if (configuration.profile === "gossip-eip191-v2") {
+    const engine = await connectV2Engine(signer, configuration);
+    try {
+      const kit = new GossipV2Kit(
+        directory,
+        signer.address,
+        engine,
+        configuration,
+      );
+      return { kit, engine, configuration };
+    } catch (error) {
+      await engine.close();
+      throw error;
+    }
+  }
+
+  const engine = await connectEngine(signer, configuration);
   try {
-    const kit =
-      configuration.profile === "gossip-eip191-v2"
-        ? new GossipV2Kit(directory, signer.address, engine, configuration)
-        : new RuntimeKit(
-            directory,
-            signer.address,
-            engine,
-            configuration.policy,
-          );
+    const kit = new RuntimeKit(
+      directory,
+      signer.address,
+      engine,
+      configuration.policy,
+    );
     return { kit, engine, configuration };
   } catch (error) {
     await engine.close();

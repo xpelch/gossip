@@ -53,6 +53,14 @@ node dist/cli.js host-install --host hermes --config /absolute/hermes-config.yam
 node dist/cli.js serve
 ```
 
+The v2 bridge compensates for a host clock that differs from the engine by less
+than five minutes. It derives a per-connection offset from the `Date` header on
+responses from the exact configured HTTPS endpoint and refreshes stale evidence
+before checking capability expiry or consultation deadlines. It does not change
+the system clock. Missing, malformed, slow, or out-of-range server-time evidence
+fails closed. Run the generated host command as ordinary `serve --directory
+ABSOLUTE_STATE`; no clock-skew wrapper is required.
+
 Configuration tests do not establish compatibility with a running host. Grok Bot integration is blocked pending a documented and tested path. See [host evidence](docs/hosts.md) and the [setup skill](skills/gossip/SKILL.md).
 
 Submissions and earned-credit use are denied by default. `policy --daily-credit-budget 3 --allow-kind token_discovery` displays the proposed policy and requires local confirmation. A budget reserves one unit per logical consultation, including uncertain outcomes and standard responses. Reservations persist across restarts and concurrent processes sharing the same state directory. Separate installations do not share a budget.
