@@ -33,13 +33,24 @@ bind:
   storage versions used in acceptance.
 
 Do not publish a release from an unmerged feature branch or reuse the local
-synthetic signing keys. Gossip commit
-`56d280c899f5d47d5e8f0c9bf3fb5147834ce7d3` produced a repository-bound GitHub
-attestation in [workflow run 34725836485](https://github.com/xpelch/gossip/actions/runs/34725836485).
+synthetic signing keys. Current Gossip `main` commit
+`95fcf79d9b31557e75b5ab472f4486548561a65a` produced a repository-bound GitHub
+attestation in [workflow run 34726756316](https://github.com/xpelch/gossip/actions/runs/34726756316).
 The package artifact digest is
-`sha256:cb9321b6af32a9970fd5e1b78b1940e20bbc0ce92fcb597c95787aa93fdebe12`.
+`sha256:66a958af73a354ffea46f1588733f3eddc124a29e62bbbe4764d9794eb795c2c`,
+and the lockfile digest is
+`sha256:76742ae5cc7a79f97a4dc85f552a16f0d6c78f912fd484e2f53f73c18d9bc7d1`.
+The downloaded package passed `gh attestation verify --repo xpelch/gossip` and
+the full Windows artifact completed the checksum-verifying installer; see the
+[installation acceptance](../acceptance/full-artifact-install-2026-09-12.md).
 This artifact-only evidence does not create a tag, publish a package, or promote
 endpoint or host acceptance.
+
+Use the checked-in
+[`ws7-production-manifest.template.json`](../acceptance/ws7-production-manifest.template.json)
+as the release record starting point. Replace null fields only with captured
+evidence. A template with blockers or false verification flags is not a release
+manifest.
 
 ## Candidate endpoint configuration
 

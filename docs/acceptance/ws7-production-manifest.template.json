@@ -1,0 +1,95 @@
+{
+  "schema": "gossip.ws7-production-acceptance.v1",
+  "result": "blocked",
+  "generated_at": null,
+  "release": {
+    "gossip_commit": "95fcf79d9b31557e75b5ab472f4486548561a65a",
+    "sherwood_commit": "db968f5010b9491b67190aff749d62f2ad0e7a97",
+    "package": "@gossip/agent-kit@0.1.0-dev.1",
+    "artifact_sha256": "sha256:66a958af73a354ffea46f1588733f3eddc124a29e62bbbe4764d9794eb795c2c",
+    "lockfile_sha256": "sha256:76742ae5cc7a79f97a4dc85f552a16f0d6c78f912fd484e2f53f73c18d9bc7d1",
+    "provenance_run": "https://github.com/xpelch/gossip/actions/runs/34726756316",
+    "release_tag": null
+  },
+  "deployment": {
+    "provider": "railway",
+    "environment": "production",
+    "service": "engine",
+    "deployment_id": "6415704531",
+    "image_digest": null,
+    "endpoint": "https://engine-production-c4d8.up.railway.app/mcp",
+    "audience": "https://engine-production-c4d8.up.railway.app/"
+  },
+  "contract": {
+    "protocol": "gossip/2-draft.1",
+    "schema_revision": "2026-09-09",
+    "authentication": "gossip-eip191-v2",
+    "mcp_revision": "2025-11-25"
+  },
+  "receipt_trust": {
+    "key_id": null,
+    "public_key": null,
+    "ethereum_address": null,
+    "valid_from": null,
+    "valid_until": null,
+    "manifest_digest": null
+  },
+  "production_checks": {
+    "signed_capabilities": false,
+    "standard_zero_cost_consultation": false,
+    "evidence_reproduction": false,
+    "receipt_chain": false,
+    "exact_retry": false,
+    "changed_content_conflict": false,
+    "owner_isolation": false,
+    "restart_upgrade_rollback": false,
+    "session_rotation_revocation": false,
+    "telemetry_scan": false
+  },
+  "hosts": {
+    "grok_bot": {
+      "version": null,
+      "operating_system": null,
+      "protected_storage": null,
+      "verified": false
+    },
+    "hermes": {
+      "version": null,
+      "operating_system": null,
+      "protected_storage": null,
+      "verified": false
+    },
+    "openclaw": {
+      "version": null,
+      "operating_system": null,
+      "protected_storage": null,
+      "verified": false
+    }
+  },
+  "slos": {
+    "consultation_latency": null,
+    "pending_operation_age": null,
+    "reconciliation_window": null,
+    "replay_rejection": null,
+    "rpc_divergence": null,
+    "correction_latency": null
+  },
+  "private_submission": {
+    "enabled": false,
+    "policy_approved": false,
+    "policy_digest": null
+  },
+  "verification": {
+    "production_verified": false,
+    "host_acceptance_verified": false,
+    "independent_verifier": null,
+    "verified_at": null
+  },
+  "blockers": [
+    "production receipt signer and public trust manifest are not provisioned",
+    "signed production acceptance has not run",
+    "real Grok Bot, Hermes, and OpenClaw acceptance has not run",
+    "numeric SLOs are not approved or measured",
+    "private-submission production policy is not approved"
+  ]
+}
