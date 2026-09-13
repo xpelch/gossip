@@ -169,3 +169,29 @@ test("v2 engine rejects discovery with a malformed tool name", async () => {
     globalThis.fetch = originalFetch;
   }
 });
+
+test("v2 engine reports when required capabilities are not verified", async () => {
+  const originalFetch = globalThis.fetch;
+  const now = Math.floor(Date.now() / 1000);
+  const report = capabilities(now);
+  report.features[0] = {
+    capability: "atomic_consult",
+    status: "blocked",
+    reason: "Production verification is pending.",
+    next_action: "Complete the production capability tests.",
+  };
+  globalThis.fetch = createFetch(report);
+
+  try {
+    await assert.rejects(
+      connectV2Engine(Wallet.createRandom(), {
+        endpoint,
+        audience,
+        profile: "gossip-eip191-v2",
+      }),
+      /required Gossip v2 capabilities are not verified/i,
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

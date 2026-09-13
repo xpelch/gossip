@@ -384,6 +384,12 @@ function safeError(error: unknown): string {
   if (!(error instanceof Error)) {
     return "Gossip command failed. Run `gossip doctor` and retry.";
   }
+  if (
+    error.message ===
+    "Engine connection is pending because required Gossip v2 capabilities are not verified."
+  ) {
+    return error.message;
+  }
   if (error.message === "Trade authorization requires an interactive terminal")
     return error.message;
   if (/configuration/i.test(error.message)) {
