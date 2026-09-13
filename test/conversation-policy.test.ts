@@ -86,6 +86,26 @@ test("moves from neutral to casual only after consistent signals", () => {
   });
 });
 
+test("recognizes common informal French without switching after one turn", () => {
+  const first = [turn("yo check ce token", 1)];
+  const second = [...first, turn("ouais dis-moi le risk", 2)];
+
+  assert.equal(
+    inferConversationPreferences(first, { casualTurnThreshold: 2 }).voice,
+    "neutral",
+  );
+  assert.equal(
+    inferConversationPreferences(second, { casualTurnThreshold: 2 }).voice,
+    "casual",
+  );
+  assert.equal(
+    inferConversationPreferences([turn("c’est quoi le risque ici", 3)], {
+      defaultLanguage: "en",
+    }).responseLanguage,
+    "fr",
+  );
+});
+
 test("strictly parses and localizes a bounded evidence summary", () => {
   const summary = {
     schema: "gossip.evidence-summary.v1",
